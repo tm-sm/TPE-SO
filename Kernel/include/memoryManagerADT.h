@@ -1,0 +1,10 @@
+//
+// Created by ptorl on 10/3/2023.
+//
+
+#ifndef TPE_ARQUI_MEMORYMANAGERADT_H
+#define TPE_ARQUI_MEMORYMANAGERADT_H
+
+
+
+#endif //TPE_ARQUI_MEMORYMANAGERADT_H
