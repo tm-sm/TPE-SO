@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-struct proc{
+struct processCDT{
     int pid;
     uint8_t* stack_ptr;
-} proc;
+} processCDT;
