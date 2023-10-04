@@ -1,6 +1,7 @@
 include ../Makefile.inc
 
 MODULE=0000-sampleCodeModule.bin
+ELF=sampleCodeModule.elf
 SOURCES=$(wildcard [^_]*.c)
 SOURCES_ASM=$(wildcard asm/*.asm)
 OBJECTS=$(SOURCES:.c=.o)
@@ -10,10 +11,13 @@ LOADERSRC=_loader.c
 LOADEROBJECT=$(LOADERSRC:.c=.o)
 STATICLIBS=
 
-all: $(MODULE)
+all: $(MODULE) $(ELF)
 
 $(MODULE): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
 	$(LD) $(LDFLAGS) -T sampleCodeModule.ld -o ../$(MODULE) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+
+$(ELF): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
+	$(LD) $(LDFLAGS) -T gdb.ld -o ../$(ELF) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@

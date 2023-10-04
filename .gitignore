@@ -2,6 +2,9 @@
 *.bin
 *.sys
 
+#Elf files
+*.elf
+
 #The images
 *.img
 *.qcow2
@@ -13,3 +16,5 @@
 build.sh
 maker.sh
 /.vs
+.idea
+cmake-build-debug

@@ -19,3 +19,6 @@ exit
 cd root
 ./run.sh
 exit
+cd root
+ls
+exit
