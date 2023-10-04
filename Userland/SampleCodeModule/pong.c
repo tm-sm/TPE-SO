@@ -119,9 +119,7 @@ void check_entity_collision(player * p, ball * b) {
     int mult = (b->xDir > 0)?(1):(-1);
     int ball_next_pos_y = b->y + BALLSPEED * b->yDir + b->radius * mult;
     int ball_next_pos_x = b->x + BALLSPEED * b->xDir + b->radius * mult;
-    if (((ball_next_pos_y + b->radius >= p->v_bar.y && ball_next_pos_y + b->radius <= p->v_bar.y + p->v_bar.height) ||
-    (ball_next_pos_y - b->radius >= p->v_bar.y && ball_next_pos_y - b->radius <= p->v_bar.y + p->v_bar.height))
-    && ball_next_pos_x >= p->v_bar.x && ball_next_pos_x <= p->v_bar.x + p->v_bar.width) {
+    if ((+{
         // collision detected
         b->xDir = -b->xDir;
         ball_impulse(b, p->v_bar.dir);
