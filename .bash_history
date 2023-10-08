@@ -22,3 +22,10 @@ exit
 cd root
 ls
 exit
+cd root
+cd toolchain
+make all
+cd ..
+make all
+./run.sh
+exit
