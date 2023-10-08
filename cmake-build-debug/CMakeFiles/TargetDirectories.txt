@@ -1,4 +1,0 @@
-C:/Users/timos/OneDrive/Documentos/Timo/ITBA/WSL/SO/TPE-SO/cmake-build-debug/CMakeFiles/KernelTarget.dir
-C:/Users/timos/OneDrive/Documentos/Timo/ITBA/WSL/SO/TPE-SO/cmake-build-debug/CMakeFiles/UserlandTarget.dir
-C:/Users/timos/OneDrive/Documentos/Timo/ITBA/WSL/SO/TPE-SO/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/timos/OneDrive/Documentos/Timo/ITBA/WSL/SO/TPE-SO/cmake-build-debug/CMakeFiles/rebuild_cache.dir
