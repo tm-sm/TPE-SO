@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <console.h>
 
-static char* regs[]={"rax: ", "rbx: ", "rcx: ", "rdx: ", "rbp: ", "rdi: ", "rsi: ", " r8: ", " r9: ", "r10: ", "r11: ", "r12: ", "r13: ","r14: ", "r15: ", "rflags: ", "rsp: ", "rip: "};
+static char* regs[]={"rax: ", "rbx: ", "rcx: ", "rdx: ", "rbp: ", "rdi: ", "rsi: ", " r8: ", " r9: ", "r10: ", "r11: ", "r12: ", "r13: ","r14: ", "r15: ", "flg: ", "rsp: ", "rip: "};
 
 static void exScreen(char* str, uint64_t* stack);
 
