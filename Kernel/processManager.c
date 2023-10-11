@@ -16,7 +16,8 @@ struct process {
     uint64_t ip;
     uint8_t* stackTop;
     uint8_t* stackTrace;
-    char state;
+    char * state;
+    int priority;
 } process;
 
 typedef struct process* proc;
@@ -48,4 +49,9 @@ void saveProcess(int pid) {
 void switchProcess() {
     currProc = (currProc + 1) % MAX_PROC;
     loadProcess(currProc);
+}
+
+
+int getPriority(proc p){
+    return p->priority;
 }
