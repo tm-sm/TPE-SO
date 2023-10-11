@@ -13,7 +13,8 @@ struct process {
     uint64_t ip;
     uint8_t* stackTop;
     uint8_t* stackTrace;
-    char state;
+    char * state;
+    int priority;
 } process;
 
 typedef struct process* proc;
@@ -52,4 +53,9 @@ void switchProcess(uint64_t* registers, int pid) {
         cPrintHex(switch_process(registers, processes[currProc], processes[pid]));
     }
     return;
+}
+
+
+int getPriority(proc p){
+    return p->priority;
 }
