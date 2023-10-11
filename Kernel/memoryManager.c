@@ -1,5 +1,5 @@
 #include "./memoryManager.h"
-
+#include <lib.h>
 //INTENTO DE ALOCAR MEMORIA ESTATICA DE MANERA DINAMICA (Para un manipular mas facilmente los strings)
 #define MEM_START_ADR 0x0000000000050000
 
@@ -82,6 +82,31 @@ void deallocate(void * ptr) {
     }
 }
 
+void * realloc(void * ptr, size_t newSize){
+    //Equivalente a un dealloc
+    if (newSize == 0) {
+        deallocate(ptr);
+        return NULL;
+    }
+    //Si no hay nada, es como un allocate
+    if (ptr == NULL) {
+        return allocate(newSize);
+    }
+
+    void * newPtr = allocate(newSize);
+
+    if (newPtr) {
+        size_t oldSize = ((BlockHeader *)(ptr - sizeof(BlockHeader)))->size;
+        size_t copySize = (oldSize < newSize) ? oldSize : newSize;  //Copio lo minimo para no excederme del tamano, ESTO PUEDE CAUSAR PERDIDAS DE MEMORIA
+        memcpy(newPtr, ptr, copySize);
+
+        deallocate(ptr);
+        return newPtr;
+    } else {
+        return NULL;
+    }
+}
+
 size_t convertToPageSize(size_t size, size_t pageSize){
     if (pageSize == 0) {
         return 0;
@@ -94,10 +119,6 @@ size_t convertToPageSize(size_t size, size_t pageSize){
 
 
 /*todo
- * processAllocation handler
- * ProctableHandler
- * ModifyToPageSize
  * AgregarASyscall
  * ConvertirABuddySystem
- * 2880B para TPROC --> 120 Paginas a referenciar de 512B
  */
