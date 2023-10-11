@@ -8,6 +8,8 @@
 #include <keyboardDriver.h>
 #include <time.h>
 #include <sound.h>
+#include <memoryManager.h>
+#include <processManager.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -90,10 +92,16 @@ int main()
     initializeConsole();
     cPrint("[Kernel Main]");
     cNewline();
+    cPrint("Initializing Memory Manager");
+    cNewline();
+    createMemoryManager();
+    cPrint("Initializing Process Manager");
+    initializeProcessManager();
+    cNewline();
     cPrint("Loading IDT descriptors");
     load_idt();
     cNewline();
-
+    cNewline();
 
     cPrint("  Sample data module at 0x");
     cPrintHex((uint64_t)sampleDataModuleAddress);
@@ -107,5 +115,7 @@ int main()
     cNewline();
     ((EntryPoint)sampleCodeModuleAddress)();
     cPrint("[Exiting System]");
+    cPrint("BAZAMAA");
+    cNewline();
 	return 0;
 }

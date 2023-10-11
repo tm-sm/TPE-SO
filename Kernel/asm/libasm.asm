@@ -7,9 +7,8 @@ GLOBAL play_sound
 GLOBAL stop_sound
 GLOBAL timer_wait
 GLOBAL get_ip
-GLOBAL load_process
-GLOBAL save_process
 GLOBAL get_stack_trace
+GLOBAL switch_process
 
 EXTERN displayRegs
 
@@ -250,26 +249,35 @@ load_process:
     mov rax, [rsp + 8]
     ret
 
-save_process:
-    push [rdi]      ;rax
-    push [rdi + 8]  ;rbx
-    push [rdi + 16]  ;rcx
-    push [rdi + 24]  ;rdx
-    push [rdi + 32]  ;rbp
-    push [rdi + 40]  ;rsi
-    push [rdi + 48]  ;r8
-    push [rdi + 56]  ;r9
-    push [rdi + 64]  ;r10
-    push [rdi + 72]  ;r11
-    push [rdi + 80]  ;r12
-    push [rdi + 88]  ;r13
-    push [rdi + 96]  ;r14
-    push [rdi + 104]  ;r15
-    push [rdi + 112]  ;rflags
-    mov [rsi + 16], [rdi + 120] ;rsp
-    mov [rsi], [rdi + 128]      ;rip
+switch_process:
+    push rbx
+    mov rbx, [rdi]
+    mov [rsi + 16], rbx ;rsp to proc->stackTrace
+    mov rbx, [rdi + 128]
+    mov [rsi], rbx      ;rip to proc->ip
 
+    mov rsp, [rdx + 16]
+    pop rbx
 
+    pop rax
+    pop rbx
+    pop rcx
+    pop rdx
+    pop rbp
+    pop rdi
+    pop rsi
+    pop r8
+    pop r9
+    pop r10
+    pop r11
+    pop r12
+    pop r13
+    pop r14
+    pop r15
+    popf
+    pop rsp
+    add rsp, 8
+    mov rax, qword[rdx]
     ret
 
 get_stack_trace:

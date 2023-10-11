@@ -1,5 +1,6 @@
 #include <time.h>
 #include <stdint.h>
+#include <processManager.h>
 
 #define SECONDS 0X00
 #define MINUTES 0X02
@@ -78,8 +79,9 @@ void dateToStr(char * dest){
 
 static unsigned long ticks = 0;
 
-void timer_handler() {
+void timer_handler(uint64_t* registers) {
     ticks++;
+    switchProcess(registers, 0);
 }
 
 int ticks_elapsed() {

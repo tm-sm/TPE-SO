@@ -64,6 +64,7 @@ SECTION .text
 
 %macro pushStateInverse 0
     push rsp
+    pushf
 	push r15
 	push r14
 	push r13
@@ -97,6 +98,7 @@ SECTION .text
 	pop r13
 	pop r14
 	pop r15
+	popf
 	pop rsp
 %endmacro
 

@@ -11,7 +11,7 @@ void irqDispatcher(uint64_t irq, uint64_t* registers) {
 }
 
 void int_20(uint64_t* registers) {
-    timer_handler();
+    timer_handler(registers);
 }
 
 void int_21(uint64_t* registers) {
