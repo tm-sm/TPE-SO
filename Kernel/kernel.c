@@ -101,8 +101,6 @@ int main()
     cPrint("Loading IDT descriptors");
     load_idt();
     cNewline();
-    cNewline();
-
     cPrint("  Sample data module at 0x");
     cPrintHex((uint64_t)sampleDataModuleAddress);
     cNewline();
@@ -115,7 +113,6 @@ int main()
     cNewline();
     ((EntryPoint)sampleCodeModuleAddress)();
     cPrint("[Exiting System]");
-    cPrint("BAZAMAA");
     cNewline();
 	return 0;
 }

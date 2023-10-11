@@ -250,34 +250,41 @@ load_process:
     ret
 
 switch_process:
-    push rbx
-    mov rbx, [rdi]
-    mov [rsi + 16], rbx ;rsp to proc->stackTrace
-    mov rbx, [rdi + 128]
-    mov [rsi], rbx      ;rip to proc->ip
+    ;goes to the new stack, and sets the rip as the return point
+    push rax
+    mov rax, rsp
+    mov rsp, [rdi + 16]
 
-    mov rsp, [rdx + 16]
-    pop rbx
+    push qword[rdi]
 
+    mov rsp, rax
     pop rax
-    pop rbx
-    pop rcx
-    pop rdx
-    pop rbp
-    pop rdi
-    pop rsi
-    pop r8
-    pop r9
-    pop r10
-    pop r11
-    pop r12
-    pop r13
-    pop r14
-    pop r15
-    popf
+
+    ;saves the rsp
+    push qword[rdi + 16]
+
+    ;loads proc->stack to registers
+    mov rax, [rdi + 24]
+    push qword[rax]
+    mov rbx, [rax + 8]
+    mov rcx, [rax + 16]
+    mov rdx, [rax + 24]
+    mov rbp, [rax + 32]
+    mov rdi, [rax + 40]
+    mov rsi, [rax + 48]
+    mov r8, [rax + 56]
+    mov r9, [rax + 64]
+    mov r10, [rax + 72]
+    mov r11, [rax + 80]
+    mov r12, [rax + 88]
+    mov r13, [rax + 96]
+    mov r14, [rax + 104]
+    mov r15, [rax + 112]
+    pop rax
+
+    ;changes the stack and moves to the new rip
     pop rsp
-    add rsp, 8
-    mov rax, qword[rdx]
+    sub rsp, 8
     ret
 
 get_stack_trace:

@@ -2,6 +2,8 @@
 #include <memoryManager.h>
 #include <console.h>
 
+#define REGISTERS 16
+
 #define RUNNING 0
 #define READY 1
 #define BLOCKED 2
@@ -10,10 +12,11 @@
 #define MAX_PROC 2
 
 struct process {
-    uint64_t ip;
+    uint8_t* ip;
     uint8_t* stackTop;
     uint8_t* stackTrace;
-    char * state;
+    uint64_t stack[REGISTERS];
+    uint8_t state;
     int priority;
 } process;
 
@@ -23,10 +26,8 @@ static proc* processes;
 static int amount = 0;
 static int currProc = 1;
 
-uint64_t get_ip();
-void load_process(uint64_t ip, uint8_t* stackTop, uint8_t* stackTrace);
-uint64_t switch_process(uint64_t* registers, proc prevProcess, proc nextProcess);
-uint8_t* get_stack_trace();
+uint8_t* get_ip();
+uint64_t switch_process(proc nextProcess);
 
 void initializeProcessManager() {
     processes = allocate(sizeof(process) * MAX_PROC);
@@ -36,21 +37,28 @@ void initializeProcessManager() {
 }
 
 void startProcess() {
-    processes[amount]->ip = 0x400000;
+    processes[amount]->ip = get_ip();
     processes[amount]->stackTop = allocate(sizeof(uint8_t) * 128);
-    for(int i=0; i<17; i++) {
-        processes[amount]->stackTop[i] = 0;
+    processes[amount]->stackTrace = processes[amount]->stackTop;
+    for(int i=0; i<REGISTERS; i++) {
+        processes[amount]->stack[i] = 0;
     }
-    processes[amount]->stackTrace = processes[amount]->stackTop + 17;
     processes[amount]->state = READY;
     amount = (amount + 1) % MAX_PROC;
 }
 
 void switchProcess(uint64_t* registers, int pid) {
     if(processes[pid]->state == READY) {
-        processes[currProc]->state = READY;
+        //TODO activarlo cuando ya haya multiplos procesos corriendo
+        /*processes[currProc]->state = READY;
+        for(int i=0; i<REGISTERS; i++) {
+            processes[currProc]->stack[i] = registers[i];
+        }
+        processes[currProc]->stackTrace = (uint8_t*)&registers[16];
+        processes[currProc]->ip = (uint8_t*)&registers[17];
+         */
         processes[pid]->state = RUNNING;
-        cPrintHex(switch_process(registers, processes[currProc], processes[pid]));
+        switch_process(processes[pid]);
     }
     return;
 }
