@@ -251,22 +251,25 @@ load_process:
     ret
 
 save_process:
-    push rax
-    push r15
-    push r14
-    push r13
-    push r12
-    push r11
-    push r10
-    push r9
-    push r8
-    push rsi
-    push rdi
-    push rbp
-    push rdx
-    push rcx
-    push rbx
-    mov rax, [rbp + 8]
+    push [rdi]      ;rax
+    push [rdi + 8]  ;rbx
+    push [rdi + 16]  ;rcx
+    push [rdi + 24]  ;rdx
+    push [rdi + 32]  ;rbp
+    push [rdi + 40]  ;rsi
+    push [rdi + 48]  ;r8
+    push [rdi + 56]  ;r9
+    push [rdi + 64]  ;r10
+    push [rdi + 72]  ;r11
+    push [rdi + 80]  ;r12
+    push [rdi + 88]  ;r13
+    push [rdi + 96]  ;r14
+    push [rdi + 104]  ;r15
+    push [rdi + 112]  ;rflags
+    mov [rsi + 16], [rdi + 120] ;rsp
+    mov [rsi], [rdi + 128]      ;rip
+
+
     ret
 
 get_stack_trace:
