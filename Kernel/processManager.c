@@ -3,13 +3,6 @@
 #include <console.h>
 #include <processManager.h>
 
-#define RUNNING 0
-#define READY 1
-#define BLOCKED 2
-#define DEAD 3
-#define INIT_STACK_SIZE 1024
-#define MAXPROCESSES 10
-#define MAX_PROC 10
 
 struct process {
     char pname[20];
@@ -20,7 +13,7 @@ struct process {
     int priority;
 } process;
 
-typedef struct process* proc;
+
 
 static proc* processes;
 static int amount = 0;
