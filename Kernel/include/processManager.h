@@ -1,4 +1,4 @@
-#include <lib.h>
+#include "lib.h"
 
 #ifndef PROCESSMANAGER_H
 #define PROCESSMANAGER_H
@@ -18,5 +18,6 @@ void selectNextProcess(int pid);
 
 //if started with ip = NULL, works as fork
 int startProcess(uint8_t* ip);
+int getPriority(proc p);
 
 #endif //TPE_ARQUI_PROCESSMANAGER_H
