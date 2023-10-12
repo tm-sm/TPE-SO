@@ -79,9 +79,9 @@ void dateToStr(char * dest){
 
 static unsigned long ticks = 0;
 
-void timer_handler(uint64_t* registers) {
+void timer_handler() {
     ticks++;
-    switchProcess(registers, 0);
+    selectNextProcess(0);
 }
 
 int ticks_elapsed() {

@@ -1,3 +1,4 @@
+#include <system.h>
 #include <commands.h>
 #include <graphics.h>
 #include <standardLib.h>
@@ -28,9 +29,12 @@ void startShell() {
 
 void shellLoop() {
     //waits for input and stores it in prompt
-    char c;
+    char c = 0;
     writePromptIcon();
-    while((c = getChar()) != 27 ) {// 'esc'
+    while(c != 27 ) {// 'esc'
+        if(keyPress()) {
+            c = getChar();
+        }
         if(c == '\n') {
             //executes the command
             putChar(c);

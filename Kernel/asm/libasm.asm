@@ -7,10 +7,11 @@ GLOBAL play_sound
 GLOBAL stop_sound
 GLOBAL timer_wait
 GLOBAL get_ip
-GLOBAL get_stack_trace
-GLOBAL switch_process
+GLOBAL prepare_process
 
 EXTERN displayRegs
+EXTERN cPrintHex
+EXTERN cNewline
 
 section .text
 
@@ -229,62 +230,33 @@ get_ip:
     mov rax, [rbp + 8]
     ret
 
-load_process:
-    mov rsp, rcx
-    pop rbx
-    pop rcx
-    pop rdx
+prepare_process:
+    push rbp
+    mov rbp, rsp
+
+    mov dword[rdi - 2], 0x0      ;Stack Segment
+    mov qword[rdi - 10], rsi     ;RSP
+    mov qword[rdi - 18], 0x202   ;RFLAGS
+    mov dword[rdi - 20], 0x8    ;CS
+    mov qword[rdi - 28], rdx     ;RIP
+    mov qword[rdi - 36], 0x2     ;RAX
+    mov qword[rdi - 44], 0x3     ;RBX
+    mov qword[rdi - 52], 0x4     ;RCX
+    mov qword[rdi - 60], 0x5     ;RDX
+    mov qword[rdi - 68], rdi     ;RBP
+    mov qword[rdi - 76], 0x6     ;RDI
+    mov qword[rdi - 80], 0x7     ;RSI
+    mov qword[rdi - 88], 0x8     ;R8
+    mov qword[rdi - 96], 0x9    ;R9
+    mov qword[rdi - 104], 0x10    ;R10
+    mov qword[rdi - 112], 0x11    ;R11
+    mov qword[rdi - 120], 0x12    ;R12
+    mov qword[rdi - 128], 0x13    ;R13
+    mov qword[rdi - 136], 0x14    ;R14
+    mov qword[rdi - 144], 0x15    ;R15
+
+    mov rsp, rbp
     pop rbp
-    pop rdi
-    pop rsi
-    pop r8
-    pop r9
-    pop r10
-    pop r11
-    pop r12
-    pop r13
-    pop r14
-    pop r15
-    push rax
-    mov rax, [rsp + 8]
-    ret
-
-switch_process:
-    ;goes to the new stack, and sets the rip as the return point
-    push rax
-    mov rax, rsp
-    mov rsp, [rdi + 16]
-
-    push qword[rdi]
-
-    mov rsp, rax
-    pop rax
-
-    ;saves the rsp
-    push qword[rdi + 16]
-
-    ;loads proc->stack to registers
-    mov rax, [rdi + 24]
-    push qword[rax]
-    mov rbx, [rax + 8]
-    mov rcx, [rax + 16]
-    mov rdx, [rax + 24]
-    mov rbp, [rax + 32]
-    mov rdi, [rax + 40]
-    mov rsi, [rax + 48]
-    mov r8, [rax + 56]
-    mov r9, [rax + 64]
-    mov r10, [rax + 72]
-    mov r11, [rax + 80]
-    mov r12, [rax + 88]
-    mov r13, [rax + 96]
-    mov r14, [rax + 104]
-    mov r15, [rax + 112]
-    pop rax
-
-    ;changes the stack and moves to the new rip
-    pop rsp
-    sub rsp, 8
     ret
 
 get_stack_trace:

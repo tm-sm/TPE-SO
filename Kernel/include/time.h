@@ -20,7 +20,7 @@ void dateToStr(char * dest);
 
 // functions for timer tick
 
-void timer_handler(uint64_t* registers);
+void timer_handler();
 int ticks_elapsed();
 int seconds_elapsed();
 void wait(uint64_t milliseconds);

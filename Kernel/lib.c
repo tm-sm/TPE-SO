@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <console.h>
 
-static char* regs[]={"rax: ", "rbx: ", "rcx: ", "rdx: ", "rbp: ", "rdi: ", "rsi: ", " r8: ", " r9: ", "r10: ", "r11: ", "r12: ", "r13: ","r14: ", "r15: ", "flg: ", "rsp: ", "rip: "};
+static char* regs[]={"rax: ", "rbx: ", "rcx: ", "rdx: ", "rbp: ", "rdi: ", "rsi: ", " r8: ", " r9: ", "r10: ", "r11: ", "r12: ", "r13: ","r14: ", "r15: ", "rsp: ", "rip: "};
 
 static void exScreen(char* str, uint64_t* stack);
 
@@ -88,7 +88,7 @@ void * memcut(void * destination, void * source, uint64_t length)
 }
 
 void displayRegs(uint64_t* exregs) {
-    int linesToWrite = 18;
+    int linesToWrite = 17;
     int margin = 3;
     moveGlobalCursor(0, linesToWrite+margin);
     while(!(getGlobalCursorX() == 0 && getGlobalCursorY() == 0)) {

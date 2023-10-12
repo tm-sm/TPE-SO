@@ -23,6 +23,9 @@ EXTERN irqDispatcher
 EXTERN exceptionDispatcher
 EXTERN swInterruptDispatcher
 EXTERN displayRegs
+EXTERN switchProcess
+EXTERN cPrintHex
+EXTERN cNewline
 
 SECTION .text
 
@@ -63,8 +66,6 @@ SECTION .text
 %endmacro
 
 %macro pushStateInverse 0
-    push rsp
-    pushf
 	push r15
 	push r14
 	push r13
@@ -98,8 +99,6 @@ SECTION .text
 	pop r13
 	pop r14
 	pop r15
-	popf
-	pop rsp
 %endmacro
 
 %macro irqHandlerMaster 1
@@ -110,19 +109,36 @@ SECTION .text
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
+	mov rax, rsp
+	call switchProcess
+	cmp rax, 0
+
+	je .skip
+	mov rsp, rax
 	popStateInverse
+    pop rsp
+    mov rdi, 0x400000
+    push rdi
+
+    ret
+    jmp .finish
+.skip:
+    popStateInverse
+.finish:
 	iretq
 %endmacro
 
 
 
 %macro exceptionHandler 1
+    push rsp
     pushStateInverse
     mov rdi, rsp
     call displayRegs ; the registers need to be displayed asap
 	mov rdi, %1 ; pasaje de parametro
 	call exceptionDispatcher
 	popStateInverse
+	pop rsp
 	call getStackBase
     sub rax, 20h
     mov qword [rsp+8*3], rax

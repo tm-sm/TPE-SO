@@ -1,6 +1,8 @@
 #ifndef TPE_ARQUI_SYSTEM_H
 #define TPE_ARQUI_SYSTEM_H
 
+#include <stdint.h>
+
 /**
  * Checks whether a key is currently being pressed or not
  * @return 1 if a key press was detected, 0 if not
