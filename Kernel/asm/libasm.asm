@@ -233,27 +233,30 @@ get_ip:
 prepare_process:
     push rbp
     mov rbp, rsp
+    mov rsp, rdi
 
-    mov dword[rdi - 2], 0x0      ;Stack Segment
-    mov qword[rdi - 10], rsi     ;RSP
-    mov qword[rdi - 18], 0x202   ;RFLAGS
-    mov dword[rdi - 20], 0x8    ;CS
-    mov qword[rdi - 28], rdx     ;RIP
-    mov qword[rdi - 36], 0x2     ;RAX
-    mov qword[rdi - 44], 0x3     ;RBX
-    mov qword[rdi - 52], 0x4     ;RCX
-    mov qword[rdi - 60], 0x5     ;RDX
-    mov qword[rdi - 68], rdi     ;RBP
-    mov qword[rdi - 76], 0x6     ;RDI
-    mov qword[rdi - 80], 0x7     ;RSI
-    mov qword[rdi - 88], 0x8     ;R8
-    mov qword[rdi - 96], 0x9    ;R9
-    mov qword[rdi - 104], 0x10    ;R10
-    mov qword[rdi - 112], 0x11    ;R11
-    mov qword[rdi - 120], 0x12    ;R12
-    mov qword[rdi - 128], 0x13    ;R13
-    mov qword[rdi - 136], 0x14    ;R14
-    mov qword[rdi - 144], 0x15    ;R15
+    push dword 0x0      ;SS
+    push rsi            ;RSP
+    push qword 0x202    ;RFLAGS
+    push dword 0x8      ;CS
+    push rdx            ;RIP
+    push qword 0x0      ;RAX
+    push qword 0x1      ;RBX
+    push qword 0x2      ;RCX
+    push qword 0x3      ;RDX
+    push rdi            ;RBP
+    push qword 0x5      ;RDI
+    push qword 0x6      ;RSI
+    push qword 0x7      ;R8
+    push qword 0x8      ;R9
+    push qword 0x9      ;R10
+    push qword 0x10     ;R11
+    push qword 0x11     ;R12
+    push qword 0x12     ;R13
+    push qword 0x13     ;R14
+    push qword 0x14     ;R15
+
+    mov rax, rsp
 
     mov rsp, rbp
     pop rbp

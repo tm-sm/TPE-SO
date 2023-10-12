@@ -25,7 +25,7 @@ static int currProc = -1;
 static int nextProc = 0;
 
 uint8_t* get_ip();
-uint8_t* prepare_process(uint8_t* stackPtr, uint64_t rsp, uint64_t rip);
+uint8_t* prepare_process(uint8_t* stackPtr, uint8_t* rbp, uint8_t* rip);
 
 void initializeProcessManager() {
     processes = allocate(sizeof(process) * MAX_PROC);
@@ -35,30 +35,17 @@ void initializeProcessManager() {
 }
 
 int startProcess(uint8_t* ip) {
-
-    processes[amount]->stackTop = allocate(sizeof(uint8_t) * INIT_STACK_SIZE) + INIT_STACK_SIZE;
+    int pid = amount;
+    processes[pid]->stackTop = allocate(sizeof(uint8_t) * INIT_STACK_SIZE) + INIT_STACK_SIZE;
 
     if(ip == NULL) {
         ip = get_ip();
     }
-    prepare_process(processes[amount]->stackTop, *processes[amount]->stackTop, *ip);
-    processes[amount]->stackTrace = processes[amount]->stackTop - 144;
-    processes[amount]->state = READY;
-    int pid = amount;
-    amount++;
+    processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop,
+                                                    processes[pid]->stackTop, ip);
+    processes[pid]->state = READY;
 
-    cPrint("Created new process: ");
-    cPrintDec(pid);
-    cNewline();
-    cPrint("Stack base at: 0x");
-    cPrintHex((uint64_t)processes[pid]->stackTop);
-    cNewline();
-    cPrint("Stack at: 0x");
-    cPrintHex((uint64_t)processes[pid]->stackTrace);
-    cNewline();
-    cPrint("RIP at: 0x");
-    cPrintHex((uint64_t)ip);
-    cNewline();
+    amount++;
     return pid;
 }
 

@@ -103,29 +103,30 @@ SECTION .text
 
 %macro irqHandlerMaster 1
 	pushStateInverse
-	mov rdi, %1 ; pasaje de parametro
+
+	mov rdi, %1     ;sys_call id
 	mov rsi, rsp
 	call irqDispatcher
+
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
 	mov rax, rsp
 	call switchProcess
-	cmp rax, 0
 
-	je .skip
+	cmp rax, 0
+    je .skip
+
 	mov rsp, rax
 	popStateInverse
-    pop rsp
-    mov rdi, 0x400000
-    push rdi
 
-    ret
     jmp .finish
+
 .skip:
     popStateInverse
 .finish:
 	iretq
+
 %endmacro
 
 
