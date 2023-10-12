@@ -1,23 +1,19 @@
 #include <lib.h>
 #include <memoryManager.h>
 #include <console.h>
+#include <processManager.h>
 
-#define RUNNING 0
-#define READY 1
-#define BLOCKED 2
-#define DEAD 3
-#define INIT_STACK_SIZE 1024
-
-#define MAX_PROC 10
 
 struct process {
+    char pname[20];
+    int pid;
     uint8_t* stackTop;
     uint8_t* stackTrace;
     uint8_t state;
     int priority;
 } process;
 
-typedef struct process* proc;
+
 
 static proc* processes;
 static int amount = 0;
@@ -68,4 +64,22 @@ uint64_t switchProcess(uint64_t rsp) {
 
 int getPriority(proc p){
     return p->priority;
+}
+
+int getSpace(){
+    for(int i=0;i<MAXPROCESSES;i++)
+        if(processes[i]->state==DEAD)
+            return i;
+    return -1;
+}
+
+proc getProcess(int pid){
+for(int i=0;i<MAXPROCESSES;i++)
+    if(processes[i]->pid==pid)
+        return processes[i];
+    return NULL;
+}
+void BeheadProcess(int pid){
+    proc p=getProcess(pid);
+    p->state=DEAD;
 }
