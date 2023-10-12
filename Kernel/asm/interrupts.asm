@@ -108,20 +108,18 @@ SECTION .text
 	mov rsi, rsp
 	call irqDispatcher
 
+    mov rdi, rsp
+	call switchProcess
+	cmp rax, 0
+    mov rbx, rax
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
-	mov rax, rsp
-	call switchProcess
-
-	cmp rax, 0
     je .skip
 
-	mov rsp, rax
+	mov rsp, rbx
 	popStateInverse
-
     jmp .finish
-
 .skip:
     popStateInverse
 .finish:

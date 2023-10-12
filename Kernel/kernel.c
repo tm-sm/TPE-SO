@@ -111,9 +111,9 @@ int main()
     cNewline();
     cPrint("[Kernel finished]");
     cNewline();
-    ((EntryPoint)sampleCodeModuleAddress)();
-    //startProcess(sampleCodeModuleAddress);
-    //wait(2000);
+    //((EntryPoint)sampleCodeModuleAddress)();
+    startProcess(sampleCodeModuleAddress, 1);
+    wait(2000);
     cPrint("[Exiting System]");
     cNewline();
 	return 0;

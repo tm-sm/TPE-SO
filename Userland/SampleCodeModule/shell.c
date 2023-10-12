@@ -31,10 +31,8 @@ void shellLoop() {
     //waits for input and stores it in prompt
     char c = 0;
     writePromptIcon();
-    while(c != 27 ) {// 'esc'
-        if(keyPress()) {
-            c = getChar();
-        }
+    while((c = getChar()) != 27 ) {// 'esc'
+
         if(c == '\n') {
             //executes the command
             putChar(c);

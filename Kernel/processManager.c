@@ -18,7 +18,7 @@ struct process {
 static proc* processes;
 static int amount = 0;
 static int currProc = -1;
-static int nextProc = 0;
+static int nextProc = -1;
 
 uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stackPtr, uint8_t* rbp, uint8_t* rip);
@@ -30,7 +30,7 @@ void initializeProcessManager() {
     }
 }
 
-int startProcess(uint8_t* ip) {
+int startProcess(uint8_t* ip, int priority) {
     int pid = amount;
     processes[pid]->stackTop = allocate(sizeof(uint8_t) * INIT_STACK_SIZE) + INIT_STACK_SIZE;
 
@@ -39,9 +39,13 @@ int startProcess(uint8_t* ip) {
     }
     processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop,
                                                     processes[pid]->stackTop, ip);
+
+    processes[pid]->priority = priority;
     processes[pid]->state = READY;
 
     amount++;
+
+    //TODO llamar al scheduler para que lo agregue a su lista
     return pid;
 }
 
@@ -74,11 +78,21 @@ int getSpace(){
 }
 
 proc getProcess(int pid){
-for(int i=0;i<MAXPROCESSES;i++)
-    if(processes[i]->pid==pid)
-        return processes[i];
+    for(int i=0;i<MAXPROCESSES;i++) {
+        if (processes[i]->pid == pid)
+            return processes[i];
+    }
     return NULL;
 }
+
+void setProcessPriority(int pid, int priority) {
+    processes[pid]->priority = priority;
+}
+
+int getProcessPriority(int pid) {
+    return processes[pid]->priority;
+}
+
 void BeheadProcess(int pid){
     proc p=getProcess(pid);
     p->state=DEAD;

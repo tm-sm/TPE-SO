@@ -17,7 +17,7 @@ uint64_t switchProcess(uint64_t rsp);
 void selectNextProcess(int pid);
 
 //if started with ip = NULL, works as fork
-int startProcess(uint8_t* ip);
+int startProcess(uint8_t* ip, int priority);
 int getPriority(proc p);
 
 #endif //TPE_ARQUI_PROCESSMANAGER_H
