@@ -236,10 +236,10 @@ prepare_process:
     mov rsp, rdi
 
     push dword 0x0      ;SS
-    push rsi            ;RSP
+    push rdi            ;RSP
     push qword 0x202    ;RFLAGS
     push dword 0x8      ;CS
-    push rdx            ;RIP
+    push rsi            ;RIP
     push qword 0x0      ;RAX
     push qword 0x1      ;RBX
     push qword 0x2      ;RCX

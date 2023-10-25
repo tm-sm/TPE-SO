@@ -110,11 +110,13 @@ SECTION .text
 
     mov rdi, rsp
 	call switchProcess
-	cmp rax, 0
     mov rbx, rax
+
 	; signal pic EOI (End of Interrupt)
 	mov al, 20h
 	out 20h, al
+
+	cmp rbx, 0
     je .skip
 
 	mov rsp, rbx
