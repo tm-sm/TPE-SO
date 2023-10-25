@@ -2,6 +2,12 @@
 #include <memoryManager.h>
 #include <console.h>
 
+typedef struct BlockHeader {
+    size_t size;
+    size_t is_free;
+    struct BlockHeader *next;
+}BlockHeader;
+
 int memoryAllocTest(){
     char * mem1 = allocate(500);
     char * mem2 = allocate(2603);

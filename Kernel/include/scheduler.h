@@ -5,15 +5,11 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#define RUNNING 0
-#define READY 1
-#define BLOCKED 2
-#define DEAD 3
-#define INIT_STACK_SIZE 1024
-#define MAXPROCESSES 10
-#define MAX_PROC 10
+#define HIGH 0
+#define MED 1
+#define LOW 2
 
-void roundRobin();
-void addToSchedule(proc p);
+void scheduler();
+void addToScheduler(int pid);
 
 #endif //SCHEDULER

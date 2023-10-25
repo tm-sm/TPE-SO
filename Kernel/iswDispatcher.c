@@ -17,13 +17,14 @@ void sys_get_time(BASE_PARAMS);//code 4
 void sys_detect_key_press(BASE_PARAMS);//code 5
 void sys_wait(BASE_PARAMS);//code 6
 void sys_sound(BASE_PARAMS); // code 7
+void sys_nop(BASE_PARAMS); // code 8
 extern uint64_t* current_regs();
 
 extern void _sti();
 
 FunctionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_get_time, sys_detect_key_press,
-                               sys_wait, sys_sound};
+                               sys_wait, sys_sound, sys_nop};
 
 void swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -157,4 +158,9 @@ void sys_sound(BASE_PARAMS) {
     //beep needs the timer tick interruption to work, this isn't pretty, but it won't work without it
     _sti();
     play_beep(rsi, rdx);
+}
+
+// ID = 8
+void sys_nop(BASE_PARAMS){
+    //does nothing
 }

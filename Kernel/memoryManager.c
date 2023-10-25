@@ -1,7 +1,13 @@
-#include "./memoryManager.h"
+#include <memoryManager.h>
 #include <lib.h>
 //INTENTO DE ALOCAR MEMORIA ESTATICA DE MANERA DINAMICA (Para un manipular mas facilmente los strings)
 #define MEM_START_ADR 0x0000000000050000
+
+typedef struct BlockHeader {
+    size_t size;
+    size_t is_free;
+    struct BlockHeader *next;
+}BlockHeader;
 
 /*
  * Struct -> Define bloques que tienen como dato:

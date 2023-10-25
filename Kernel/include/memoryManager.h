@@ -4,12 +4,6 @@
 
 //La memoria se definio en el .c pues donde arranca y termina la memoria no deberia ser visible para tod el so, sino para el MM
 
-typedef struct BlockHeader {
-    size_t size;
-    size_t is_free;
-    struct BlockHeader *next;
-}BlockHeader;
-
 void createMemoryManager();
 
 void * allocate(size_t size);

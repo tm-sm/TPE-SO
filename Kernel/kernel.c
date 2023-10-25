@@ -10,6 +10,8 @@
 #include <sound.h>
 #include <memoryManager.h>
 #include <processManager.h>
+#include <scheduler.h>
+#include <process.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -97,6 +99,7 @@ int main()
     createMemoryManager();
     cPrint("Initializing Process Manager");
     initializeProcessManager();
+    startProcess(NULL, HIGH);
     cNewline();
     cPrint("Loading IDT descriptors");
     load_idt();
@@ -112,9 +115,10 @@ int main()
     cPrint("[Kernel finished]");
     cNewline();
     //((EntryPoint)sampleCodeModuleAddress)();
-    startProcess(sampleCodeModuleAddress, 1);
-    wait(2000);
+    //startProcess(&processHelloWorld, HIGH);
+    startProcess(sampleCodeModuleAddress, HIGH);
     cPrint("[Exiting System]");
+    while(1);
     cNewline();
 	return 0;
 }

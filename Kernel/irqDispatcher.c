@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <keyboardDriver.h>
 #include <processManager.h>
+#include <scheduler.h>
 
 static void int_20(uint64_t* registers), int_21(uint64_t* registers);
 
@@ -13,8 +14,7 @@ void irqDispatcher(uint64_t irq, uint64_t* registers) {
 
 void int_20(uint64_t* registers) {
     timer_handler();
-    //TODO agregar llamado al scheduler
-    selectNextProcess(0); //carga el shell
+    scheduler();
 }
 
 void int_21(uint64_t* registers) {

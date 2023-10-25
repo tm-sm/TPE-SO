@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <processManager.h>
+#include <scheduler.h>
 
 #define SECONDS 0X00
 #define MINUTES 0X02

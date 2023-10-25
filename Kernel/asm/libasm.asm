@@ -8,10 +8,12 @@ GLOBAL stop_sound
 GLOBAL timer_wait
 GLOBAL get_ip
 GLOBAL prepare_process
+GLOBAL interruptNop
 
 EXTERN displayRegs
 EXTERN cPrintHex
 EXTERN cNewline
+EXTERN roundRobin
 
 section .text
 
@@ -264,4 +266,8 @@ prepare_process:
 
 get_stack_trace:
     mov rax, rsp
+    ret
+
+interruptNop:
+    int 20h
     ret
