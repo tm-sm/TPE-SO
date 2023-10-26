@@ -99,7 +99,7 @@ int main()
     createMemoryManager();
     cPrint("Initializing Process Manager");
     initializeProcessManager();
-    startProcess(NULL, HIGH);
+    startProcess(NULL, HIGH, FOREGROUND);
     cNewline();
     cPrint("Loading IDT descriptors");
     load_idt();
@@ -115,10 +115,11 @@ int main()
     cPrint("[Kernel finished]");
     cNewline();
     //((EntryPoint)sampleCodeModuleAddress)();
-    //startProcess(&processHelloWorld, HIGH);
-    startProcess(sampleCodeModuleAddress, HIGH);
+    startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND);
     cPrint("[Exiting System]");
-    while(1);
+    while(1) {
+        cPrint("a");
+    }
     cNewline();
 	return 0;
 }

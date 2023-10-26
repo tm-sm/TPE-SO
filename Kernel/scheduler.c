@@ -10,6 +10,7 @@ typedef struct node{
 }node;
 
 void roundRobin();
+void dumbSchedule();
 
 
 static node * procs[3] = {NULL};
@@ -19,6 +20,15 @@ static node * runningProc = NULL;
 
 void scheduler() {
     roundRobin();
+}
+
+void dumbSchedule() {
+    //TODO sacarlo para la entrega, es mas debug
+    //for testing purposes
+    if(runningProc != NULL) {
+        runningProc = runningProc->next;
+        selectNextProcess(runningProc->pid);
+    }
 }
 
 void roundRobin() {
@@ -34,19 +44,16 @@ void roundRobin() {
         } else if(procs[i] != NULL){
             toRun = procs[i]->next;
             aux = procs[i];
-            }
+        }
         if(aux != NULL && toRun != NULL) {
             if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
                 runningProc = toRun;
-                cPrint("\n");
-                cPrintDec(runningProc->pid);
                 selectNextProcess(runningProc->pid);
+                return;
             }
             while (aux != toRun) {
                 if (getStateFromPid(toRun->pid) == READY) {
                     runningProc = toRun;
-                    cPrint("\n");
-                    cPrintDec(runningProc->pid);
                     selectNextProcess(runningProc->pid);
                     return;
                 }
@@ -55,11 +62,9 @@ void roundRobin() {
         }
     }
 
-    /*
     if(getStateFromPid(runningProc->pid) != RUNNING) {
         selectNextProcess(SENTINEL_PID);
     }
-     */
 }
 
 

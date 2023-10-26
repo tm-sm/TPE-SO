@@ -26,6 +26,7 @@ EXTERN displayRegs
 EXTERN switchProcess
 EXTERN cPrintHex
 EXTERN cNewline
+EXTERN cPrintDec
 
 SECTION .text
 

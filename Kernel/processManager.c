@@ -5,7 +5,6 @@
 #include <process.h>
 #include <scheduler.h>
 
-
 struct process {
     char pname[20];
     int pid;
@@ -14,12 +13,14 @@ struct process {
     uint8_t state;
     int priority;
     int totalMemory;
+    uint8_t foreground;
 } process;
 
-static proc* processes;
+proc processes[MAX_PROC];
 static int amount = 0;
 static int currProc = -1;
 static int nextProc = -1;
+static int fgProc = -1;
 
 uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stack, uint8_t* rip);
@@ -27,8 +28,6 @@ void startSentinel();
 void interruptNop();
 
 void initializeProcessManager() {
-    void* ip = get_ip();
-    processes = allocate(sizeof(process) * MAX_PROC);
     for(int i=0; i<MAX_PROC; i++) {
         processes[i]->state = DEAD;
     }
@@ -45,26 +44,34 @@ void startSentinel() {
     processes[pid]->priority = LOW;
     processes[pid]->state = READY;
     processes[pid]->totalMemory = SENTINEL_STACK_SIZE;
+    processes[pid]->totalMemory = BACKGROUND;
 
     amount++;
 }
 
-int startProcess(void* ip, int priority) {
-    if(ip == NULL) {
+int startProcess(void* ip, int priority, uint8_t foreground) {
+    if (ip == NULL) {
         ip = get_ip();
     }
 
     int pid = amount;
+
+    // Allocate memory for the new process
+    processes[pid] = (struct process*)allocate(sizeof(struct process));
+
     processes[pid]->pid = pid;
-    processes[pid]->stackTop = allocate(sizeof(uint8_t) * INIT_STACK_SIZE) + INIT_STACK_SIZE;
+    processes[pid]->stackTop = allocate(INIT_STACK_SIZE) + INIT_STACK_SIZE;
     processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop, ip);
     processes[pid]->priority = priority;
     processes[pid]->state = READY;
     processes[pid]->totalMemory = INIT_STACK_SIZE;
+    processes[pid]->foreground = foreground;
 
     amount++;
 
     addToScheduler(processes[pid]->pid);
+    scheduler();
+    interruptNop();
     return pid;
 }
 
@@ -73,7 +80,7 @@ void checkProcessHealth(int pid) {
     if(pid == SENTINEL_PID) return;
 
     if(processes[pid]->stackTrace > processes[pid]->stackTop
-    || processes[pid]->stackTrace < (processes[pid]->stackTop - processes[pid]->totalMemory)) {
+       || processes[pid]->stackTrace < (processes[pid]->stackTop - processes[pid]->totalMemory)) {
         return;
         //TODO matar al proceso por escribir en memoria invalida
     }
@@ -95,33 +102,21 @@ void selectNextProcess(int pid) {
 }
 
 uint64_t switchProcess(uint64_t rsp) {
-   /* cPrint("\n");
-    cPrint("amount: ");
-    cPrintDec(amount);
-    cPrint("\n");
-    cPrint("currProc:  ");
-    cPrintDec(currProc);
-    cPrint("\n");
-    cPrint("nextProc:   ");
-    cPrintDec(nextProc);
-    cPrint("\n");
-    cPrint("next proc state: ");
-    cPrintDec(processes[nextProc]->state);
-    cPrint("\n");
-
-    uint32_t i=0;
-    for(; i<100000000; i++) {
-    }
-*/
-    if(amount > 0 && currProc != nextProc && processes[nextProc]->state == READY) {
-        processes[currProc]->stackTrace = (uint8_t*)rsp;
-        processes[currProc]->state = READY;
-
-        checkProcessHealth(nextProc);
-        processes[nextProc]->state = RUNNING;
-        uint64_t returnVal = (uint64_t)processes[nextProc]->stackTrace;
+    /*if(currProc != -1) {
+        cPrint("\nCurr: ");
+        cPrintDec(currProc);
+        cPrint("Next: ");
+        cPrintDec(nextProc);
+    }*/
+    if(amount > 0 && currProc != nextProc) {
+        if(currProc != -1) {
+            processes[currProc]->stackTrace = (uint8_t *) rsp;
+            processes[currProc]->state = READY;
+        }
         currProc = nextProc;
-        return returnVal;
+        checkProcessHealth(currProc);
+        processes[currProc]->state = RUNNING;
+        return (uint64_t)processes[currProc]->stackTrace;
     }
     return 0;
 }
@@ -163,6 +158,13 @@ void setProcessPriority(int pid, int priority) {
 
 int getProcessPriority(int pid) {
     return processes[pid]->priority;
+}
+
+int isCurrentProcessInForeground() {
+    if(currProc != -1) {
+        return currProc == fgProc;
+    }
+    return -1;
 }
 
 void BeheadProcess(int pid){

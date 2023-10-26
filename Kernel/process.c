@@ -6,7 +6,14 @@ void processSentinel() {
     while(1);
 }
 
-void processHelloWorld() {
-    cPrint("Hello World\n");
-    while(1);
+void processHello() {
+    while(1) {
+        cPrint("\nHello");
+    }
+}
+
+void processWorld() {
+    while(1) {
+        cPrint("          World\n");
+    }
 }
