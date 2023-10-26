@@ -201,32 +201,29 @@ uint8_t is_key(char c, char k) {
     return c == k || c == k + dist;
 }
 
-char update_player_user(game* g) {
-    char c;
-    if (keyPress()) {
-        c = getChar();
-        if (is_key(c, 'w')) {
-            g->user.v_bar.y -= BARSPEED;
-            g->user.v_bar.dir = -1;
-        }
-        else if (is_key(c, 's')) {
-            g->user.v_bar.y += BARSPEED;
-            g->user.v_bar.dir = 1;
-        }
-        else {
-            g->user.v_bar.dir = 0;
-        }
+void update_player_user(game* g) {
+    uint8_t moved = 0;
+    if (isCharPressed('w') || isCharPressed('W')) {
+        g->user.v_bar.y -= BARSPEED;
+        g->user.v_bar.dir = -1;
+        moved = 1;
+    }
+    else if (isCharPressed('s') || isCharPressed('S')) {
+        g->user.v_bar.y += BARSPEED;
+        g->user.v_bar.dir = 1;
+        moved = 1;
     }
     else {
+        g->user.v_bar.dir = 0;
+    }
+    if(!moved) {
         //this creates smoother movement
         if(g->user.v_bar.dir!=0) {
             g->user.v_bar.y += (g->user.v_bar.dir > 0)?(BARSPEED):(-BARSPEED);
             g->user.v_bar.dir = 0;
         }
-        c = 0;
     }
     recenter_player(&g->user);
-    return c;
 }
 
 void welcome() {
@@ -265,7 +262,7 @@ void pong() {
     while(c != 27 && (game.user.score != 3 && game.computer.score != 3)) {
         
         // pressing P pauses the game and unables double buffer
-        if (c == 'p' || c == 'P') {
+        if (isCharPressed('p') || isCharPressed('P')) {
             printFormat("\nPress any key to return");
             swapBuffer();
             disableDoubleBuffering();
@@ -274,7 +271,7 @@ void pong() {
         }
 
         // UPDATES POS
-        c = update_player_user(&game);
+        update_player_user(&game);
         update_player_computer(&game);
         update_ball(&game);
 
@@ -288,6 +285,9 @@ void pong() {
         //invalidOp(); //for testing
         // SHOWS FRAME ON SCREEN
         swapBuffer();
+        if(keyPress()) {
+            c = getChar();
+        }
     }
 
     if (game.user.score == 3) {

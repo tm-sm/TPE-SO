@@ -61,7 +61,7 @@ static void putStrn(char*s){
 
 char getChar(){
     char c;
-    //this prevents the system calls from being blocked by the sys_read interruption
+    //this prevents system calls from being blocked by the sys_read interruption
     while(1) {
         if(keyPress()) {
             interrupt(SYSREAD,(uint64_t)&c,0,0,0,0);
@@ -69,6 +69,13 @@ char getChar(){
         }
     }
 }
+
+uint8_t isCharPressed(char c) {
+    uint8_t v;
+    interrupt(9, (uint64_t)&v, c, 0, 0, 0);
+    return v;
+}
+
 void printFormat(const char* format, ...) {
     char buff[17];
     va_list args;

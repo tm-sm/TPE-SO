@@ -37,8 +37,8 @@ void bubbles() {
                            {1000, 50, -3, 1, 20, WHITE},  {5, 10, 2, -2, 20, RED},  {100, 100, 2, -1, 20, BLUE},  {1200, 620, 2, -2, 20, YELLOW},
                            {100, 367, -3, 2, 20, CYAN}, {990, 701, -2, -1, 20, GREEN}, {150, 610, -1, -1, 20, PINK}};
     int i;
-    char c;
-    while(!keyPress() || (c=getChar()) != 27) {
+    char c = 0;
+    while(c != 27) {
         //runs until 'esc' is pressed
         //animation loop
         for(i = 0; i<size; i++) {
@@ -47,5 +47,8 @@ void bubbles() {
         }
 
         swapBuffer();//double buffering needs to be enabled previously
+        if(keyPress()) {
+            c = getChar();
+        }
     }
 }

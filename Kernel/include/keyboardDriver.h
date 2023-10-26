@@ -15,4 +15,7 @@ void gets(char * s);
 // gets string, from the keyboard
 char getc();
 
+// returns 1/0 depending if a key corresponding to a char is being pressed
+uint8_t isCharPressed(unsigned char c);
+
 #endif

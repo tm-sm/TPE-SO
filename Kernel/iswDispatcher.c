@@ -18,13 +18,14 @@ void sys_detect_key_press(BASE_PARAMS);//code 5
 void sys_wait(BASE_PARAMS);//code 6
 void sys_sound(BASE_PARAMS); // code 7
 void sys_nop(BASE_PARAMS); // code 8
+void sys_is_char_pressed(BASE_PARAMS); // code 9
 extern uint64_t* current_regs();
 
 extern void _sti();
 
 FunctionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_get_time, sys_detect_key_press,
-                               sys_wait, sys_sound, sys_nop};
+                               sys_wait, sys_sound, sys_nop, sys_is_char_pressed};
 
 void swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -33,9 +34,9 @@ void swInterruptDispatcher(COMPLETE_PARAMS) {
     interruptions[rdi](rsi, rdx, rcx, r8, r9);
 }
 
-//ID=0
-//rsi = char* pointing to the start of the string
-//rdx = amount of chars that should be written
+//ID= 0
+//rsi= char* pointing to the start of the string
+//rdx= amount of chars that should be written
 void sys_write(BASE_PARAMS) {
   char* s=(char*)rsi;
   for(int i=0;i<rdx ;i++){
@@ -45,18 +46,18 @@ void sys_write(BASE_PARAMS) {
   }
 }
 
-//ID=1
-//rsi=char* pointing to the tar
+//ID= 1
+//rsi= char* pointing to the tar
 void sys_read(BASE_PARAMS) {
     *(char*)rsi=getc();
 }
 
-//ID=2
-//rsi = 0 -> pixel || 1 -> line || 2 -> empty rectangle || 3 -> rectangle || 4 -> empty circle || 5 -> filled circle || 6 -> clear screen
-//rdx = INITIAL COORDINATES :: upper half -> x0 || lower half -> y0
-//rcx = FINAL COORDINATES (used for lines :: upper half -> x1 || lower half -> y1
-//r8 = DIMENSIONS (used by circles and rectangles) :: upper half -> rectangle height || lower half -> rectangle width // circle radius
-//r9 = COLOR :: in hex values
+//ID= 2
+//rsi= 0 -> pixel || 1 -> line || 2 -> empty rectangle || 3 -> rectangle || 4 -> empty circle || 5 -> filled circle || 6 -> clear screen
+//rdx= INITIAL COORDINATES :: upper half -> x0 || lower half -> y0
+//rcx= FINAL COORDINATES (used for lines :: upper half -> x1 || lower half -> y1
+//r8= DIMENSIONS (used by circles and rectangles) :: upper half -> rectangle height || lower half -> rectangle width // circle radius
+//r9= COLOR :: in hex values
 void sys_draw(BASE_PARAMS) {
     uint32_t x0 = (uint32_t) (rdx >> 32);
     uint32_t y0 = (uint32_t) rdx;
@@ -93,8 +94,8 @@ void sys_draw(BASE_PARAMS) {
     }
 }
 
-//ID=3
-//rsi = INSTRUCTION :: 0 -> disables double buffering || 1 -> enables double buffering || 2 -> swaps buffers
+//ID= 3
+//rsi= INSTRUCTION :: 0 -> disables double buffering || 1 -> enables double buffering || 2 -> swaps buffers
 void sys_double_buffer(BASE_PARAMS) {
     switch(rsi) {
         case 0:
@@ -151,16 +152,23 @@ void sys_wait(BASE_PARAMS) {
     wait(rsi);
 }
 
-// ID = 7
-// rsi = frequency of beep
-// rdx = duration of beep 
+// ID= 7
+// rsi= frequency of beep
+// rdx= duration of beep
 void sys_sound(BASE_PARAMS) {
     //beep needs the timer tick interruption to work, this isn't pretty, but it won't work without it
     _sti();
     play_beep(rsi, rdx);
 }
 
-// ID = 8
+// ID= 8
 void sys_nop(BASE_PARAMS){
     //does nothing
+}
+
+// ID= 9
+// rsi= char corresponding to a key
+// rdx= pointer to an uint8_t, returns 1 if the key corresponding to the char is being pressed, 0 if not
+void sys_is_char_pressed(BASE_PARAMS) {
+    *(uint8_t*) rsi = isCharPressed(rdx);
 }
