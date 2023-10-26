@@ -161,10 +161,7 @@ int getProcessPriority(int pid) {
 }
 
 int isCurrentProcessInForeground() {
-    if(currProc != -1) {
-        return currProc == fgProc;
-    }
-    return -1;
+    return processes[currProc]->foreground == FOREGROUND;
 }
 
 void BeheadProcess(int pid){

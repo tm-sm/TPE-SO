@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <videoDriver.h>
 #include <lib.h>
+#include <processManager.h>
 
 // codigo dado por la cátedra de Arquitectura de Computadoras
 
@@ -109,6 +110,9 @@ void scrollCharArea() {
 }
 
 void putPixel(Color c, uint32_t x, uint32_t y) {
+    if(!isCurrentProcessInForeground()) {
+        return;
+    }
     if(x >= VBE_mode_info->width || x < 0 || y >= VBE_mode_info->height || y < 0) {
         return;
     }

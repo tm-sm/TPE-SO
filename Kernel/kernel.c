@@ -99,7 +99,7 @@ int main()
     createMemoryManager();
     cPrint("Initializing Process Manager");
     initializeProcessManager();
-    startProcess(NULL, HIGH, FOREGROUND);
+    startProcess(NULL, HIGH, BACKGROUND);
     cNewline();
     cPrint("Loading IDT descriptors");
     load_idt();
