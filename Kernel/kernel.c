@@ -117,9 +117,8 @@ int main()
     //((EntryPoint)sampleCodeModuleAddress)();
     startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND);
     cPrint("[Exiting System]");
-    while(1) {
-        cPrint("a");
-    }
+    //TODO hacer que espere a que la shell termine
+    while(1) {    }
     cNewline();
 	return 0;
 }
