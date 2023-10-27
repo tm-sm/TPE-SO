@@ -20,7 +20,6 @@ proc processes[MAX_PROC] = {NULL};
 static int amount = 0;
 static int currProc = -1;
 static int nextProc = -1;
-static int initialized = 0;
 
 //TODO checkear que pid es valido antes de hacer operaciones
 
@@ -31,17 +30,14 @@ int findFirstAvailablePid();
 
 void initializeProcessManager() {
     //this should be started at the very beginning, so pid=0 == sentinel
-    startProcess(&processSentinel, LOW, BACKGROUND, "sentinel", 256);
-    initialized = 1;
+    startProcess(&processSentinel, LOW, FOREGROUND, "sentinel", 256);
 }
 
-int startProcess(void* ip, int priority, uint8_t foreground, char* name, size_t stackSize) {
-    if(initialized == 0) {
-        return -1;
-    }
+int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize) {
     int pid = findFirstAvailablePid();
 
     if(pid == -1) {
+        cPrint("couldn't find a PID");
         return -1;
     }
     if (ip == NULL) {
@@ -80,7 +76,9 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, size_t 
 
     amount++;
 
-    addToScheduler(processes[pid]->pid);
+    if(pid != 0) {
+        addToScheduler(processes[pid]->pid);
+    }
     interruptTick();
     return pid;
 }
@@ -173,7 +171,7 @@ int getProcessPriority(int pid) {
 }
 
 int isCurrentProcessInForeground() {
-    return processes[currProc]->foreground == FOREGROUND;
+    return processes[currProc]->foreground == FOREGROUND || currProc == -1;
 }
 
 int isProcessAlive(int pid) {
@@ -200,7 +198,7 @@ int findFirstAvailablePid() {
     }
 
     for(int i=0; i<MAX_PROC; i++) {
-        if(processes[i] != NULL) {
+        if(processes[i] == NULL) {
             return i;
         }
     }
