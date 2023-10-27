@@ -22,6 +22,8 @@ static int currProc = -1;
 static int nextProc = -1;
 static int initialized = 0;
 
+//TODO checkear que pid es valido antes de hacer operaciones
+
 uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stack, uint8_t* rip);
 void interruptTick();
@@ -155,6 +157,10 @@ int getSpace() {
 
 proc getProcess(int pid) {
     return processes[pid];
+}
+
+void setProcessForeground(int pid, int foreground) {
+    processes[pid]->foreground = foreground;
 }
 
 void setProcessPriority(int pid, int priority) {

@@ -23,6 +23,7 @@ uint64_t sys_nop(BASE_PARAMS); // code 8
 uint64_t sys_is_char_pressed(BASE_PARAMS); // code 9
 uint64_t sys_create_process(BASE_PARAMS); // code 10
 uint64_t sys_kill_process(BASE_PARAMS); // code 11
+uint64_t sys_set_process_foreground(BASE_PARAMS); // code 12
 extern uint64_t* current_regs();
 
 extern void _sti();
@@ -32,7 +33,7 @@ extern void _sti();
 FunctionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_get_time, sys_detect_key_press,
                                sys_wait, sys_sound, sys_nop, sys_is_char_pressed,
-                               sys_create_process, sys_kill_process};
+                               sys_create_process, sys_kill_process, sys_set_process_foreground};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -214,6 +215,15 @@ uint64_t sys_create_process(BASE_PARAMS) {
 // returns= nothing
 uint64_t sys_kill_process(BASE_PARAMS) {
     killProcess((int)rsi);
+    return 0;
+}
+
+// ID= 12
+// rsi= pid
+// rdx= 0 -> background || 1 -> foreground
+// returns= nothing
+uint64_t sys_set_process_foreground(BASE_PARAMS) {
+    setProcessForeground((int)rsi, (int)rdx);
     return 0;
 }
 

@@ -31,6 +31,7 @@ int getPriorityFromPid(int pid);
 int getPriority(proc p);
 int getStateFromPid(int pid);
 void killProcess(int pid);
+void setProcessForeground(int pid, int foreground);
 int isProcessAlive(int pid);
 
 int isCurrentProcessInForeground();
