@@ -37,7 +37,5 @@ section .text
 %endmacro
 
 interrupt:
-    pushStateNoRax
     int 80h
-    popStateNoRax
     ret

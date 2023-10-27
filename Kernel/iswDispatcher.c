@@ -24,6 +24,8 @@ uint64_t sys_is_char_pressed(BASE_PARAMS); // code 9
 uint64_t sys_create_process(BASE_PARAMS); // code 10
 uint64_t sys_kill_process(BASE_PARAMS); // code 11
 uint64_t sys_set_process_foreground(BASE_PARAMS); // code 12
+uint64_t sys_get_own_pid(BASE_PARAMS); // code 13
+uint64_t sys_is_process_alive(BASE_PARAMS); // code 14
 extern uint64_t* current_regs();
 
 extern void _sti();
@@ -33,13 +35,15 @@ extern void _sti();
 FunctionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_get_time, sys_detect_key_press,
                                sys_wait, sys_sound, sys_nop, sys_is_char_pressed,
-                               sys_create_process, sys_kill_process, sys_set_process_foreground};
+                               sys_create_process, sys_kill_process, sys_set_process_foreground,
+                               sys_get_own_pid, sys_is_process_alive};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
         return -1;
     }
-    return interruptions[rdi](rsi, rdx, rcx, r8, r9);
+    uint64_t ret = interruptions[rdi](rsi, rdx, rcx, r8, r9);
+    return ret;
 }
 
 //ID= 0
@@ -102,6 +106,7 @@ uint64_t sys_draw(BASE_PARAMS) {
             break;
         case 6:
             clearScreen();
+            break;
         default:
             return -1;
     }
@@ -121,6 +126,7 @@ uint64_t sys_double_buffer(BASE_PARAMS) {
             break;
         case 2:
             drawBuffer();
+            break;
         default:
             return -1;
     }
@@ -180,7 +186,6 @@ uint64_t sys_wait(BASE_PARAMS) {
 // returns= nothing
 uint64_t sys_sound(BASE_PARAMS) {
     //beep needs the timer tick interruption to work, this isn't pretty, but it won't work without it
-    _sti();
     play_beep(rsi, rdx);
     return 0;
 }
@@ -227,3 +232,14 @@ uint64_t sys_set_process_foreground(BASE_PARAMS) {
     return 0;
 }
 
+// ID= 13
+// returns= pid
+uint64_t sys_get_own_pid(BASE_PARAMS) {
+    return getActiveProcessPid();
+}
+
+// ID= 14
+// returns= 1 -> alive || 0 -> dead
+uint64_t sys_is_process_alive(BASE_PARAMS) {
+    return isProcessAlive(rsi);
+}

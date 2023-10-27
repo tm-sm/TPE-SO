@@ -113,15 +113,11 @@ int main()
     cNewline();
     cPrint("Initializing Process Manager");
     initializeProcessManager();
-    int initPid = startProcess(NULL, HIGH, BACKGROUND, "init", 0);
-    cPrint("\n");
-    cPrint("Created init process with PID:");
-    cPrintDec(initPid);
+    startProcess(NULL, LOW, FOREGROUND, "init", 0); //pid=1
     cNewline();
     int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0);
+    killProcess(1);
     cPrint("[Exiting System]");
-    while(isProcessAlive(shellPid))
-    killProcess(initPid);
     cNewline();
 	return 0;
 }

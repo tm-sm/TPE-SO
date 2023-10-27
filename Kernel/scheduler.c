@@ -96,6 +96,7 @@ void removeFromScheduler(int pid, int priority) {
     if(pid == procs[priority]->pid && procs[priority] == procsLast[priority]) {
         deallocate(procs[priority]);
         procs[priority] = procsLast[priority] = NULL;
+        return;
     }
     node *prev = procs[priority];
     node *n = procs[priority]->next;
@@ -107,6 +108,26 @@ void removeFromScheduler(int pid, int priority) {
         n = n->next;
     }
     prev->next = n->next;
+    procsLast[priority] = prev;
+    procs[priority] = prev->next;
     deallocate(n);
+}
+
+void printPriorityList(int priority) {
+    if(procs[priority] == NULL) {
+        return;
+    }
+    node *n = procs[priority];
+    cPrint("\n");
+    cPrintDec(n->pid);
+    cPrint(" -> ");
+    cPrintDec(n->next->pid);
+    n = n->next;
+    while(n != procsLast[priority]) {
+        cPrintDec(n->pid);
+        cPrint(" -> ");
+        cPrintDec(n->next->pid);
+        n = n->next;
+    }
 }
 

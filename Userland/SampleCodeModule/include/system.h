@@ -6,6 +6,10 @@
 #define FOREGROUND 1
 #define BACKGROUND 0
 
+#define HIGH 0
+#define MED 1
+#define LOW 2
+
 /**
  * Checks whether a key is currently being pressed or not
  * @return 1 if a key press was detected, 0 if not
@@ -27,6 +31,9 @@ void play_beep(uint32_t frequency, uint32_t milliseconds);
 
 int createProcess(void* ip, int priority, uint8_t foreground, char* name);
 void killProcess(int pid);
+void setOwnForeground(int foreground);
 void setProcessForeground(int pid, int foreground);
+int isProcessAlive(int pid);
+void exitProc();
 
 #endif //TPE_ARQUI_SYSTEM_H

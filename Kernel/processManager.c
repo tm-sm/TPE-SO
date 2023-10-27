@@ -37,7 +37,6 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     int pid = findFirstAvailablePid();
 
     if(pid == -1) {
-        cPrint("couldn't find a PID");
         return -1;
     }
     if (ip == NULL) {
@@ -71,7 +70,7 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop, ip);
     processes[pid]->priority = priority;
     processes[pid]->state = READY;
-    processes[pid]->totalMemory = stackSize;
+    processes[pid]->totalMemory = (int)stackSize;
     processes[pid]->foreground = foreground;
 
     amount++;
@@ -179,14 +178,14 @@ int isProcessAlive(int pid) {
 }
 
 void killProcess(int pid) {
-    if(processes[pid] != NULL) {
+    if (processes[pid] != NULL) {
         int priority = processes[pid]->priority;
         deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         processes[pid] = NULL;
         removeFromScheduler(pid, priority);
         amount--;
-        if(pid == currProc) {
+        if (pid == currProc) {
             interruptTick();
         }
     }
@@ -204,4 +203,8 @@ int findFirstAvailablePid() {
     }
 
     return -1;
+}
+
+int getActiveProcessPid() {
+    return currProc;
 }

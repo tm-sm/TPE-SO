@@ -93,8 +93,20 @@ int seconds_elapsed() {
 }
 
 void wait(uint64_t milliseconds) {
+    int seconds = milliseconds / 1000;
+    int counter = 0;
+    while (counter < seconds) {
+        // Loop to approximate the specified time
+        for (int i = 0; i < 100000000; i++) {
+            // Adjust this loop depending on your system's speed
+        }
+        counter++;
+    }
+}
+
+/*void wait(uint64_t milliseconds) {
     unsigned long initTicks = ticks;
     while((ticks - initTicks) < (milliseconds / 55)) {
 
     }
-}
+}*/

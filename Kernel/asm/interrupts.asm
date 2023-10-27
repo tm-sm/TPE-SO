@@ -66,7 +66,7 @@ SECTION .text
 	pop rax
 %endmacro
 
-%macro pushState 0
+%macro pushStateNoRax 0
 	push rbx
 	push rcx
 	push rdx
@@ -83,7 +83,7 @@ SECTION .text
 	push r15
 %endmacro
 
-%macro popState 0
+%macro popStateNoRax 0
 	pop r15
 	pop r14
 	pop r13

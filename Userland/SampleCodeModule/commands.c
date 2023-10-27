@@ -33,14 +33,14 @@ static Program pArr[] = {
         null //marks the end of the array
         };
 
-void parseCommand(char* str) {
+int parseCommand(char* str) {
     for(int i=0;pArr[i]!=null;i++){
         if(compString(str,pArr[i]->name_id)==0){
-            pArr[i]->program();
-            return;
+            return createProcess(pArr[i]->program, HIGH, FOREGROUND, pArr[i]->name_id);
         }
     }
     unknownCommand(str);
+    return -1;
 }
 
 void unknownCommand(char* str) {
@@ -53,24 +53,29 @@ void help() {
         printFormat("\t'%s': %s \n",pArr[i]->name_id,pArr[i]->description);
         putChar('\n');
     }
+    exitProc();
 }
 
 void testException0() {
    int i=1/0;
+   exitProc();
 }
 
 void testException6(){
     invalidOp();
+    exitProc();
 }
 
 void displayTime() {
     printTime();
     putChar('\n');
+    exitProc();
 }
 
 void displayDate() {
     printDate();
     putChar('\n');
+    exitProc();
 }
 
 void playBubbles() {
@@ -78,6 +83,7 @@ void playBubbles() {
     bubbles();
     clearScreen();
     disableDoubleBuffering();
+    exitProc();
 }
 
 void playPong() {
@@ -85,8 +91,10 @@ void playPong() {
     pong();
     clearScreen();
     disableDoubleBuffering();
+    exitProc();
 }
 
 void playBeep() {
     play_beep(2000, 100);
+    exitProc();
 }

@@ -29,6 +29,7 @@ void startShell() {
 
 void shellLoop() {
     //waits for input and stores it in prompt
+    int pid;
     char c = 0;
     writePromptIcon();
     while((c = getChar()) != 27 ) {// 'esc'
@@ -36,7 +37,11 @@ void shellLoop() {
         if(c == '\n') {
             //executes the command
             putChar(c);
-            parseCommand(prompt);
+            if((pid = parseCommand(prompt)) != -1) {
+                setOwnForeground(BACKGROUND);
+                while(isProcessAlive(pid));
+                setOwnForeground(FOREGROUND);
+            }
             clearPrompt();
             putChar('\n');
             writePromptIcon();
