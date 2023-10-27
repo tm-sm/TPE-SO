@@ -24,7 +24,7 @@ static int initialized = 0;
 
 uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stack, uint8_t* rip);
-void interruptNop();
+void interruptTick();
 int findFirstAvailablePid();
 
 void initializeProcessManager() {
@@ -79,8 +79,7 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, size_t 
     amount++;
 
     addToScheduler(processes[pid]->pid);
-    scheduler();
-    interruptNop();
+    interruptTick();
     return pid;
 }
 
@@ -184,8 +183,7 @@ void killProcess(int pid) {
         removeFromScheduler(pid, priority);
         amount--;
         if(pid == currProc) {
-            scheduler();
-            interruptNop();
+            interruptTick();
         }
     }
 }

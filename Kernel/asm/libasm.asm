@@ -8,7 +8,7 @@ GLOBAL stop_sound
 GLOBAL timer_wait
 GLOBAL get_ip
 GLOBAL prepare_process
-GLOBAL interruptNop
+GLOBAL interruptTick
 
 EXTERN displayRegs
 EXTERN cPrintHex
@@ -268,6 +268,6 @@ get_stack_trace:
     mov rax, rsp
     ret
 
-interruptNop:
+interruptTick:
     int 20h
     ret
