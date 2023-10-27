@@ -11,13 +11,13 @@
 
 typedef uint64_t (*FunctionPtr)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
-uint64_t sys_write(BASE_PARAMS);//code 0
-uint64_t sys_read(BASE_PARAMS);//code 1
-uint64_t sys_draw(BASE_PARAMS);//code 2
-uint64_t sys_double_buffer(BASE_PARAMS);//code 3
-uint64_t sys_get_time(BASE_PARAMS);//code 4
-uint64_t sys_detect_key_press(BASE_PARAMS);//code 5
-uint64_t sys_wait(BASE_PARAMS);//code 6
+uint64_t sys_write(BASE_PARAMS); // code 0
+uint64_t sys_read(BASE_PARAMS); // code 1
+uint64_t sys_draw(BASE_PARAMS); // code 2
+uint64_t sys_double_buffer(BASE_PARAMS); // code 3
+uint64_t sys_get_time(BASE_PARAMS); // code 4
+uint64_t sys_detect_key_press(BASE_PARAMS); // code 5
+uint64_t sys_wait(BASE_PARAMS); // code 6
 uint64_t sys_sound(BASE_PARAMS); // code 7
 uint64_t sys_nop(BASE_PARAMS); // code 8
 uint64_t sys_is_char_pressed(BASE_PARAMS); // code 9

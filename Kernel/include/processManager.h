@@ -34,6 +34,7 @@ void killProcess(int pid);
 void setProcessForeground(int pid, int foreground);
 int isProcessAlive(int pid);
 int getActiveProcessPid();
+void listAllProcesses();
 
 int isCurrentProcessInForeground();
 

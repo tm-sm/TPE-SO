@@ -208,3 +208,32 @@ int findFirstAvailablePid() {
 int getActiveProcessPid() {
     return currProc;
 }
+
+void listAllProcesses() {
+    for(int i=0; i<MAX_PROC; i++) {
+        if(processes[i] != NULL) {
+            cPrint("\n");
+            cPrintDec(i);
+            cPrint(" | ");
+            cPrint(processes[i]->pname);
+            switch(processes[i]->priority) {
+                case HIGH:
+                    cPrint(" | HIGH PRIO");
+                    break;
+                case MED:
+                    cPrint(" | MED PRIO");
+                    break;
+                case LOW:
+                    cPrint(" | LOW PRIO");
+                    break;
+                default:
+                    cPrint(" | INV PRIO");
+            }
+            (processes[i]->foreground == FOREGROUND) ? (cPrint(" | FOREGROUND")) : (cPrint(" | BACKGROUND"));
+            cPrint(" | rsp: ");
+            cPrintHex((uint64_t)processes[i]->stackTrace);
+            cPrint(" | rbp: ");
+            cPrintHex((uint64_t)processes[i]->stackTop);
+        }
+    }
+}
