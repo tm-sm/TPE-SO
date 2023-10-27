@@ -7,6 +7,7 @@
 typedef struct node{
     int pid;
     struct node * next;
+    int counter;
 }node;
 
 void roundRobin();
@@ -37,27 +38,34 @@ void roundRobin() {
     if(runningProc == NULL) {
         return;
     }
-    for(int i = 0; i < 3;i++){
-        if(getPriorityFromPid(runningProc->pid) == i){
-            aux = runningProc;
-            toRun = runningProc->next;
-        } else if(procs[i] != NULL){
+    if(getPriorityFromPid(runningProc->pid) == HIGH && runningProc->counter < 3){
+        runningProc->counter ++;
+    }else if(getPriorityFromPid(runningProc->pid) == MED && runningProc->counter < 2){
+        runningProc->counter ++;
+    }else{
+        runningProc->counter = 0;
+        for(int i = 0; i < 3;i++){
+            if(getPriorityFromPid(runningProc->pid) == i){
+                aux = runningProc;
+                toRun = runningProc->next;
+            } else if(procs[i] != NULL){
             toRun = procs[i]->next;
             aux = procs[i];
-        }
-        if(aux != NULL && toRun != NULL) {
+            }
+            if(aux != NULL && toRun != NULL) {
             if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
                 runningProc = toRun;
                 selectNextProcess(runningProc->pid);
                 return;
-            }
-            while (aux != toRun) {
-                if (getStateFromPid(toRun->pid) == READY) {
-                    runningProc = toRun;
-                    selectNextProcess(runningProc->pid);
-                    return;
                 }
-                toRun = toRun->next;
+                while (aux != toRun) {
+                    if (getStateFromPid(toRun->pid) == READY) {
+                        runningProc = toRun;
+                        selectNextProcess(runningProc->pid);
+                        return;
+                    }
+                    toRun = toRun->next;
+                }
             }
         }
     }
@@ -89,6 +97,7 @@ void addToScheduler(int pid) {
     int priority = getPriorityFromPid(pid);
     node * new = allocate(sizeof(node));
     new->pid = pid;
+    new->counter = 0;
     addNodeToPriority(new, priority);
 }
 
