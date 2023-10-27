@@ -3,6 +3,7 @@
 
 void processSentinel();
 void processHello();
+void processHello2();
 void processWorld();
 
 #endif //TPE_ARQUI_PROCESS_H

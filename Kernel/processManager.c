@@ -46,7 +46,6 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
         stackSize = INIT_STACK_SIZE;
     }
 
-    // Allocate memory for the new process
     processes[pid] = (struct process*)allocate(sizeof(struct process));
 
     if(processes[pid] == NULL) {

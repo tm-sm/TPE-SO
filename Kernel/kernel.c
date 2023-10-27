@@ -116,6 +116,7 @@ int main()
     startProcess(NULL, LOW, FOREGROUND, "init", 0); //pid=1
     cNewline();
     int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0);
+    while(isProcessAlive(shellPid));
     killProcess(1);
     cPrint("[Exiting System]");
     cNewline();

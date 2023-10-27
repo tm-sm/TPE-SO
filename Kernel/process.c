@@ -1,4 +1,5 @@
 #include <console.h>
+#include <processManager.h>
 
 
 void processSentinel() {
@@ -7,9 +8,17 @@ void processSentinel() {
 }
 
 void processHello() {
-    while(1) {
+    for(int i=0; i<10; i++) {
         cPrint("\nHello");
     }
+    killProcess(getActiveProcessPid());
+}
+
+void processHello2() {
+    for(int i=0; i<10; i++) {
+        cPrint("\nHello2");
+    }
+    killProcess(getActiveProcessPid());
 }
 
 void processWorld() {
