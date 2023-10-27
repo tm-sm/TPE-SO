@@ -11,5 +11,6 @@
 
 void scheduler();
 void addToScheduler(int pid);
+void removeFromScheduler(int pid, int priority);
 
 #endif //SCHEDULER

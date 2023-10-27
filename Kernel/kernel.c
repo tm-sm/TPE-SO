@@ -99,7 +99,7 @@ int main()
     createMemoryManager();
     cPrint("Initializing Process Manager");
     initializeProcessManager();
-    startProcess(NULL, HIGH, BACKGROUND);
+    int initPid = startProcess(NULL, HIGH, BACKGROUND, "init", 0);
     cNewline();
     cPrint("Loading IDT descriptors");
     load_idt();
@@ -115,10 +115,10 @@ int main()
     cPrint("[Kernel finished]");
     cNewline();
     //((EntryPoint)sampleCodeModuleAddress)();
-    startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND);
+    startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0);
     cPrint("[Exiting System]");
     //TODO hacer que espere a que la shell termine
-    while(1) {    }
+    killProcess(initPid);
     cNewline();
 	return 0;
 }

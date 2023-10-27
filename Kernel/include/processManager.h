@@ -11,6 +11,8 @@
 #define MAXPROCESSES 10
 #define MAX_PROC 10
 
+#define PROC_NAME_LENGTH 20
+
 #define FOREGROUND 1
 #define BACKGROUND 0
 
@@ -23,11 +25,13 @@ uint64_t switchProcess(uint64_t rsp);
 void selectNextProcess(int pid);
 
 //if started with ip = NULL, works as fork
-int startProcess(void* ip, int priority, uint8_t foreground);
+int startProcess(void* ip, int priority, uint8_t foreground, char* name, size_t stackSize);
 int getPid(proc p);
 int getPriorityFromPid(int pid);
 int getPriority(proc p);
 int getStateFromPid(int pid);
+void killProcess(int pid);
+int isProcessAlive(int pid);
 
 int isCurrentProcessInForeground();
 

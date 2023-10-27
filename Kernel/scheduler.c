@@ -92,3 +92,21 @@ void addToScheduler(int pid) {
     addNodeToPriority(new, priority);
 }
 
+void removeFromScheduler(int pid, int priority) {
+    if(pid == procs[priority]->pid && procs[priority] == procsLast[priority]) {
+        deallocate(procs[priority]);
+        procs[priority] = procsLast[priority] = NULL;
+    }
+    node *prev = procs[priority];
+    node *n = procs[priority]->next;
+    while(n->pid != pid) {
+        if(n == procsLast[priority]) {
+            return;
+        }
+        prev = n;
+        n = n->next;
+    }
+    prev->next = n->next;
+    deallocate(n);
+}
+
