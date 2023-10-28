@@ -81,7 +81,6 @@ void gPrintColoredChar(Color c, char character) {
         return;
     }
     if (character == '\t') {
-        //tab
         gPrintColoredChar(c, ' ');
         gPrintColoredChar(c, ' ');
         gPrintColoredChar(c, ' ');
