@@ -88,7 +88,7 @@ void deallocate(void * ptr) {
     }
 }
 
-void * realloc(void * ptr, size_t newSize){
+void * reallocate(void * ptr, size_t newSize){
     //Equivalente a un dealloc
     if (newSize == 0) {
         deallocate(ptr);

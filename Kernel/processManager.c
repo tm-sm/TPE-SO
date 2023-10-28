@@ -37,12 +37,11 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     int pid = findFirstAvailablePid();
 
     int argc = 2;
-    /*if(argv != NULL) {
-        while(argv[argc][0] != '\0') {
+    if(argv != NULL) {
+        while(argv[argc] != NULL) {
             argc++;
         }
     }
-     */
 
     if(pid == -1) {
         return -1;
@@ -105,7 +104,7 @@ int checkProcessHealth(int pid) {
     int usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
     if( usedMemory > ((processes[pid]->totalMemory / 4) * 3)) {
         int newTotalMemory = processes[pid]->totalMemory * 2;
-        processes[pid]->stackTop = realloc(processes[pid]->stackTop - processes[pid]->totalMemory,
+        processes[pid]->stackTop = reallocate(processes[pid]->stackTop - processes[pid]->totalMemory,
                                            newTotalMemory);
         if(processes[pid]->stackTop == NULL) {
             killProcess(pid);

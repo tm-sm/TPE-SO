@@ -10,6 +10,6 @@ void * allocate(size_t size);
 
 void deallocate(void * addr);
 
-void * realloc(void * ptr, size_t newSize);
+void * reallocate(void * ptr, size_t newSize);
 
 size_t convertToPageSize(size_t size, size_t pageSize);

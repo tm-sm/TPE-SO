@@ -9,7 +9,7 @@
 #define BASE_PARAMS uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9
 #define COMPLETE_PARAMS uint64_t rdi, BASE_PARAMS
 
-typedef uint64_t (*FunctionPtr)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
+typedef uint64_t (*functionPtr)(uint64_t, uint64_t, uint64_t, uint64_t, uint64_t);
 
 uint64_t sys_write(BASE_PARAMS); // code 0
 uint64_t sys_read(BASE_PARAMS); // code 1
@@ -26,17 +26,18 @@ uint64_t sys_kill_process(BASE_PARAMS); // code 11
 uint64_t sys_set_process_foreground(BASE_PARAMS); // code 12
 uint64_t sys_get_own_pid(BASE_PARAMS); // code 13
 uint64_t sys_is_process_alive(BASE_PARAMS); // code 14
+uint64_t sys_memory_manager(BASE_PARAMS); // code 15
 extern uint64_t* current_regs();
 
 extern void _sti();
 
 //TODO cambiar las funciones que usaban punteros para retornar a que usen rax
 
-FunctionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
+functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_get_time, sys_detect_key_press,
                                sys_wait, sys_sound, sys_nop, sys_is_char_pressed,
                                sys_create_process, sys_kill_process, sys_set_process_foreground,
-                               sys_get_own_pid, sys_is_process_alive};
+                               sys_get_own_pid, sys_is_process_alive, sys_memory_manager};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -210,9 +211,10 @@ uint64_t sys_is_char_pressed(BASE_PARAMS) {
 // rsi= instruction pointer
 // rdx= PRIORITY :: 0 -> HIGH || 1 -> MEDIUM || 2 -> LOW
 // rcx= DRAWING STATE :: define FOREGROUND (1) / define BACKGROUND (0)
+// r8= char* argv[]
 // returns= pid on success, -1 on fail
 uint64_t sys_create_process(BASE_PARAMS) {
-    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, NULL);
+    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, (char**)r8);
 }
 
 // ID= 11
@@ -242,4 +244,22 @@ uint64_t sys_get_own_pid(BASE_PARAMS) {
 // returns= 1 -> alive || 0 -> dead
 uint64_t sys_is_process_alive(BASE_PARAMS) {
     return isProcessAlive(rsi);
+}
+
+// ID= 15
+// rsi= 0 -> allocate || 1 -> reallocate || 2 -> deallocate
+// rdx= memory address for reallocate and deallocate
+// rcx= size for allocate and reallocate
+// returns= memory address for allocate and reallocate, 0 for deallocate
+uint64_t sys_memory_manager(BASE_PARAMS) {
+    switch(rsi) {
+        case 0:
+            return (uint64_t) allocate(rcx);
+        case 1:
+            return (uint64_t) reallocate((void*)rdx, rcx);
+        case 2:
+            deallocate((void*)rdx);
+        default:
+            return 0;
+    }
 }

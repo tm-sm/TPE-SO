@@ -115,7 +115,6 @@ int main()
     initializeProcessManager();
     startProcess(NULL, LOW, FOREGROUND, "init", 0, NULL); //pid=1
     cNewline();
-    cPrint("a");
     /*
     char** contents = (char**) allocate(sizeof(char*) * 3);
     *contents = (char*) allocate(sizeof(char) * 3 * 7);

@@ -2,6 +2,7 @@
 #define TPE_ARQUI_SYSTEM_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define FOREGROUND 1
 #define BACKGROUND 0
@@ -29,11 +30,14 @@ void wait(uint64_t milliseconds);
  */
 void play_beep(uint32_t frequency, uint32_t milliseconds);
 
-int createProcess(void* ip, int priority, uint8_t foreground, char* name);
+int createProcess(void* ip, int priority, uint8_t foreground, char* name, char* argv[]);
+void* alloc(size_t size);
+void* realloc(void* address, size_t size);
+void dealloc(void* address);
 void killProcess(int pid);
 void setOwnForeground(int foreground);
 void setProcessForeground(int pid, int foreground);
 int isProcessAlive(int pid);
-void exitProc();
+void exitProc(int argc, char* argv[]);
 
 #endif //TPE_ARQUI_SYSTEM_H

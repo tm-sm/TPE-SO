@@ -177,3 +177,69 @@ int getDigits(int n){
     }
     return digits;
 }
+
+int strcmp(const char* str1, const char* str2) {
+    int i = 0;
+    while (str1[i] && (str1[i] == str2[i])) i++;
+
+    return (int)(str1[i] - str2[i]);
+}
+
+int strncmp(const char* str1, const char* str2, size_t n) {
+    int i = 0;
+    while(n-- && str1[i] && str2[i] && str1[i] == str2[i]) i++;
+    return (int)(str1[i] - str2[i]);
+}
+
+size_t strlen(const char* str) {
+    size_t len = 0;
+    while(str[len]) len++;
+    return len;
+}
+
+char * strcpy(char* dest, const char* src) {
+    int i = 0;
+    while ((dest[i] = src[i])) i++;
+
+    return dest;
+}
+
+char * strcat(char* dest, const char* src) {
+    size_t dest_len = strlen(dest);
+    int i = 0;
+    while(src[i] != '\0'){
+        dest[dest_len++] = src[i++];
+    }
+    dest[dest_len] = '\0';
+    return dest;
+}
+
+char* strtok(char* str, const char* delim) {
+    static char* last_ptr = NULL;
+
+    if (str != NULL) {
+        last_ptr = str;
+    } else if (last_ptr == NULL || *last_ptr == '\0') {
+        return NULL;
+    }
+
+    char* token = last_ptr;
+    while (*last_ptr != '\0') {
+        int i;
+        for (i = 0; delim[i] != '\0'; i++) {
+            if (*last_ptr == delim[i]) {
+                *last_ptr = '\0';
+                last_ptr++;
+                if (token != last_ptr) {
+                    return token;
+                } else {
+                    token = last_ptr;
+                    continue;
+                }
+            }
+        }
+        last_ptr++;
+    }
+    last_ptr = NULL;
+    return token;
+}

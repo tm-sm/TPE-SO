@@ -2,6 +2,7 @@
 #define TPE_ARQUI_STANDARDLIB_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define null ((void*)0)
 
@@ -42,6 +43,13 @@ void printFormat(const char*format,...);
  * @return 0 if the strings are equal
  */
 int compString(const char *s1,const char *s2);
+
+char * strtok(char * str, const char * delim);
+char * strcat(char* dest, const char* src);
+char * strcpy(char* dest, const char* src);
+size_t strlen(const char* str);
+int strncmp(const char* str1, const char* str2, size_t n);
+int strcmp(const char* str1, const char* str2);
 
 uint8_t isCharPressed(char c);
 #endif //TPE_ARQUI_STANDARDLIB_H
