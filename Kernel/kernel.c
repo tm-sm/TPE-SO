@@ -113,9 +113,16 @@ int main()
     cNewline();
     cPrint("Initializing Process Manager");
     initializeProcessManager();
-    startProcess(NULL, LOW, FOREGROUND, "init", 0); //pid=1
+    startProcess(NULL, LOW, FOREGROUND, "init", 0, NULL); //pid=1
     cNewline();
-    int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0);
+    cPrint("a");
+    /*
+    char** contents = (char**) allocate(sizeof(char*) * 3);
+    *contents = (char*) allocate(sizeof(char) * 3 * 7);
+    cPrint("b");
+     */
+
+    int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
     while(isProcessAlive(shellPid));
     killProcess(1);
     cPrint("[Exiting System]");

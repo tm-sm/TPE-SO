@@ -18,3 +18,10 @@ maker.sh
 /.vs
 .idea
 cmake-build-debug
+
+.tgdbinit
+tgdb
+.gdbinit
+.gdb_history
+.bash_history
+tmux.conf

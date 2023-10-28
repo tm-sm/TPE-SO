@@ -242,21 +242,21 @@ prepare_process:
     push qword 0x202    ;RFLAGS
     push dword 0x8      ;CS
     push rsi            ;RIP
-    push qword 0x0      ;RAX
-    push qword 0x1      ;RBX
-    push qword 0x2      ;RCX
-    push qword 0x3      ;RDX
-    push rdi            ;RBP
-    push qword 0x5      ;RDI
-    push qword 0x6      ;RSI
-    push qword 0x7      ;R8
-    push qword 0x8      ;R9
-    push qword 0x9      ;R10
-    push qword 0x10     ;R11
-    push qword 0x11     ;R12
-    push qword 0x12     ;R13
-    push qword 0x13     ;R14
     push qword 0x14     ;R15
+    push qword 0x13     ;R14
+    push qword 0x12     ;R13
+    push qword 0x11     ;R12
+    push qword 0x10     ;R11
+    push qword 0x9      ;R10
+    push qword 0x8      ;R9
+    push qword 0x7      ;R8
+    push rcx            ;RSI
+    push rdx            ;RDI
+    push rdi            ;RBP
+    push qword 0x3      ;RDX
+    push qword 0x2      ;RCX
+    push qword 0x1      ;RBX
+    push qword 0x0      ;RAX
 
     mov rax, rsp
 

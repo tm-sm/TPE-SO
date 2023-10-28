@@ -25,7 +25,7 @@ uint64_t switchProcess(uint64_t rsp);
 void selectNextProcess(int pid);
 
 //if started with ip = NULL, works as fork
-int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize);
+int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize, char* argv[]);
 int getPid(proc p);
 int getPriorityFromPid(int pid);
 int getPriority(proc p);

@@ -29,3 +29,37 @@ cd ..
 make all
 ./run.sh
 exit
+cd roo
+cd root
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+apt-install tmux
+apt install tmux
+tgdb
+ls
+tgdb
+.tgdb
+tgdb
+ls
+tgdb
+./tgdb
+ln -s tgdb /user/local/bin/
+ln -s tgdb /usr/local/bin/
+tgdb
+./tgdb
+ls
+echo $path
+echo $PATH
+ln -s tgdb /usr/local/bin
+tgds
+tgdb
+quit
+quit docker
+exit

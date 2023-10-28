@@ -14,11 +14,12 @@ void processHello() {
     killProcess(getActiveProcessPid());
 }
 
-void processHello2() {
-    for(int i=0; i<10; i++) {
-        cPrint("\nHello2");
+void processHello2(int argc, char* argv[]) {
+    while(1) {
+        for(int i=0; i<argc; i++) {
+            cPrint(argv[i]);
+        }
     }
-    killProcess(getActiveProcessPid());
 }
 
 void processWorld() {

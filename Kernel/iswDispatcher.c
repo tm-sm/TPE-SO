@@ -212,8 +212,7 @@ uint64_t sys_is_char_pressed(BASE_PARAMS) {
 // rcx= DRAWING STATE :: define FOREGROUND (1) / define BACKGROUND (0)
 // returns= pid on success, -1 on fail
 uint64_t sys_create_process(BASE_PARAMS) {
-
-    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0);
+    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, NULL);
 }
 
 // ID= 11

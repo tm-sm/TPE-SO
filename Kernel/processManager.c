@@ -24,17 +24,25 @@ static int nextProc = -1;
 //TODO checkear que pid es valido antes de hacer operaciones
 
 uint8_t* get_ip();
-uint8_t* prepare_process(uint8_t* stack, uint8_t* rip);
+uint8_t* prepare_process(uint8_t* stack, uint8_t* rip, int argc, char* argv[]);
 void interruptTick();
 int findFirstAvailablePid();
 
 void initializeProcessManager() {
     //this should be started at the very beginning, so pid=0 == sentinel
-    startProcess(&processSentinel, LOW, FOREGROUND, "sentinel", 256);
+    startProcess(&processSentinel, LOW, FOREGROUND, "sentinel", 256, NULL);
 }
 
-int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize) {
+int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize, char* argv[]) {
     int pid = findFirstAvailablePid();
+
+    int argc = 2;
+    /*if(argv != NULL) {
+        while(argv[argc][0] != '\0') {
+            argc++;
+        }
+    }
+     */
 
     if(pid == -1) {
         return -1;
@@ -66,7 +74,7 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
         return -1;
     }
 
-    processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop, ip);
+    processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop, ip, argc, argv);
     processes[pid]->priority = priority;
     processes[pid]->state = READY;
     processes[pid]->totalMemory = (int)stackSize;
