@@ -92,6 +92,24 @@ void addNodeToPriority(node * n, int priority) {
         runningProc = n;
     }
 }
+void removeNodefromPriority(node* n ,int p){
+    node* aux = procs[p];
+    while(aux->next != n)
+        aux = aux->next;
+    aux->next = n->next;
+    return ;
+}
+
+void lowerPriority(node* node){
+
+    int nextpriority = getPriorityFromPid(node->pid);
+    if(nextpriority==LOW)
+        return;
+    removeNodefromPriority(node,nextpriority);
+    nextpriority++; //es raro sumar para bajarlo xd
+    addNodeToPriority(node,nextpriority);
+    return;
+}
 
 void addToScheduler(int pid) {
     int priority = getPriorityFromPid(pid);
