@@ -38,6 +38,7 @@ void listAllProcesses();
 void removeFromFgStack(int pid);
 void addToFgStack(int pid);
 
+int isProcessInForeground(int pid);
 int isCurrentProcessInForeground();
 
 #endif //TPE_ARQUI_PROCESSMANAGER_H

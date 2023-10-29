@@ -39,7 +39,7 @@ void initializeProcessManager() {
 int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize, char* argv[]) {
     int pid = findFirstAvailablePid();
 
-    int argc = 2;
+    int argc = 0;
     if(argv != NULL) {
         while(argv[argc] != NULL) {
             argc++;
@@ -85,6 +85,10 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
 
     if(pid != 0) {
         addToScheduler(processes[pid]->pid);
+    }
+
+    if(foreground) {
+        addToFgStack(pid);
     }
     interruptTick();
     return pid;
@@ -190,8 +194,14 @@ int getProcessPriority(int pid) {
     return processes[pid]->priority;
 }
 
+int isProcessInForeground(int pid) {
+    //if lastFgProc == -1, no process currently exists
+    //meaning whatever is running should have access to the console/keyboard
+    return lastFgProc == -1 || pid == fgStack[lastFgProc];
+}
+
 int isCurrentProcessInForeground() {
-    return lastFgProc == -1 || currProc == fgStack[lastFgProc];
+    return isProcessInForeground(currProc);
 }
 
 void addToFgStack(int pid) {

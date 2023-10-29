@@ -128,7 +128,13 @@ int sh(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i]!=NULL; i++){
             if(strcmp(pArr[i]->name, argv[1]) == 0) {
-                return createProcess(pArr[i]->program, HIGH, FOREGROUND, pArr[i]->name, argv + 1);
+                int fg = FOREGROUND;
+                for(int j=2; j<argc; j++) {
+                    if(strcmp(argv[j], "&") == 0) {
+                        fg = BACKGROUND;
+                    }
+                }
+                return createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, argv + 1);
             }
         }
     }

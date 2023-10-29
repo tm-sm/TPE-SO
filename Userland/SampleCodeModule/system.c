@@ -12,6 +12,7 @@
 #define SYS_GET_OWN_PID 13
 #define SYS_IS_PROCESS_ALIVE 14
 #define SYS_MEMORY_MANAGER 15
+#define SYS_CHECK_PROCESS_FOREGROUND 16
 
 #define ALLOC_ID 0
 #define REALLOC_ID 1
@@ -46,6 +47,10 @@ void setOwnForeground(int foreground) {
 
 void setProcessForeground(int pid, int foreground) {
     interrupt(SYS_SET_PROCESS_FOREGROUND, pid, foreground, 0, 0, 0);
+}
+
+int isProcessInForeground(int pid) {
+    return (int)interrupt(SYS_CHECK_PROCESS_FOREGROUND, pid, 0, 0, 0, 0);
 }
 
 void exitProc(int argc, char* argv[]) {

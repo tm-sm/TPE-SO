@@ -38,7 +38,11 @@ void shellLoop() {
             //executes the command
             putChar(c);
             if((pid = parseCommand(prompt)) != -1) {
-                while(isProcessAlive(pid));
+                if(isProcessInForeground(pid)) {
+                    while(isProcessAlive(pid));
+                } else {
+                    printFormat("\nProcess Started\n");
+                }
             }
             clearPrompt();
             putChar('\n');
