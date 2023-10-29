@@ -4,6 +4,7 @@
 #include <processManager.h>
 #include <process.h>
 #include <scheduler.h>
+#include <stddef.h>
 
 struct process {
     char pname[PROC_NAME_LENGTH + 1];
@@ -13,7 +14,6 @@ struct process {
     uint8_t state;
     int priority;
     int totalMemory;
-    uint8_t foreground;
 } process;
 
 proc processes[MAX_PROC] = {NULL};
@@ -27,6 +27,9 @@ uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stack, uint8_t* rip, int argc, char* argv[]);
 void interruptTick();
 int findFirstAvailablePid();
+
+int fgStack[MAX_PROC];
+int lastFgProc = -1;
 
 void initializeProcessManager() {
     //this should be started at the very beginning, so pid=0 == sentinel
@@ -77,7 +80,6 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     processes[pid]->priority = priority;
     processes[pid]->state = READY;
     processes[pid]->totalMemory = (int)stackSize;
-    processes[pid]->foreground = foreground;
 
     amount++;
 
@@ -103,9 +105,11 @@ int checkProcessHealth(int pid) {
     //check if process needs more memory
     int usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
     if( usedMemory > ((processes[pid]->totalMemory / 4) * 3)) {
-        int newTotalMemory = processes[pid]->totalMemory * 2;
+        int oldTotalMemory = processes[pid]->totalMemory;
+        int newTotalMemory = oldTotalMemory * 2;
         processes[pid]->stackTop = reallocate(processes[pid]->stackTop - processes[pid]->totalMemory,
                                            newTotalMemory);
+        memcpy(processes[pid]->stackTop - newTotalMemory, processes[pid]->stackTop - oldTotalMemory, oldTotalMemory);
         if(processes[pid]->stackTop == NULL) {
             killProcess(pid);
             return -1;
@@ -163,7 +167,18 @@ proc getProcess(int pid) {
 }
 
 void setProcessForeground(int pid, int foreground) {
-    processes[pid]->foreground = foreground;
+    switch(foreground) {
+        case FOREGROUND:
+            //if already in stack, move it to the front
+            removeFromFgStack(pid);
+            addToFgStack(pid);
+            break;
+        case BACKGROUND:
+            removeFromFgStack(pid);
+            break;
+        default:
+            return;
+    }
 }
 
 void setProcessPriority(int pid, int priority) {
@@ -176,7 +191,30 @@ int getProcessPriority(int pid) {
 }
 
 int isCurrentProcessInForeground() {
-    return processes[currProc]->foreground == FOREGROUND || currProc == -1;
+    return lastFgProc == -1 || currProc == fgStack[lastFgProc];
+}
+
+void addToFgStack(int pid) {
+    if(lastFgProc < MAX_PROC) {
+        lastFgProc++;
+        fgStack[lastFgProc] = pid;
+    }
+}
+
+void removeFromFgStack(int pid) {
+    if(lastFgProc == -1) {
+        return;
+    }
+    if(fgStack[lastFgProc] == pid) {
+        lastFgProc--;
+    } else {
+        for(int i=0; i<lastFgProc; i++) {
+            if(fgStack[i] == pid) {
+                memcpy(fgStack + i, fgStack + i + 1, sizeof(int) * (MAX_PROC - i - 1));
+                lastFgProc--;
+            }
+        }
+    }
 }
 
 int isProcessAlive(int pid) {
@@ -189,6 +227,7 @@ void killProcess(int pid) {
         deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         processes[pid] = NULL;
+        removeFromFgStack(pid);
         removeFromScheduler(pid, priority);
         amount--;
         if (pid == currProc) {
@@ -235,7 +274,7 @@ void listAllProcesses() {
                 default:
                     cPrint(" | INV PRIO");
             }
-            (processes[i]->foreground == FOREGROUND) ? (cPrint(" | FOREGROUND")) : (cPrint(" | BACKGROUND"));
+            (fgStack[lastFgProc] == processes[i]->pid) ? (cPrint(" | FOREGROUND")) : (cPrint(" | BACKGROUND"));
             cPrint(" | rsp: ");
             cPrintHex((uint64_t)processes[i]->stackTrace);
             cPrint(" | rbp: ");
@@ -243,3 +282,5 @@ void listAllProcesses() {
         }
     }
 }
+
+

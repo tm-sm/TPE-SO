@@ -7,7 +7,7 @@
 #define READY 1
 #define BLOCKED 2
 #define DEAD 3
-#define INIT_STACK_SIZE 1024
+#define INIT_STACK_SIZE 2048
 #define MAXPROCESSES 10
 #define MAX_PROC 10
 
@@ -35,6 +35,8 @@ void setProcessForeground(int pid, int foreground);
 int isProcessAlive(int pid);
 int getActiveProcessPid();
 void listAllProcesses();
+void removeFromFgStack(int pid);
+void addToFgStack(int pid);
 
 int isCurrentProcessInForeground();
 

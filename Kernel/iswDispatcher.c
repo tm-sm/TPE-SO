@@ -166,11 +166,9 @@ uint64_t sys_get_time(BASE_PARAMS) {
 
 
 //ID=5
-//rsi= pointer to an uint8_t, returns 1 if a key press was detected, 0 if not
-// returns= nothing TODO
+// returns= 0 if key buffer is empty, 1 if not
 uint64_t sys_detect_key_press(BASE_PARAMS) {
-    *(uint8_t*) rsi = keyPressed();
-    return 0;
+    return keyPressed();
 }
 
 //ID=6
