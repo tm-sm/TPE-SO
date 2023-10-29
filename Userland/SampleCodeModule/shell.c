@@ -38,9 +38,7 @@ void shellLoop() {
             //executes the command
             putChar(c);
             if((pid = parseCommand(prompt)) != -1) {
-                setOwnForeground(BACKGROUND);
                 while(isProcessAlive(pid));
-                setOwnForeground(FOREGROUND);
             }
             clearPrompt();
             putChar('\n');

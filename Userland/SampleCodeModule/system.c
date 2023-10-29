@@ -20,9 +20,7 @@
 extern uint64_t* current_regs();
 
 uint8_t keyPress() {
-    uint8_t b;
-    interrupt(SYS_DETECT_KEY_PRESS_ID, (uint64_t)&b, 0, 0, 0, 0);
-    return b;
+    return interrupt(SYS_DETECT_KEY_PRESS_ID, 0, 0, 0, 0, 0);
 }
 
 void wait(uint64_t milliseconds) {

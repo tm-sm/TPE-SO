@@ -166,11 +166,9 @@ uint64_t sys_get_time(BASE_PARAMS) {
 
 
 //ID=5
-//rsi= pointer to an uint8_t, returns 1 if a key press was detected, 0 if not
-// returns= nothing TODO
+// returns= 0 if key buffer is empty, 1 if not
 uint64_t sys_detect_key_press(BASE_PARAMS) {
-    *(uint8_t*) rsi = keyPressed();
-    return 0;
+    return keyPressed();
 }
 
 //ID=6
@@ -214,7 +212,7 @@ uint64_t sys_is_char_pressed(BASE_PARAMS) {
 // r8= char* argv[]
 // returns= pid on success, -1 on fail
 uint64_t sys_create_process(BASE_PARAMS) {
-    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, (char**)r8);
+    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, (char**)r9);
 }
 
 // ID= 11

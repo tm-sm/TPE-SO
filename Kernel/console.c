@@ -2,6 +2,7 @@
 #include <console.h>
 #include <videoDriver.h>
 #include <utils.h>
+#include <processManager.h>
 
 
 void scrollUp();
@@ -34,6 +35,9 @@ void cPrintChar(char character) {
 }
 
 void cPrintColoredChar(Color c, char character) {
+    if(!isCurrentProcessInForeground()) {
+        return;
+    }
     //writes at consoleCursor
     if (character == '\b' && consoleCursor > 0) {
         //backspace
@@ -65,6 +69,9 @@ void gPrint(char* string) {
 }
 
 void gPrintColoredChar(Color c, char character) {
+    if(!isCurrentProcessInForeground()) {
+        return;
+    }
     //writes at globalCursor
     if (character == '\b' && (globalCursorX != 0 || globalCursorY != 0)) {
         //backspace
@@ -124,6 +131,9 @@ void gPrintBase(uint64_t value, uint32_t base) {
 }
 
 void gErase() {
+    if(!isCurrentProcessInForeground()) {
+        return;
+    }
     if(globalCursorX == 0) {
         if(globalCursorY == 0) {
             return;

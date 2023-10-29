@@ -55,9 +55,12 @@ uint8_t isCharPressed(unsigned char c) {
 }
 
 static char readBuffer() {
-    char ret = keyBuffer;
-    keyBuffer = NO_INPUT;
-    return ret;
+    if(isCurrentProcessInForeground()) {
+        char ret = keyBuffer;
+        keyBuffer = NO_INPUT;
+        return ret;
+    }
+    return NO_INPUT;
 }
 
 static void addToBuffer(uint8_t keycode) {
