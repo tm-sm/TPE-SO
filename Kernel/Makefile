@@ -1,34 +1,53 @@
 include Makefile.inc
 
-KERNEL=kernel.bin
-ELF=kernel.elf
-SOURCES=$(wildcard *.c)
-SOURCES_ASM=$(wildcard asm/*.asm)
-OBJECTS=$(SOURCES:.c=.o)
-OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
-LOADERSRC=loader.asm
+KERNEL = kernel.bin
+ELF = kernel.elf
+SOURCES_ASM = $(wildcard asm/*.asm)
+OBJECTS_ASM = $(SOURCES_ASM:.asm=.o)
+SOURCES = $(wildcard *.c)
+OBJECTS = $(SOURCES:.c=.o)
+LOADERSRC = loader.asm
+LOADEROBJECT = $(LOADERSRC:.asm=.o)
+STATICLIBS =
+MEMORY_MANAGER =
 
-LOADEROBJECT=$(LOADERSRC:.asm=.o)
-STATICLIBS=
+MEMORY_MANAGER_DIR = memoryManager
+BUDDY_MEMORY_MANAGER_DIR = buddyMemoryManager
 
+MEMORY_MANAGER_SOURCES = $(wildcard $(MEMORY_MANAGER_DIR)/*.c)
+BUDDY_MEMORY_MANAGER_SOURCES = $(wildcard $(BUDDY_MEMORY_MANAGER_DIR)/*.c)
+
+MEMORY_MANAGER_OBJECTS = $(MEMORY_MANAGER_SOURCES:.c=.o)
+BUDDY_MEMORY_MANAGER_OBJECTS = $(BUDDY_MEMORY_MANAGER_SOURCES:.c=.o)
+
+all: MEMORY_MANAGER = memoryManager
 all: $(KERNEL) $(ELF)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+buddy: MEMORY_MANAGER = buddyMemoryManager
+buddy: $(KERNEL) $(ELF)
 
-$(ELF): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T gdb.ld -o $(ELF) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(MEMORY_MANAGER_OBJECTS)
+	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(MEMORY_MANAGER_OBJECTS) $(STATICLIBS)
+
+$(ELF): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM) $(BUDDY_MEMORY_MANAGER_OBJECTS)
+	$(LD) $(LDFLAGS) -T gdb.ld -o $(ELF) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(BUDDY_MEMORY_MANAGER_OBJECTS) $(STATICLIBS)
 
 %.o: %.c
 	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
 
-%.o : %.asm
+%.o: $(MEMORY_MANAGER_DIR)/%.c
+	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+
+%.o: $(BUDDY_MEMORY_MANAGER_DIR)/%.c
+	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+
+%.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 $(LOADEROBJECT):
 	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
 
 clean:
-	rm -rf asm/*.o *.o *.bin
+	rm -rf asm/*.o *.o *.bin $(MEMORY_MANAGER_DIR)/*.o $(BUDDY_MEMORY_MANAGER_DIR)/*.o
 
-.PHONY: all clean
+.PHONY: all buddy clean
