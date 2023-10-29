@@ -7,7 +7,7 @@
 #define READY 1
 #define BLOCKED 2
 #define DEAD 3
-#define INIT_STACK_SIZE 2048
+#define INIT_STACK_SIZE 4096
 #define MAXPROCESSES 10
 #define MAX_PROC 10
 

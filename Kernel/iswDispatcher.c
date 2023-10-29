@@ -212,7 +212,7 @@ uint64_t sys_is_char_pressed(BASE_PARAMS) {
 // r8= char* argv[]
 // returns= pid on success, -1 on fail
 uint64_t sys_create_process(BASE_PARAMS) {
-    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, (char**)r8);
+    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, (char**)r9);
 }
 
 // ID= 11
