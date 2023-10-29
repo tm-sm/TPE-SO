@@ -1,5 +1,5 @@
 #include <stddef.h>
-#define PAGE_SIZE 512
+#define PAGE_SIZE 256
 #define MEMORY_SIZE 65536
 
 //La memoria se definio en el .c pues donde arranca y termina la memoria no deberia ser visible para tod el so, sino para el MM

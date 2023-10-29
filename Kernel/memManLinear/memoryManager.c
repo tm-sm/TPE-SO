@@ -1,5 +1,5 @@
 #include <memoryManager.h>
-#include <lib.h>
+#include "lib.h"
 //INTENTO DE ALOCAR MEMORIA ESTATICA DE MANERA DINAMICA (Para un manipular mas facilmente los strings)
 #define MEM_START_ADR 0x0000000000050000
 
@@ -68,6 +68,11 @@ void * allocate(size_t size) {
 void deallocate(void * ptr) {
     if (ptr == NULL) {
         return;  // Si apunta a nada => no hay nada que liberar
+    }
+
+
+    if ((size_t) ptr < MEM_START_ADR || (size_t) ptr >= (MEM_START_ADR + MEMORY_SIZE)) {
+        return;
     }
 
     // Obtengo el puntero al bloque que quiero liberar y cambio el flag is_free a 1
