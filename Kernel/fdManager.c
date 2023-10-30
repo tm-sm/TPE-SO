@@ -1,8 +1,9 @@
 #include <fdManager.h>
 #include <stddef.h>
 #include <memoryManager.h>
+#include <console.h>
 
-#define MAX_FILE_DESCRIPTORS 64
+#define MAX_FILE_DESCRIPTORS 128
 
 #define PIPE_BUFFER_SIZE 1024
 
@@ -38,8 +39,7 @@ int openFD(void* data) {
         if (!manager->entries[i].used) {
             manager->entries[i].used = 1;
             manager->entries[i].data = data;
-            manager->entries[i].fd = i;
-            return manager->entries[i].fd;
+            return manager->entries[i].fd = i;
         }
     }
     return -1;
@@ -128,9 +128,8 @@ size_t readFD(int fd, void* buff, size_t bytes) {
     }
 
     size_t bytesRead = 0;
-    while (bytesRead < bytes && pipe->inputFD != pipe->outputFD) {
-        ((char*)buff)[bytesRead] = pipe->buffer[pipe->inputFD];
-        pipe->inputFD = (pipe->inputFD + 1) % PIPE_BUFFER_SIZE;
+    while (bytesRead < bytes) {
+        ((char*)buff)[bytesRead] = pipe->buffer[bytesRead];
         bytesRead++;
     }
 
@@ -145,13 +144,8 @@ size_t writeFD(int fd, const void* buff, size_t bytes) {
 
     size_t bytesWritten = 0;
     for (size_t i = 0; i < bytes; i++) {
-        if ((pipe->outputFD + 1) % PIPE_BUFFER_SIZE != pipe->inputFD) {
-            pipe->buffer[pipe->outputFD] = ((const char*)buff)[i];
-            pipe->outputFD = (pipe->outputFD + 1) % PIPE_BUFFER_SIZE;
+            pipe->buffer[bytesWritten] = ((const char*)buff)[i];
             bytesWritten++;
-        } else {
-            break;
-        }
     }
 
     return bytesWritten;
