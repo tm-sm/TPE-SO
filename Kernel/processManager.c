@@ -204,9 +204,10 @@ void setProcessForeground(int pid, int foreground) {
 }
 
 void setProcessPriority(int pid, int priority) {
-    if(isPidValid(pid)) {
+    if(isPidValid(pid) && (priority == LOW || priority == MED || priority == HIGH) ) {
+        int oldPriority = processes[pid]->priority;
         processes[pid]->priority = priority;
-        //TODO llamar al scheduler para avisarle del cambio
+        changeProcessPriority(pid, oldPriority, priority);
     }
 }
 

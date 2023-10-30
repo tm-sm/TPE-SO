@@ -13,6 +13,7 @@
 void scheduler();
 void addToScheduler(int pid);
 void removeFromScheduler(int pid, int priority);
+void changeProcessPriority(int pid, int originalPriority, int newPriority);
 void printPriorityList(int priority);
 
 #endif //SCHEDULER

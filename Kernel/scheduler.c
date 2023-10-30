@@ -103,6 +103,35 @@ void lowerPriority(node* node){
     return;
 }
 
+void changeProcessPriority(int pid, int originalPriority, int newPriority) {
+    node* curr = procs[originalPriority];
+    node* prev = procsLast[originalPriority];
+
+    if(curr == prev && curr->pid == pid) {
+        procs[originalPriority] = NULL;
+        procsLast[originalPriority] = NULL;
+        return;
+    } else {
+
+        while (curr->pid != pid & curr != procsLast[originalPriority]) {
+            prev = curr;
+            curr = curr->next;
+        }
+
+        if (curr->pid != pid) {
+            //finished the whole list and didn't find anything
+            return;
+        } else if (curr == procsLast[originalPriority]) {
+            procsLast[originalPriority] = prev;
+            prev->next = curr->next;
+            return;
+        } else {
+            prev->next = curr->next;
+        }
+    }
+    addNodeToPriority(curr, newPriority);
+}
+
 void addToScheduler(int pid) {
     int priority = getPriorityFromPid(pid);
     node * new = allocate(sizeof(node));
