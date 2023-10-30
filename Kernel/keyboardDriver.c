@@ -51,7 +51,10 @@ uint8_t keyPressed() {
 }
 
 uint8_t isCharPressed(unsigned char c) {
-    return keyMap[c];
+    if(isCurrentProcessInForeground()) {
+        return keyMap[c];
+    }
+    return FALSE;
 }
 
 static char readBuffer() {
@@ -130,12 +133,15 @@ void keyboard_handler(uint64_t* registers) {
 }
 
 char getc(){
-    uint8_t c = readBuffer();
-    while( c == NO_INPUT) {
-        keyboard_handler(0);
-        c = readBuffer();
+    if(isCurrentProcessInForeground()) {
+        uint8_t c = readBuffer();
+        while (c == NO_INPUT) {
+            keyboard_handler(0);
+            c = readBuffer();
+        }
+        return (char) c;
     }
-    return (char) c;
+    return NO_INPUT;
 }
 
 void gets(char * s) {
