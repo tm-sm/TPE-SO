@@ -5,6 +5,7 @@
 #include <process.h>
 #include <scheduler.h>
 #include <stddef.h>
+#include <interProcessComunicationMechs.h>
 
 struct process {
     char pname[PROC_NAME_LENGTH + 1];
@@ -14,6 +15,8 @@ struct process {
     uint8_t state;
     int priority;
     int totalMemory;
+    int stdin;
+    int stdout;
 } process;
 
 proc processes[MAX_PROC] = {NULL};
@@ -80,6 +83,16 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     processes[pid]->priority = priority;
     processes[pid]->state = READY;
     processes[pid]->totalMemory = (int)stackSize;
+
+    int fds[2];
+
+    if (customPipe(fds) == -1) {
+        deallocate(processes[pid]);
+        return -1;
+    }
+
+    processes[pid]->stdin = fds[0];
+    processes[pid]->stdout = fds[1];
 
     amount++;
 

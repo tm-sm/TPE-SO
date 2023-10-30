@@ -56,3 +56,26 @@ void killFDManager(){
     }
     deallocate(manager);
 }
+
+int customDup2(int oldFD, int newFD) {
+    if (oldFD < 0 || oldFD >= MAX_FILE_DESCRIPTORS || newFD < 0 || newFD >= MAX_FILE_DESCRIPTORS || oldFD == newFD) {
+        return -1;
+    }
+
+    struct FileDescriptorEntry* oldEntry = &manager->entries[oldFD];
+    
+    if (!oldEntry->in_use) {
+        return -1; 
+    }
+    
+    if (manager->entries[newFD].in_use) {
+        if (oldEntry->data != NULL) {
+            oldEntry->data = NULL;
+        }
+        closeFD(newFD);
+    }
+
+    // Duplicate the oldFD to newFD
+    manager->entries[newFD] = * oldEntry;
+    return newFD;
+}
