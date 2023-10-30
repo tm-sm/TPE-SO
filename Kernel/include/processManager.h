@@ -8,8 +8,7 @@
 #define BLOCKED 2
 #define DEAD 3
 #define INIT_STACK_SIZE 4096
-#define MAXPROCESSES 10
-#define MAX_PROC 10
+#define MAX_PROC 11 // 10 processes for the user + sentinel
 
 #define PROC_NAME_LENGTH 20
 

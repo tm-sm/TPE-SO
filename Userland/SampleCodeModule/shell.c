@@ -22,6 +22,14 @@ void writePromptIcon() {
     printFormat("$~");
 }
 
+void writeCursor() {
+    putChar('_');
+}
+
+void eraseCursor() {
+    putChar('\b');
+}
+
 void startShell() {
     putChar('\n');
     shellLoop();
@@ -32,10 +40,12 @@ void shellLoop() {
     int pid;
     char c = 0;
     writePromptIcon();
+    writeCursor();
     while((c = getChar()) != 27 ) {// 'esc'
 
         if(c == '\n') {
             //executes the command
+            eraseCursor();
             putChar(c);
             if((pid = parseCommand(prompt)) != -1) {
                 if(isProcessInForeground(pid)) {
@@ -45,18 +55,23 @@ void shellLoop() {
             clearPrompt();
             putChar('\n');
             writePromptIcon();
+            writeCursor();
         }
 
         else if(c == '\b') {
+            eraseCursor();
             if(promptDim > 0) {
                 putChar(c);
                 prompt[--promptDim] = '\0';
             }
+            writeCursor();
         }
 
-        else if(promptDim < CONSOLE_X_DIM - 2){
+        else if(promptDim < CONSOLE_X_DIM - 3){
+            eraseCursor();
             putChar(c);
             prompt[promptDim++] = c;
+            writeCursor();
         }
     }
     clearScreen();
