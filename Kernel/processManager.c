@@ -5,7 +5,7 @@
 #include <process.h>
 #include <scheduler.h>
 #include <stddef.h>
-#include <interProcessComunicationMechs.h>
+#include <fdManager.h>
 
 struct process {
     char pname[PROC_NAME_LENGTH + 1];
@@ -237,6 +237,8 @@ int isProcessAlive(int pid) {
 void killProcess(int pid) {
     if (processes[pid] != NULL) {
         int priority = processes[pid]->priority;
+
+        closePipe(&processes[pid]->stdin);
         deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         processes[pid] = NULL;

@@ -6,6 +6,8 @@
 
 #define PIPE_BUFFER_SIZE 1024
 
+//TODO AGREGAR SEMAFOROS A LOS PIPES
+
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];
     size_t inputFD;
@@ -36,7 +38,8 @@ int openFD(void* data) {
         if (!manager->entries[i].used) {
             manager->entries[i].used = 1;
             manager->entries[i].data = data;
-            return manager->entries[i].fd = i;
+            manager->entries[i].fd = i;
+            return manager->entries[i].fd;
         }
     }
     return -1;
@@ -83,7 +86,6 @@ int customDup2(int oldFD, int newFD) {
         closeFD(newFD);
     }
 
-    // Duplicate the oldFD to newFD
     manager->entries[newFD] = * oldEntry;
     return newFD;
 }
