@@ -67,7 +67,9 @@ void roundRobin() {
     }
 }
 
-
+int getRunningPid(){
+    return runningProc->pid;
+}
 
 void addNodeToPriority(node * n, int priority) {
     if(procs[priority] == NULL) {

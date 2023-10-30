@@ -14,5 +14,5 @@ void scheduler();
 void addToScheduler(int pid);
 void removeFromScheduler(int pid, int priority);
 void printPriorityList(int priority);
-
+int getRunningPid();
 #endif //SCHEDULER
