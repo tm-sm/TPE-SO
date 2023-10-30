@@ -29,6 +29,7 @@ uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stack, uint8_t* rip, int argc, char* argv[]);
 void interruptTick();
 int findFirstAvailablePid();
+int isPidValid(int pid);
 
 int fgStack[MAX_PROC];
 int lastFgProc = -1;
@@ -99,6 +100,9 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
 }
 
 int checkProcessHealth(int pid) {
+    if(!isPidValid(pid)) {
+        return 1;
+    }
     if(pid == SENTINEL_PID) {
         //the sentinel process shouldn't be terminated
         return 0;
@@ -130,7 +134,9 @@ int checkProcessHealth(int pid) {
 }
 
 void selectNextProcess(int pid) {
-    nextProc = pid;
+    if(isPidValid(pid)) {
+        nextProc = pid;
+    }
 }
 
 uint64_t switchProcess(uint64_t rsp) {
@@ -152,10 +158,16 @@ int getPriority(proc p) {
 }
 
 int getPriorityFromPid(int pid) {
+    if(!isPidValid(pid)) {
+        return UNDEFINED;
+    }
     return processes[pid]->priority;
 }
 
 int getStateFromPid(int pid) {
+    if(!isPidValid(pid)) {
+        return DEAD;
+    }
     return processes[pid]->state;
 }
 
@@ -164,38 +176,44 @@ int getPid(proc p) {
 }
 
 int getSpace() {
-    for(int i=0;i<MAXPROCESSES;i++)
-        if(processes[i]->state==DEAD)
-            return i;
-    return -1;
+    return (MAX_PROC - 1) - amount;
 }
 
 proc getProcess(int pid) {
-    return processes[pid];
+    if(isPidValid(pid)) {
+        return processes[pid];
+    }
+    return NULL;
 }
 
 void setProcessForeground(int pid, int foreground) {
-    switch(foreground) {
-        case FOREGROUND:
-            //if already in stack, move it to the front
-            removeFromFgStack(pid);
-            addToFgStack(pid);
-            break;
-        case BACKGROUND:
-            removeFromFgStack(pid);
-            break;
-        default:
-            return;
+    if(isPidValid(pid)) {
+        switch (foreground) {
+            case FOREGROUND:
+                //if already in stack, move it to the front
+                removeFromFgStack(pid);
+                addToFgStack(pid);
+                break;
+            case BACKGROUND:
+                removeFromFgStack(pid);
+                break;
+            default:
+                return;
+        }
     }
 }
 
 void setProcessPriority(int pid, int priority) {
-    processes[pid]->priority = priority;
-    //TODO llamar al scheduler para avisarle del cambio
+    if(isPidValid(pid)) {
+        processes[pid]->priority = priority;
+        //TODO llamar al scheduler para avisarle del cambio
+    }
 }
 
 int getProcessPriority(int pid) {
-    return processes[pid]->priority;
+    if(isPidValid(pid)) {
+        return processes[pid]->priority;
+    }
 }
 
 int isProcessInForeground(int pid) {
@@ -209,21 +227,24 @@ int isCurrentProcessInForeground() {
 }
 
 void addToFgStack(int pid) {
-    if(lastFgProc < MAX_PROC) {
-        lastFgProc++;
-        fgStack[lastFgProc] = pid;
+    if(isPidValid(pid)) {
+        if (lastFgProc < MAX_PROC) {
+            lastFgProc++;
+            fgStack[lastFgProc] = pid;
+        }
     }
 }
 
 void removeFromFgStack(int pid) {
-    if(lastFgProc == -1) {
+    //pid is not checked, as processes are removed from the stack after they are killed
+    if (lastFgProc == -1) {
         return;
     }
-    if(fgStack[lastFgProc] == pid) {
+    if (fgStack[lastFgProc] == pid) {
         lastFgProc--;
     } else {
-        for(int i=0; i<lastFgProc; i++) {
-            if(fgStack[i] == pid) {
+        for (int i = 0; i < lastFgProc; i++) {
+            if (fgStack[i] == pid) {
                 memcpy(fgStack + i, fgStack + i + 1, sizeof(int) * (MAX_PROC - i - 1));
                 lastFgProc--;
             }
@@ -232,11 +253,14 @@ void removeFromFgStack(int pid) {
 }
 
 int isProcessAlive(int pid) {
-    return processes[pid] != NULL;
+    if (isPidValid(pid)) {
+        return processes[pid] != NULL;
+    }
+    return 0;
 }
 
 void killProcess(int pid) {
-    if (processes[pid] != NULL) {
+    if (isPidValid(pid)) {
         int priority = processes[pid]->priority;
         for(int i=0; i<processes[pid]->argc; i++) {
             deallocate(processes[pid]->argv[i]);
@@ -301,4 +325,7 @@ void listAllProcesses() {
     }
 }
 
+int isPidValid(int pid) {
+    return pid < MAX_PROC && pid >= 0 && processes[pid] != NULL;
+}
 

@@ -8,6 +8,7 @@
 #define HIGH 0
 #define MED 1
 #define LOW 2
+#define UNDEFINED 3
 
 void scheduler();
 void addToScheduler(int pid);
