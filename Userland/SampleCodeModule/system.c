@@ -53,13 +53,8 @@ int isProcessInForeground(int pid) {
     return (int)interrupt(SYS_CHECK_PROCESS_FOREGROUND, pid, 0, 0, 0, 0);
 }
 
-void exitProc(int argc, char* argv[]) {
+void exitProc() {
     int pid = (int)interrupt(SYS_GET_OWN_PID, 0, 0, 0, 0, 0);
-    argv--;
-    for(int i=0; i<argc + 1; i++) {
-        dealloc(argv[i]);
-    }
-    dealloc(argv);
     killProcess(pid);
 }
 

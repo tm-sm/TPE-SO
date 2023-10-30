@@ -40,8 +40,6 @@ void shellLoop() {
             if((pid = parseCommand(prompt)) != -1) {
                 if(isProcessInForeground(pid)) {
                     while(isProcessAlive(pid));
-                } else {
-                    printFormat("\nProcess Started\n");
                 }
             }
             clearPrompt();

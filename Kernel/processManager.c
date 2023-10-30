@@ -14,6 +14,8 @@ struct process {
     uint8_t state;
     int priority;
     int totalMemory;
+    char** argv;
+    int argc;
 } process;
 
 proc processes[MAX_PROC] = {NULL};
@@ -66,7 +68,6 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     for(i=0; i<PROC_NAME_LENGTH && name[i]!='\0'; i++) {
         processes[pid]->pname[i] = name[i];
     }
-
     processes[pid]->pname[i] = '\0';
     processes[pid]->pid = pid;
     processes[pid]->stackTop = allocate(stackSize) + stackSize;
@@ -80,6 +81,8 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     processes[pid]->priority = priority;
     processes[pid]->state = READY;
     processes[pid]->totalMemory = (int)stackSize;
+    processes[pid]->argv = argv;
+    processes[pid]->argc = argc;
 
     amount++;
 
@@ -90,6 +93,7 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     if(foreground) {
         addToFgStack(pid);
     }
+
     interruptTick();
     return pid;
 }
@@ -234,6 +238,10 @@ int isProcessAlive(int pid) {
 void killProcess(int pid) {
     if (processes[pid] != NULL) {
         int priority = processes[pid]->priority;
+        for(int i=0; i<processes[pid]->argc; i++) {
+            deallocate(processes[pid]->argv[i]);
+        }
+        deallocate(processes[pid]->argv);
         deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         processes[pid] = NULL;
