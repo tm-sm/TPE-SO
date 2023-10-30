@@ -13,6 +13,7 @@
 #define SYS_IS_PROCESS_ALIVE 14
 #define SYS_MEMORY_MANAGER 15
 #define SYS_CHECK_PROCESS_FOREGROUND 16
+#define SYS_PRINT_ALL_PROCESSES 17
 
 #define ALLOC_ID 0
 #define REALLOC_ID 1
@@ -72,4 +73,8 @@ void* realloc(void* address, size_t size) {
 
 void dealloc(void* address) {
     interrupt(SYS_MEMORY_MANAGER, DEALLOC_ID, (uint64_t)address, 0, 0, 0);
+}
+
+void printAllProcesses() {
+    interrupt(SYS_PRINT_ALL_PROCESSES, 0, 0 ,0 ,0, 0);
 }

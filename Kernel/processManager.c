@@ -261,6 +261,10 @@ int isProcessAlive(int pid) {
 }
 
 void killProcess(int pid) {
+    if(pid == 0) {
+        //the sentinel shouldn't be terminated
+        return;
+    }
     if (isPidValid(pid)) {
         int priority = processes[pid]->priority;
         for(int i=0; i<processes[pid]->argc; i++) {

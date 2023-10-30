@@ -14,37 +14,49 @@ static char * itoa( uint64_t value, char * str, int base )
     char * rc;
     char * ptr;
     char * low;
-    // Check for supported base.
-    if ( base < 2 || base > 36 )
-    {
+    if ( base < 2 || base > 36 ) {
         *str = '\0';
         return str;
     }
     rc = ptr = str;
-    // Set '-' for negative decimals.
-    if ( value < 0 && base == 10 )
-    {
+    if ( value < 0 && base == 10 ) {
         *ptr++ = '-';
     }
-    // Remember where the numbers start.
     low = ptr;
-    // The actual conversion.
-    do
-    {
-        // Modulo is negative for negative value. This trick makes abs() unnecessary.
-        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + value % base]; //???????
+    do {
+        *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + value % base];
         value /= base;
     } while ( value );
-    // Terminating the string.
     *ptr-- = '\0';
-    // Invert the numbers.
-    while ( low < ptr )
-    {
+    while( low < ptr ) {
         char tmp = *low;
         *low++ = *ptr;
         *ptr-- = tmp;
     }
     return rc;
+}
+
+
+
+int atoi(const char* str) {
+    int result = 0;
+    int sign = 1;
+
+    while (*str == ' ' || (*str >= 9 && *str <= 13)) {
+        str++;
+    }
+
+    if (*str == '-' || *str == '+') {
+        sign = (*str == '-') ? -1 : 1;
+        str++;
+    }
+
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+
+    return result * sign;
 }
 
 void putChar(char c){ //a partir del segundo parametro no importa lo que le ponga

@@ -28,6 +28,7 @@ uint64_t sys_get_own_pid(BASE_PARAMS); // code 13
 uint64_t sys_is_process_alive(BASE_PARAMS); // code 14
 uint64_t sys_memory_manager(BASE_PARAMS); // code 15
 uint64_t sys_check_process_foreground(BASE_PARAMS); // code 16
+uint64_t sys_print_all_processes(BASE_PARAMS); // code 17
 extern uint64_t* current_regs();
 
 extern void _sti();
@@ -39,7 +40,7 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_wait, sys_sound, sys_nop, sys_is_char_pressed,
                                sys_create_process, sys_kill_process, sys_set_process_foreground,
                                sys_get_own_pid, sys_is_process_alive, sys_memory_manager,
-                               sys_check_process_foreground};
+                               sys_check_process_foreground, sys_print_all_processes};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -269,4 +270,11 @@ uint64_t sys_memory_manager(BASE_PARAMS) {
 // returns= 1 if in foreground, 0 if not
 uint64_t sys_check_process_foreground(BASE_PARAMS) {
     return isProcessInForeground((int)rsi);
+}
+
+// ID= 17
+// returns= nothing
+uint64_t sys_print_all_processes(BASE_PARAMS) {
+    listAllProcesses();
+    return 0;
 }

@@ -12,7 +12,6 @@ extern unsigned char keydown();
 #define CAPS_LOCK 0x3A
 
 #define F1 0x3B
-#define F2 0x3C
 
 #define NO_INPUT 0x00
 
@@ -119,9 +118,6 @@ void keyboard_handler(uint64_t* registers) {
     }
     else if(keycode == F1) {
         displayRegs(registers);
-    }
-    else if(keycode == F2) {
-        listAllProcesses();
     }
     else if(!keyRelease) {
         addToBuffer(keycode);

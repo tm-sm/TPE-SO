@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define null ((void*)0)
-
 /**
  * Calls a system interruption
  * @param rdi
@@ -51,6 +49,8 @@ size_t strlen(const char* str);
 void putStrn(char* s);
 int strncmp(const char* str1, const char* str2, size_t n);
 int strcmp(const char* str1, const char* str2);
+
+int atoi(const char* str);
 
 uint8_t isCharPressed(char c);
 #endif //TPE_ARQUI_STANDARDLIB_H
