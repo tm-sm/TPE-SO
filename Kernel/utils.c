@@ -32,3 +32,17 @@ uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 
     return digits;
 }
+
+int strcmp(const char* str1, const char* str2) {
+    int i = 0;
+    while (str1[i] && (str1[i] == str2[i])) i++;
+
+    return (int)(str1[i] - str2[i]);
+}
+
+char * strcpy(char* dest, const char* src) {
+    int i = 0;
+    while ((dest[i] = src[i])) i++;
+
+    return dest;
+}
