@@ -40,6 +40,7 @@ void setProcessForeground(int pid, int foreground);
 int isProcessInForeground(int pid);
 int isProcessAlive(int pid);
 void printAllProcesses();
+int getOwnPid();
 void exitProc();
 
 #endif //TPE_ARQUI_SYSTEM_H

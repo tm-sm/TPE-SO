@@ -156,7 +156,9 @@ uint64_t switchProcess(uint64_t rsp) {
     if(amount > 0 && currProc != nextProc && processes[nextProc] != NULL && processes[nextProc]->state == READY) {
         if(currProc != -1) {
             processes[currProc]->stackTrace = (uint8_t *) rsp;
-            processes[currProc]->state = READY;
+            if(processes[currProc]->state == RUNNING) {
+                processes[currProc]->state = READY;
+            }
         }
         currProc = nextProc;
         checkProcessHealth(currProc);
@@ -348,5 +350,18 @@ void listAllProcesses() {
 
 int isPidValid(int pid) {
     return pid < MAX_PROC && pid >= 0 && processes[pid] != NULL;
+}
+
+void unblockProcess(int pid) {
+    if(isPidValid(pid)){
+        processes[pid]->state = READY;
+    }
+}
+
+void blockCurrentProcess() {
+    if(currProc != -1 && currProc != 0) {
+        processes[currProc]->state = BLOCKED;
+    }
+    interruptTick();
 }
 

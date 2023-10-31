@@ -25,7 +25,7 @@ extern void invalidOp();
 void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS),
-sh(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS);
+sh(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -34,6 +34,7 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"time", "prints the current time", displayTime},
         &(struct EXECUTABLE){"date", "prints the current date", displayDate},
         &(struct EXECUTABLE){"sh", "runs the specified process", sh},
+        &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         NULL
@@ -197,6 +198,17 @@ int sh(ARGS) {
     }
     unkownProcess(proc);
     return -1;
+}
+
+int loopProc(ARGS) {
+    while(1) {
+        wait(2000);
+        printFormat("\nHello from process %d!", getOwnPid());
+    }
+}
+
+int loop(ARGS) {
+    return createProcess(loopProc, HIGH, FOREGROUND, "loop", NULL);
 }
 
 int playBubbles(ARGS) {

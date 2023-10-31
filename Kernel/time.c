@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <processManager.h>
+#include <memoryManager.h>
 #include <scheduler.h>
 
 #define SECONDS 0X00
@@ -10,6 +11,20 @@
 #define MONTH 0X08
 #define YEAR 0X09
 #define TIME_ZONE -3
+#define TICK_MS 55
+
+struct waitNode {
+    int remainingTicks;
+    int processPid;
+    struct waitNode* next;
+}waitNode;
+
+typedef struct waitNode* node;
+
+static node waitingList = NULL;
+
+void addToWaitingList(int ticks, int pid);
+void removeFromWaitingList(int pid);
 
 extern unsigned char clock(unsigned char mode);
 
@@ -82,6 +97,15 @@ static unsigned long ticks = 0;
 
 void timer_handler() {
     ticks++;
+    node curr = waitingList;
+    while(curr != NULL) {
+        if(curr->remainingTicks <= 0) {
+            removeFromWaitingList(curr->processPid);
+        } else {
+            curr->remainingTicks--;
+        }
+        curr = curr->next;
+    }
 }
 
 int ticks_elapsed() {
@@ -92,17 +116,45 @@ int seconds_elapsed() {
     return ticks / 18;
 }
 
-void wait(uint64_t milliseconds) {
-    int seconds = milliseconds / 1000;
-    int counter = 0;
-    while (counter < seconds) {
-        // Loop to approximate the specified time
-        for (int i = 0; i < 100000000; i++) {
-            // Adjust this loop depending on your system's speed
-        }
-        counter++;
+void addToWaitingList(int totalTicks, int pid) {
+    node n = allocate(sizeof(waitNode));
+    n->remainingTicks = totalTicks;
+    n->processPid = pid;
+    n->next = waitingList;
+    waitingList = n;
+}
+
+void removeFromWaitingList(int pid) {
+    node curr = waitingList;
+    node prev;
+    if(curr != NULL && curr->processPid == pid) {
+        waitingList = curr->next;
+        unblockProcess(pid);
+        deallocate(curr);
+        return;
+    }
+
+    prev = curr;
+    curr = curr->next;
+    while(curr != NULL && curr->processPid != pid) {
+        prev = curr;
+        curr = curr->next;
+    }
+    if(curr != NULL) {
+        prev->next = curr->next;
+        unblockProcess(pid);
+        deallocate(curr);
+        return;
     }
 }
+
+void wait(uint64_t milliseconds) {
+    int pid = getActiveProcessPid();
+    int totalTicks = (int)(milliseconds / TICK_MS);
+    addToWaitingList(totalTicks, pid);
+    blockCurrentProcess();
+}
+
 
 /*void wait(uint64_t milliseconds) {
     unsigned long initTicks = ticks;

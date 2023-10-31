@@ -36,6 +36,8 @@ int getActiveProcessPid();
 void listAllProcesses();
 void removeFromFgStack(int pid);
 void addToFgStack(int pid);
+void blockCurrentProcess();
+void unblockProcess(int pid);
 
 int isProcessInForeground(int pid);
 int isCurrentProcessInForeground();

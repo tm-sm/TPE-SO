@@ -54,8 +54,12 @@ int isProcessInForeground(int pid) {
     return (int)interrupt(SYS_CHECK_PROCESS_FOREGROUND, pid, 0, 0, 0, 0);
 }
 
+int getOwnPid() {
+    return (int)interrupt(SYS_GET_OWN_PID, 0, 0, 0, 0, 0);
+}
+
 void exitProc() {
-    int pid = (int)interrupt(SYS_GET_OWN_PID, 0, 0, 0, 0, 0);
+    int pid = getOwnPid();
     killProcess(pid);
 }
 
