@@ -77,20 +77,28 @@ static uint8_t videoBuffer[BUFFER_SIZE] = {0};
 void hexToColor(uint32_t hexColor, Color* c);
 
 void enableDoubleBuffering() {
-    doubleBufferingEnabled = TRUE;
+    if(isCurrentProcessInForeground()) {
+        doubleBufferingEnabled = TRUE;
+    }
 }
 
 void disableDoubleBuffering() {
-    doubleBufferingEnabled = FALSE;
+    if(isCurrentProcessInForeground()) {
+        doubleBufferingEnabled = FALSE;
+    }
 }
 
 void drawBuffer() {
-    memcut(VBE_mode_info->framebuffer, videoBuffer,
-           VBE_mode_info->width * (VBE_mode_info->bpp / 8) * VBE_mode_info->height);
+    if(isCurrentProcessInForeground()) {
+        memcut(VBE_mode_info->framebuffer, videoBuffer,
+               VBE_mode_info->width * (VBE_mode_info->bpp / 8) * VBE_mode_info->height);
+    }
 }
 
 void clearBuffer() {
-    memset(videoBuffer, 0, BUFFER_SIZE);
+    if(isCurrentProcessInForeground()) {
+        memset(videoBuffer, 0, BUFFER_SIZE);
+    }
 }
 
 void scrollCharArea() {

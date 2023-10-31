@@ -37,7 +37,9 @@ void dealloc(void* address);
 void killProcess(int pid);
 void setOwnForeground(int foreground);
 void setProcessForeground(int pid, int foreground);
+int isProcessInForeground(int pid);
 int isProcessAlive(int pid);
-void exitProc(int argc, char* argv[]);
+void printAllProcesses();
+void exitProc();
 
 #endif //TPE_ARQUI_SYSTEM_H

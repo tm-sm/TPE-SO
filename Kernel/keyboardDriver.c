@@ -12,7 +12,6 @@ extern unsigned char keydown();
 #define CAPS_LOCK 0x3A
 
 #define F1 0x3B
-#define F2 0x3C
 
 #define NO_INPUT 0x00
 
@@ -51,7 +50,10 @@ uint8_t keyPressed() {
 }
 
 uint8_t isCharPressed(unsigned char c) {
-    return keyMap[c];
+    if(isCurrentProcessInForeground()) {
+        return keyMap[c];
+    }
+    return FALSE;
 }
 
 static char readBuffer() {
@@ -117,9 +119,6 @@ void keyboard_handler(uint64_t* registers) {
     else if(keycode == F1) {
         displayRegs(registers);
     }
-    else if(keycode == F2) {
-        listAllProcesses();
-    }
     else if(!keyRelease) {
         addToBuffer(keycode);
         setKeyMap(keycode, TRUE);
@@ -130,12 +129,15 @@ void keyboard_handler(uint64_t* registers) {
 }
 
 char getc(){
-    uint8_t c = readBuffer();
-    while( c == NO_INPUT) {
-        keyboard_handler(0);
-        c = readBuffer();
+    if(isCurrentProcessInForeground()) {
+        uint8_t c = readBuffer();
+        while (c == NO_INPUT) {
+            keyboard_handler(0);
+            c = readBuffer();
+        }
+        return (char) c;
     }
-    return (char) c;
+    return NO_INPUT;
 }
 
 void gets(char * s) {
