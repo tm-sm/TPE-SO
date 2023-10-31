@@ -344,6 +344,12 @@ void listAllProcesses() {
             cPrintHex((uint64_t)processes[i]->stackTrace);
             cPrint(" | rbp: ");
             cPrintHex((uint64_t)processes[i]->stackTop);
+            cPrint(" |");
+            if(processes[i]->state == BLOCKED) {
+                cPrint(" BLOCKED");
+            } else {
+                cPrint(" UNBLOCKED");
+            }
         }
     }
 }
@@ -358,10 +364,17 @@ void unblockProcess(int pid) {
     }
 }
 
-void blockCurrentProcess() {
-    if(currProc != -1 && currProc != 0) {
-        processes[currProc]->state = BLOCKED;
+void blockProcess(int pid) {
+    if(pid == 0) {
+        return;
     }
+    if(isPidValid(pid)) {
+        processes[pid]->state = BLOCKED;
+    }
+}
+
+void blockCurrentProcess() {
+    blockProcess(currProc);
     interruptTick();
 }
 

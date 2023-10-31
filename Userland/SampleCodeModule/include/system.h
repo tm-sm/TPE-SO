@@ -43,4 +43,9 @@ void printAllProcesses();
 int getOwnPid();
 void exitProc();
 
+void setProcessPriority(int pid, int priority);
+int isProcessBlocked(int pid);
+void blockProcess(int pid);
+void unblockProcess(int pid);
+
 #endif //TPE_ARQUI_SYSTEM_H

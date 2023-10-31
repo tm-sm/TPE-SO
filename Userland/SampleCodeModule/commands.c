@@ -17,6 +17,7 @@ struct EXECUTABLE {
     functionPtr program;
 }EXECUTABLE;
 
+//TODO agregar mensajes de error para parametros mal pasados
 
 typedef struct EXECUTABLE* exec;
 
@@ -25,7 +26,7 @@ extern void invalidOp();
 void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS),
-sh(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS);
+sh(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS), nice(ARGS), block(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -37,6 +38,8 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
+        &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
+        &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
         NULL
         };
 
@@ -50,13 +53,16 @@ static exec pArr[] = {
 };
 
 int callBuiltin(int argc, char* argv[]) {
-    if(argc >= 1) {
-        for(int i=0; bArr[i]!=NULL; i++) {
-            if(strcmp(bArr[i]->name, argv[0]) == 0) {
+    if (argc >= 1) {
+        for (int i = 0; bArr[i] != NULL; i++) {
+            if (strcmp(bArr[i]->name, argv[0]) == 0) {
                 return bArr[i]->program(argc, argv);
             }
         }
+        unknownCommand(argv[0]);
+        return 0;
     }
+    unknownCommand(" ");
     return 0;
 }
 
@@ -131,14 +137,41 @@ int displayDate(ARGS) {
 }
 
 int kill(ARGS) {
-    int pid = atoi(argv[1]);
-    killProcess(pid);
+    if(argc == 2) {
+        int pid = atoi(argv[1]);
+        killProcess(pid);
+    }
     return 0;
 }
 
 int ps(ARGS) {
     printAllProcesses();
     putChar('\n');
+    return 0;
+}
+
+
+//TODO hacer que funque
+int nice(ARGS) {
+    if(argc == 3) {
+        int pid = atoi(argv[1]);
+        int priority = atoi(argv[2]);
+        if(priority <= 3 && priority >= 0) {
+            setProcessPriority(pid, priority);
+        }
+    }
+    return 0;
+}
+
+int block(ARGS) {
+    if(argc == 2) {
+        int pid = atoi(argv[1]);
+        if(isProcessBlocked(pid)) {
+            unblockProcess(pid);
+        } else {
+            blockProcess(pid);
+        }
+    }
     return 0;
 }
 
