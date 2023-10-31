@@ -5,6 +5,10 @@
 #include <system.h>
 #include <commands.h>
 
+#define SENTINEL_PID 0
+#define INIT_PID 1
+#define SHELL_PID 2
+
 #define ARGS int argc, char* argv[]
 
 typedef int (*functionPtr)(ARGS);
@@ -139,6 +143,10 @@ int displayDate(ARGS) {
 int kill(ARGS) {
     if(argc == 2) {
         int pid = atoi(argv[1]);
+        if(pid == SENTINEL_PID || pid == INIT_PID || pid == SHELL_PID || pid < 0) {
+            printFormat("\nForbidden\n");
+            return -1;
+        }
         killProcess(pid);
     }
     return 0;
@@ -150,8 +158,6 @@ int ps(ARGS) {
     return 0;
 }
 
-
-//TODO hacer que funque
 int nice(ARGS) {
     if(argc == 3) {
         int pid = atoi(argv[1]);

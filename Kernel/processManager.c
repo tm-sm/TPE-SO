@@ -8,6 +8,13 @@
 #include <fdManager.h>
 #include <time.h>
 
+typedef struct childNode* cNode;
+
+struct childNode {
+    int pid;
+    cNode next;
+}childNode;
+
 struct process {
     char pname[PROC_NAME_LENGTH + 1];
     int pid;
@@ -20,6 +27,8 @@ struct process {
     int stdout;
     char** argv;
     int argc;
+    int parentPid;
+    cNode children;
 } process;
 
 proc processes[MAX_PROC] = {NULL};
@@ -34,6 +43,8 @@ uint8_t* prepare_process(uint8_t* stack, uint8_t* rip, int argc, char* argv[]);
 void interruptTick();
 int findFirstAvailablePid();
 int isPidValid(int pid);
+int addChildNode(int parentPid, int childPid);
+void removeChildNode(int parentPid, int childPid);
 
 int fgStack[MAX_PROC];
 int lastFgProc = -1;
@@ -92,12 +103,24 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     int fds[2];
 
     if (customPipe(fds) == -1) {
+        deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         return -1;
     }
 
     processes[pid]->stdin = fds[0];
     processes[pid]->stdout = fds[1];
+
+    processes[pid]->parentPid = currProc;
+    if(processes[pid]->parentPid >= 1) {
+        //the sentinel has no children
+        if(addChildNode(processes[pid]->parentPid, pid) == -1) {
+            //TODO liberar pipes
+            deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
+            deallocate(processes[pid]);
+            return -1;
+        }
+    }
 
     amount++;
 
@@ -285,6 +308,12 @@ void killProcess(int pid) {
     if (isPidValid(pid)) {
         int priority = processes[pid]->priority;
 
+        //because each children removes itself from the parent, c always points to the next child
+        for(cNode c = processes[pid]->children; c != NULL; c = processes[pid]->children) {
+            killProcess(c->pid);
+        }
+        removeChildNode(processes[pid]->parentPid, pid);
+
         closePipe(&processes[pid]->stdin);
         for(int i=0; i<processes[pid]->argc; i++) {
             deallocate(processes[pid]->argv[i]);
@@ -388,4 +417,38 @@ void killProcessInForeground() {
         }
         killProcess(fgStack[lastFgProc]);
     }
+}
+
+//only called within procManager, no checks are performed
+int addChildNode(int parentPid, int childPid) {
+    cNode child = allocate(sizeof(childNode));
+    if(child == NULL) {
+        return -1;
+    }
+    child->pid = childPid;
+    child->next = processes[parentPid]->children;
+    processes[parentPid]->children = child;
+    return 0;
+}
+
+void removeChildNode(int parentPid, int childPid) {
+    if(parentPid == -1 || parentPid == 0) {
+        return;
+    }
+    cNode curr;
+    cNode prev;
+    curr = processes[parentPid]->children;
+    if(curr->pid == childPid) {
+        processes[parentPid]->children = curr->next;
+        return;
+    }
+    while(curr != NULL && curr->pid != childPid) {
+        prev = curr;
+        curr = curr->next;
+    }
+    if(curr == NULL) {
+        return;
+    }
+    prev->next = curr->next;
+    deallocate(curr);
 }
