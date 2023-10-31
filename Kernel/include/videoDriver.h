@@ -8,15 +8,14 @@ typedef struct Color{
     uint8_t b;
 }Color;
 
-static struct Color WHITE = {255, 255, 255};
-static struct Color BLACK = {0, 0, 0};
-static struct Color RED = {255, 0, 0};
-static struct Color GREEN = {0, 255, 0};
-static struct Color BLUE = {0, 0, 255};
-static struct Color YELLOW = {255, 255, 0};
-static struct Color PINK = {255, 0, 255};
-static struct Color CYAN = {0, 255, 255};
-
+#define WHITE (struct Color){255, 255, 255}
+#define BLACK (struct Color){0, 0, 0}
+#define RED (struct Color){255, 0, 0}
+#define GREEN (struct Color){0, 255, 0}
+#define BLUE (struct Color){0, 0, 255}
+#define YELLOW (struct Color){255, 255, 0}
+#define PINK (struct Color){255, 0, 255}
+#define CYAN (struct Color){0, 255, 255}
 
 //DOUBLE BUFFERING OPTIONS
 void enableDoubleBuffering();

@@ -90,7 +90,7 @@ void disableDoubleBuffering() {
 
 void drawBuffer() {
     if(isCurrentProcessInForeground()) {
-        memcut(VBE_mode_info->framebuffer, videoBuffer,
+        memcut((void*)VBE_mode_info->framebuffer, videoBuffer,
                VBE_mode_info->width * (VBE_mode_info->bpp / 8) * VBE_mode_info->height);
     }
 }
@@ -110,7 +110,7 @@ void scrollCharArea() {
     uint64_t offset = VBE_mode_info->width * vPixels * (VBE_mode_info->bpp / 8);
     for(int i=0; i<YDIM + 1; i++) {
         for(int j=0; j<vPixels; j++) {
-            memcpy(currMem, currMem + offset, xLen);
+            memcpy((void*)currMem, (void*)(currMem + offset), xLen);
             currMem += VBE_mode_info->width * (VBE_mode_info->bpp / 8);//jumps to the pixels below
         }
         //once it finishes it has copied an entire block of characters
@@ -133,7 +133,7 @@ void putPixel(Color c, uint32_t x, uint32_t y) {
         return;
     }
     //double buffering is disabled, it paints directly to the screen
-    uint8_t * videoPtr = VBE_mode_info->framebuffer;
+    uint8_t* videoPtr = (uint8_t*)VBE_mode_info->framebuffer;
     int offset = y * VBE_mode_info->pitch + x * (VBE_mode_info->bpp / 8);
     videoPtr[offset] = c.b;
     videoPtr[offset+1] = c.g;
@@ -304,7 +304,7 @@ void putCharAt(uint32_t x, uint32_t y, char character) {
 }
 
 void clearScreen() {
-    uint8_t * videoPtr = VBE_mode_info->framebuffer;
+    uint8_t * videoPtr = (uint8_t*)VBE_mode_info->framebuffer;
     memset(videoPtr, 0, VBE_mode_info->width * VBE_mode_info->height * (VBE_mode_info->bpp / 8));
 }
 

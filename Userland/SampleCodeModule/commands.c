@@ -205,6 +205,7 @@ int playBubbles(ARGS) {
     clearScreen();
     disableDoubleBuffering();
     exitProc();
+    return 0;
 }
 
 int playPong(ARGS) {
@@ -213,11 +214,13 @@ int playPong(ARGS) {
     clearScreen();
     disableDoubleBuffering();
     exitProc();
+    return 0;
 }
 
 int playBeep(ARGS) {
     play_beep(2000, 100);
     exitProc();
+    return 0;
 }
 
 int repeat(ARGS) {
@@ -225,4 +228,5 @@ int repeat(ARGS) {
         printFormat("\n%s ", argv[i]);
     }
     exitProc();
+    return 0;
 }

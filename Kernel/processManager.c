@@ -42,7 +42,7 @@ void initializeProcessManager() {
     startProcess(&processSentinel, LOW, FOREGROUND, "sentinel", 256, NULL);
 }
 
-int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize, char* argv[]) {
+int startProcess(void* ip, int priority, uint8_t foreground, const char* name, unsigned int stackSize, char* argv[]) {
     int pid = findFirstAvailablePid();
 
     int argc = 0;
@@ -128,7 +128,7 @@ int checkProcessHealth(int pid) {
     }
 
     //check if process needs more memory
-    int usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
+    uint64_t usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
     if( usedMemory > ((processes[pid]->totalMemory / 4) * 3)) {
         int oldTotalMemory = processes[pid]->totalMemory;
         int newTotalMemory = oldTotalMemory * 2;
@@ -228,6 +228,7 @@ int getProcessPriority(int pid) {
     if(isPidValid(pid)) {
         return processes[pid]->priority;
     }
+    return UNDEFINED;
 }
 
 int isProcessInForeground(int pid) {
