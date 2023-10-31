@@ -293,7 +293,7 @@ uint64_t sys_process_priority(BASE_PARAMS) {
         case 0:
             return getPriorityFromPid((int)rsi);
         case 1:
-            changeProcessPriority((int)rsi, getPriorityFromPid((int)rsi), (int)rcx);
+            setProcessPriority((int)rsi, (int)rcx);
             break;
         default:
             break;

@@ -6,6 +6,7 @@
 #include <scheduler.h>
 #include <stddef.h>
 #include <fdManager.h>
+#include <time.h>
 
 struct process {
     char pname[PROC_NAME_LENGTH + 1];
@@ -378,3 +379,13 @@ void blockCurrentProcess() {
     interruptTick();
 }
 
+void killProcessInForeground() {
+    if(lastFgProc >= 0) {
+        if(doubleBufferingEnabled()) {
+            forceDisableDoubleBuffering(); // in case the fg process had double buffering enabled
+            forceClearScreen();
+            wait(55);
+        }
+        killProcess(fgStack[lastFgProc]);
+    }
+}

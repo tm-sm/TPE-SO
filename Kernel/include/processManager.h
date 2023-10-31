@@ -39,6 +39,8 @@ void addToFgStack(int pid);
 void blockCurrentProcess();
 void blockProcess(int pid);
 void unblockProcess(int pid);
+void setProcessPriority(int pid, int priority);
+void killProcessInForeground();
 
 int isProcessInForeground(int pid);
 int isCurrentProcessInForeground();

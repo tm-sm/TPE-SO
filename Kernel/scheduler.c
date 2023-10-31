@@ -115,7 +115,7 @@ void changeProcessPriority(int pid, int originalPriority, int newPriority) {
         return;
     } else {
 
-        while((curr->pid != pid) & (curr != procsLast[originalPriority])) {
+        while((curr->pid != pid) && (curr != procsLast[originalPriority])) {
             prev = curr;
             curr = curr->next;
         }

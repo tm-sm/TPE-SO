@@ -20,6 +20,9 @@ typedef struct Color{
 //DOUBLE BUFFERING OPTIONS
 void enableDoubleBuffering();
 void disableDoubleBuffering();
+void forceEnableDoubleBuffering();
+void forceDisableDoubleBuffering();
+int doubleBufferingEnabled();
 void drawBuffer();
 void clearBuffer();
 
@@ -48,6 +51,7 @@ void drawHexRectangle(uint32_t hexColor, uint32_t x, uint32_t y, uint32_t width,
 
 //UTILS
 void clearScreen();
+void forceClearScreen();
 void scrollCharArea();
 
 uint32_t getXCharSlots();
