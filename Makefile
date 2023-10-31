@@ -9,7 +9,7 @@ kernel:
 	cd Kernel; make all
 
 kernelBuddy:
-	cd Kernel; make buddy
+	cd Kernel; make MEMORY_MANAGER=buddy
 
 userland:
 	cd Userland; make all

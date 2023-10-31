@@ -7,7 +7,7 @@
 
 #define PIPE_BUFFER_SIZE 1024
 
-//TODO AGREGAR SEMAFOROS A LOS PIPES
+// // TODO AGREGAR SEMAFOROS A LOS PIPES // //
 
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];
@@ -74,19 +74,17 @@ int customDup2(int oldFD, int newFD) {
     }
 
     struct FileDescriptorEntry* oldEntry = &manager->entries[oldFD];
-    
+
     if (!oldEntry->used) {
-        return -1; 
+        return -1;
     }
-    
+
     if (manager->entries[newFD].used) {
-        if (oldEntry->data != NULL) {
-            oldEntry->data = NULL;
-        }
         closeFD(newFD);
     }
 
-    manager->entries[newFD] = * oldEntry;
+
+    manager->entries[newFD] = *oldEntry;
     return newFD;
 }
 
