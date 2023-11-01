@@ -4,7 +4,7 @@
 #include <console.h>
 //64 KB libres
 #define MEM_START_ADR 0x0000000000050000
-#define MIN_SIZE 512
+#define MIN_SIZE 128
 
 typedef struct BuddyBlock {
     int size;
@@ -16,6 +16,8 @@ typedef struct BuddyBlock {
 
 static BuddyBlock *root = NULL;
 
+static size_t currentAvailableMemory;
+
 BuddyBlock *createBlock(int size, void *address) {
     BuddyBlock * block = (BuddyBlock *) address;
 
@@ -24,14 +26,7 @@ BuddyBlock *createBlock(int size, void *address) {
     block->isSplit = 0;
     block->left = NULL;
     block->right = NULL;
-    /*
-    cPrint("Created Mem block addr: ");
-    cPrintHex((uint64_t) block);
-    cNewline();
-    cPrint("Size: ");
-    cPrintDec(block->size);
-    cNewline();
-     */
+
     return block;
 }
 
@@ -98,22 +93,22 @@ BuddyBlock* allocateRecursive(size_t size, BuddyBlock* node) {
 }
 
 void *allocate(size_t size) {
-    /*
-    cPrint("Requested size: ");
-    cPrintDec(size);
-    cNewline();
-    */
     size_t sizeToUse = convertToClosestPowerOf2(size);
     BuddyBlock *node = root;
 
     // Find a suitable block
     BuddyBlock *allocatedBlock = allocateRecursive(sizeToUse, node);
+
     /*
+    cPrint("Requested size: ");
+    cPrintDec(allocatedBlock->size);
+    cNewline();
     cPrint("Returning: ");
     cPrintHex((uint64_t)allocatedBlock);
     cNewline();
-    */
+*/
     if (allocatedBlock != NULL) {
+        currentAvailableMemory -= sizeof(struct BuddyBlock) - allocatedBlock->size;
         return (void *)allocatedBlock + sizeof(struct BuddyBlock);
     }
 
@@ -123,34 +118,13 @@ void *allocate(size_t size) {
 }
 
 void mergeBlocks(BuddyBlock **node) {
-    if (*node == NULL) {
-        return;
-    }
 
-    BuddyBlock *parent = NULL;
-
-    if (*node == (*node)->left) {
-        parent = (*node)->right;
-    } else {
-        parent = (*node)->left;
-    }
-
-    if (parent != NULL && parent->isFree && !parent->isSplit) {
-        (*node)->isFree = 1;
-        (*node)->isSplit = 0;
-        (*node)->left = NULL;
-        (*node)->right = NULL;
-        (*node)->size *= 2;
-
-        mergeBlocks(&parent);
-
-        *node = parent;
-    }
 }
+
 
 void deallocate(void *addr) {
     BuddyBlock *block = (BuddyBlock *)((uintptr_t)addr - sizeof(struct BuddyBlock));
-
+    currentAvailableMemory += block->size + sizeof(struct BuddyBlock);
     block->isFree = 1;
 
     mergeBlocks(&block);
@@ -179,6 +153,10 @@ void * reallocate(void * ptr, size_t newSize) {
     } else {
         return NULL;
     }
+}
+
+size_t getCurrentMemSize(){
+    return currentAvailableMemory;
 }
 
 size_t convertToPageSize(size_t size, size_t pageSize) {
