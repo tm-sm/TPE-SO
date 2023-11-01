@@ -148,24 +148,30 @@ int _pow(int base, int power) {
 }
 
 void _printDec(int value, int len, uint8_t padding0, char* buff) {
-    int digits=getDigits(value);
-    int zeros;
-    while(digits > len) {
-        //example: 4567 -> 567
-        int place = _pow(10, digits - 1);// place = 10^(4-1) = 1000
-        int num = value / place;        // num = 4567 / 1000 = 4
-        value = value - place * num;   // value = 4567 - (1000 * 4) = 567
-        digits--;
-        padding0=0;
+    char tempBuff[17];
+    int i = 0;
+    int isNegative = 0;
+    if (value < 0) {
+        isNegative = 1;
+        value = -value;
     }
-    if(len > 0 && padding0) {
-        //how many zeros need to be placed before writing the number
-        zeros = len - digits;
-        for(int i=0; i<zeros; i++) {
-            putChar('0');
+    while (value > 0) {
+        tempBuff[i++] = (char)((value % 10) + '0');
+        value /= 10;
+    }
+    while (i < len) {
+        if (padding0) {
+            tempBuff[i++] = '0';
+        } else {
+            tempBuff[i++] = ' ';
         }
     }
-    putStrn(itoa(value,buff,10));
+    if(isNegative) {
+        tempBuff[i++] = '-';
+    }
+    for(int j = i - 1; j >= 0; j--) {
+        putChar(tempBuff[j]);
+    }
 }
 
 void _printHex(uint64_t value, char* buff) {

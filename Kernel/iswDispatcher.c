@@ -29,6 +29,10 @@ uint64_t sys_is_process_alive(BASE_PARAMS); // code 14
 uint64_t sys_memory_manager(BASE_PARAMS); // code 15
 uint64_t sys_check_process_foreground(BASE_PARAMS); // code 16
 uint64_t sys_print_all_processes(BASE_PARAMS); // code 17
+uint64_t sys_process_priority(BASE_PARAMS); // code 18
+uint64_t sys_process_block(BASE_PARAMS); // code 19
+uint64_t sys_wait_for_children(BASE_PARAMS); // code 20
+
 extern uint64_t* current_regs();
 
 extern void _sti();
@@ -40,7 +44,8 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_wait, sys_sound, sys_nop, sys_is_char_pressed,
                                sys_create_process, sys_kill_process, sys_set_process_foreground,
                                sys_get_own_pid, sys_is_process_alive, sys_memory_manager,
-                               sys_check_process_foreground, sys_print_all_processes};
+                               sys_check_process_foreground, sys_print_all_processes,
+                               sys_process_priority, sys_process_block, sys_wait_for_children};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -276,5 +281,56 @@ uint64_t sys_check_process_foreground(BASE_PARAMS) {
 // returns= nothing
 uint64_t sys_print_all_processes(BASE_PARAMS) {
     listAllProcesses();
+    return 0;
+}
+
+// ID= 18
+// rsi= pid
+// rdx= 0 -> get || 1 -> set
+// rcx= value
+// returns= priority if rdx==get
+uint64_t sys_process_priority(BASE_PARAMS) {
+    switch(rdx) {
+        case 0:
+            return getPriorityFromPid((int)rsi);
+        case 1:
+            setProcessPriority((int)rsi, (int)rcx);
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
+// ID= 19
+// rsi= pid
+// rdx= 0 -> get || 1 -> set
+// rcx= if rdx==set 0 -> unblock || 1 -> block
+// returns= if rdx==get 0 -> unblocked || 1 -> blocked
+uint64_t sys_process_block(BASE_PARAMS) {
+    switch(rdx) {
+        case 0:
+            return getStateFromPid((int)rsi) == BLOCKED;
+        case 1:
+            if(rdx == 0) {
+                unblockProcess((int)rsi);
+            } else if(rdx == 1) {
+                blockProcess((int)rsi);
+            }
+            break;
+        default:
+            break;
+    }
+    return 0;
+}
+
+// ID= 20
+// rsi= 0 -> all children || !0 -> child with specific pid
+uint64_t sys_wait_for_children(BASE_PARAMS) {
+    if(rsi == 0) {
+        waitForChildren();
+    } else {
+        waitForChild((int)rsi);
+    }
     return 0;
 }

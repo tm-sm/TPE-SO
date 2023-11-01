@@ -7,7 +7,7 @@
 #define READY 1
 #define BLOCKED 2
 #define DEAD 3
-#define INIT_STACK_SIZE 4096
+#define INIT_STACK_SIZE 2048
 #define MAX_PROC 11 // 10 processes for the user + sentinel
 
 #define PROC_NAME_LENGTH 20
@@ -24,7 +24,7 @@ uint64_t switchProcess(uint64_t rsp);
 void selectNextProcess(int pid);
 
 //if started with ip = NULL, works as fork
-int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize, char* argv[]);
+int startProcess(void* ip, int priority, uint8_t foreground, const char* name, unsigned int stackSize, char* argv[]);
 int getPid(proc p);
 int getPriorityFromPid(int pid);
 int getPriority(proc p);
@@ -36,6 +36,15 @@ int getActiveProcessPid();
 void listAllProcesses();
 void removeFromFgStack(int pid);
 void addToFgStack(int pid);
+void blockCurrentProcess();
+void blockProcess(int pid);
+void unblockProcess(int pid);
+void setProcessPriority(int pid, int priority);
+void killProcessInForeground();
+
+void waitForChild(int pid);
+void waitForChildren();
+void notifyParent(int parentPid, int childPid);
 
 int isProcessInForeground(int pid);
 int isCurrentProcessInForeground();

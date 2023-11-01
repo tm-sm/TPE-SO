@@ -5,6 +5,10 @@
 #include <system.h>
 #include <commands.h>
 
+#define SENTINEL_PID 0
+#define INIT_PID 1
+#define SHELL_PID 2
+
 #define ARGS int argc, char* argv[]
 
 typedef int (*functionPtr)(ARGS);
@@ -17,6 +21,7 @@ struct EXECUTABLE {
     functionPtr program;
 }EXECUTABLE;
 
+//TODO agregar mensajes de error para parametros mal pasados
 
 typedef struct EXECUTABLE* exec;
 
@@ -25,7 +30,7 @@ extern void invalidOp();
 void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS),
-sh(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS);
+sh(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS), nice(ARGS), block(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -34,8 +39,11 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"time", "prints the current time", displayTime},
         &(struct EXECUTABLE){"date", "prints the current date", displayDate},
         &(struct EXECUTABLE){"sh", "runs the specified process", sh},
+        &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
+        &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
+        &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
         NULL
         };
 
@@ -49,13 +57,16 @@ static exec pArr[] = {
 };
 
 int callBuiltin(int argc, char* argv[]) {
-    if(argc >= 1) {
-        for(int i=0; bArr[i]!=NULL; i++) {
-            if(strcmp(bArr[i]->name, argv[0]) == 0) {
+    if (argc >= 1) {
+        for (int i = 0; bArr[i] != NULL; i++) {
+            if (strcmp(bArr[i]->name, argv[0]) == 0) {
                 return bArr[i]->program(argc, argv);
             }
         }
+        unknownCommand(argv[0]);
+        return 0;
     }
+    unknownCommand(" ");
     return 0;
 }
 
@@ -130,14 +141,43 @@ int displayDate(ARGS) {
 }
 
 int kill(ARGS) {
-    int pid = atoi(argv[1]);
-    killProcess(pid);
+    if(argc == 2) {
+        int pid = atoi(argv[1]);
+        if(pid == SENTINEL_PID || pid == INIT_PID || pid == SHELL_PID || pid < 0) {
+            printFormat("\nForbidden\n");
+            return -1;
+        }
+        killProcess(pid);
+    }
     return 0;
 }
 
 int ps(ARGS) {
     printAllProcesses();
     putChar('\n');
+    return 0;
+}
+
+int nice(ARGS) {
+    if(argc == 3) {
+        int pid = atoi(argv[1]);
+        int priority = atoi(argv[2]);
+        if(priority <= 3 && priority >= 0) {
+            setProcessPriority(pid, priority);
+        }
+    }
+    return 0;
+}
+
+int block(ARGS) {
+    if(argc == 2) {
+        int pid = atoi(argv[1]);
+        if(isProcessBlocked(pid)) {
+            unblockProcess(pid);
+        } else {
+            blockProcess(pid);
+        }
+    }
     return 0;
 }
 
@@ -188,7 +228,11 @@ int sh(ARGS) {
                     strcpy(arguments[k], argv[k+1]);
                 }
                 arguments[k] = NULL;
-                return createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, arguments);
+                int ret = createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, arguments);
+                if(fg == BACKGROUND) {
+                    return -1;
+                }
+                return ret;
             }
         }
         proc = argv[1];
@@ -199,12 +243,24 @@ int sh(ARGS) {
     return -1;
 }
 
+int loopProc(ARGS) {
+    while(1) {
+        wait(2000);
+        printFormat("\nHello from process %d!", getOwnPid());
+    }
+}
+
+int loop(ARGS) {
+    return createProcess(loopProc, HIGH, FOREGROUND, "loop", NULL);
+}
+
 int playBubbles(ARGS) {
     enableDoubleBuffering();
     bubbles();
     clearScreen();
     disableDoubleBuffering();
     exitProc();
+    return 0;
 }
 
 int playPong(ARGS) {
@@ -213,11 +269,13 @@ int playPong(ARGS) {
     clearScreen();
     disableDoubleBuffering();
     exitProc();
+    return 0;
 }
 
 int playBeep(ARGS) {
     play_beep(2000, 100);
     exitProc();
+    return 0;
 }
 
 int repeat(ARGS) {
@@ -225,4 +283,5 @@ int repeat(ARGS) {
         printFormat("\n%s ", argv[i]);
     }
     exitProc();
+    return 0;
 }

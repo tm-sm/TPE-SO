@@ -233,7 +233,6 @@ void welcome() {
 }
 
 void pause() {
-    char c;
     while(!getChar()) { }
 }
 

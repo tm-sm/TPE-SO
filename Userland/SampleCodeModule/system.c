@@ -14,10 +14,20 @@
 #define SYS_MEMORY_MANAGER 15
 #define SYS_CHECK_PROCESS_FOREGROUND 16
 #define SYS_PRINT_ALL_PROCESSES 17
+#define SYS_PROCESS_PRIORITY 18
+#define SYS_PROCESS_BLOCK 19
+#define SYS_WAIT_FOR_CHILDREN 20
 
 #define ALLOC_ID 0
 #define REALLOC_ID 1
 #define DEALLOC_ID 2
+
+#define BLOCK_GET 0
+#define BLOCK_SET 1
+#define BLOCK_BLOCK 1
+#define BLOCK_UNBLOCK 0
+#define PRIORITY_GET 0
+#define PRIORITY_SET 1
 
 extern uint64_t* current_regs();
 
@@ -54,8 +64,12 @@ int isProcessInForeground(int pid) {
     return (int)interrupt(SYS_CHECK_PROCESS_FOREGROUND, pid, 0, 0, 0, 0);
 }
 
+int getOwnPid() {
+    return (int)interrupt(SYS_GET_OWN_PID, 0, 0, 0, 0, 0);
+}
+
 void exitProc() {
-    int pid = (int)interrupt(SYS_GET_OWN_PID, 0, 0, 0, 0, 0);
+    int pid = getOwnPid();
     killProcess(pid);
 }
 
@@ -77,4 +91,31 @@ void dealloc(void* address) {
 
 void printAllProcesses() {
     interrupt(SYS_PRINT_ALL_PROCESSES, 0, 0 ,0 ,0, 0);
+}
+
+void setProcessPriority(int pid, int priority) {
+    interrupt(SYS_PROCESS_PRIORITY, pid, PRIORITY_SET, priority, 0, 0);
+}
+
+int isProcessBlocked(int pid) {
+    return (int)interrupt(SYS_PROCESS_BLOCK, pid, BLOCK_GET, 0, 0, 0);
+}
+
+void blockProcess(int pid) {
+    interrupt(SYS_PROCESS_BLOCK, pid, BLOCK_SET, BLOCK_BLOCK, 0, 0);
+}
+
+void unblockProcess(int pid) {
+    interrupt(SYS_PROCESS_BLOCK, pid, BLOCK_SET, BLOCK_UNBLOCK, 0, 0);
+}
+
+void waitForChildren() {
+    interrupt(SYS_WAIT_FOR_CHILDREN, 0, 0, 0, 0, 0);
+}
+
+void waitForChild(int pid) {
+    if(pid <= 2) {
+        return;
+    }
+    interrupt(SYS_WAIT_FOR_CHILDREN, pid, 0, 0, 0, 0);
 }

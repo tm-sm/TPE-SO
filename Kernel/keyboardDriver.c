@@ -2,6 +2,7 @@
 #include <keyboardDriver.h>
 #include <lib.h>
 #include <processManager.h>
+#include <time.h>
 
 extern unsigned char keydown();
 
@@ -10,6 +11,7 @@ extern unsigned char keydown();
 #define LCTRL 0x1D
 #define LALT 0x38
 #define CAPS_LOCK 0x3A
+#define C 0x2E
 
 #define F1 0x3B
 
@@ -22,6 +24,7 @@ static uint8_t shift = FALSE;
 static uint8_t ctrl = FALSE;
 static uint8_t alt = FALSE;
 static uint8_t caps_lock = FALSE;
+static uint8_t ctrlOperation = FALSE;
 
 static char keyBuffer = NO_INPUT;
 
@@ -104,6 +107,19 @@ void keyboard_handler(uint64_t* registers) {
     if(code & 0x80) {
         keyRelease = TRUE;
     }
+    if(ctrl && !ctrlOperation) {
+        ctrlOperation = TRUE;
+        switch(keycode) {
+            case C:
+                killProcessInForeground();
+                return;
+            default:
+                //continues
+        }
+    }else if(!ctrl){
+        ctrlOperation = FALSE;
+    }
+
     if(keycode == LCTRL) {
         ctrl = (keyRelease)?(FALSE):(TRUE);
     }
@@ -144,7 +160,7 @@ void gets(char * s) {
     int i = 0;
     char c;
     while((c=keyBuffer)!='\n') {
-        s[i] = c; // lee hasta el enter supuestamente
+        s[i] = c;
         i++;
     }
     s[i]='\0';

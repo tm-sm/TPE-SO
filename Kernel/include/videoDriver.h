@@ -8,19 +8,21 @@ typedef struct Color{
     uint8_t b;
 }Color;
 
-static struct Color WHITE = {255, 255, 255};
-static struct Color BLACK = {0, 0, 0};
-static struct Color RED = {255, 0, 0};
-static struct Color GREEN = {0, 255, 0};
-static struct Color BLUE = {0, 0, 255};
-static struct Color YELLOW = {255, 255, 0};
-static struct Color PINK = {255, 0, 255};
-static struct Color CYAN = {0, 255, 255};
-
+#define WHITE (struct Color){255, 255, 255}
+#define BLACK (struct Color){0, 0, 0}
+#define RED (struct Color){255, 0, 0}
+#define GREEN (struct Color){0, 255, 0}
+#define BLUE (struct Color){0, 0, 255}
+#define YELLOW (struct Color){255, 255, 0}
+#define PINK (struct Color){255, 0, 255}
+#define CYAN (struct Color){0, 255, 255}
 
 //DOUBLE BUFFERING OPTIONS
 void enableDoubleBuffering();
 void disableDoubleBuffering();
+void forceEnableDoubleBuffering();
+void forceDisableDoubleBuffering();
+int doubleBufferingEnabled();
 void drawBuffer();
 void clearBuffer();
 
@@ -49,6 +51,7 @@ void drawHexRectangle(uint32_t hexColor, uint32_t x, uint32_t y, uint32_t width,
 
 //UTILS
 void clearScreen();
+void forceClearScreen();
 void scrollCharArea();
 
 uint32_t getXCharSlots();

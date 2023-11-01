@@ -3,8 +3,6 @@
 
 static char* regs[]={"rax: ", "rbx: ", "rcx: ", "rdx: ", "rbp: ", "rdi: ", "rsi: ", " r8: ", " r9: ", "r10: ", "r11: ", "r12: ", "r13: ","r14: ", "r15: ", "rsp: ", "rip: "};
 
-static void exScreen(char* str, uint64_t* stack);
-
 void * memset(void * destination, int32_t c, uint64_t length)
 {
 	uint8_t chr = (uint8_t)c;

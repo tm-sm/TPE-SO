@@ -6,6 +6,17 @@
 #include <scheduler.h>
 #include <stddef.h>
 #include <fdManager.h>
+#include <time.h>
+
+typedef struct childNode* cNode;
+
+#define TRUE 1
+#define FALSE 0
+
+struct childNode {
+    int pid;
+    cNode next;
+}childNode;
 
 struct process {
     char pname[PROC_NAME_LENGTH + 1];
@@ -19,6 +30,10 @@ struct process {
     int stdout;
     char** argv;
     int argc;
+    int parentPid;
+    char waitingForChildren;
+    int waitingForChild;
+    cNode children;
 } process;
 
 proc processes[MAX_PROC] = {NULL};
@@ -33,6 +48,8 @@ uint8_t* prepare_process(uint8_t* stack, uint8_t* rip, int argc, char* argv[]);
 void interruptTick();
 int findFirstAvailablePid();
 int isPidValid(int pid);
+int addChildNode(int parentPid, int childPid);
+void removeChildNode(int parentPid, int childPid);
 
 int fgStack[MAX_PROC];
 int lastFgProc = -1;
@@ -42,7 +59,7 @@ void initializeProcessManager() {
     startProcess(&processSentinel, LOW, FOREGROUND, "sentinel", 256, NULL);
 }
 
-int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigned int stackSize, char* argv[]) {
+int startProcess(void* ip, int priority, uint8_t foreground, const char* name, unsigned int stackSize, char* argv[]) {
     int pid = findFirstAvailablePid();
 
     int argc = 0;
@@ -87,16 +104,31 @@ int startProcess(void* ip, int priority, uint8_t foreground, char* name, unsigne
     processes[pid]->totalMemory = (int)stackSize;
     processes[pid]->argv = argv;
     processes[pid]->argc = argc;
+    processes[pid]->children = NULL;
+    processes[pid]->waitingForChildren = FALSE;
+    processes[pid]->waitingForChild = FALSE;
 
     int fds[2];
 
     if (customPipe(fds) == -1) {
+        deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         return -1;
     }
 
     processes[pid]->stdin = fds[0];
     processes[pid]->stdout = fds[1];
+
+    processes[pid]->parentPid = currProc;
+    if(processes[pid]->parentPid >= 1) {
+        //the sentinel has no children
+        if(addChildNode(processes[pid]->parentPid, pid) == -1) {
+            //TODO liberar pipes
+            deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
+            deallocate(processes[pid]);
+            return -1;
+        }
+    }
 
     amount++;
 
@@ -128,7 +160,7 @@ int checkProcessHealth(int pid) {
     }
 
     //check if process needs more memory
-    int usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
+    uint64_t usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
     if( usedMemory > ((processes[pid]->totalMemory / 4) * 3)) {
         int oldTotalMemory = processes[pid]->totalMemory;
         int newTotalMemory = oldTotalMemory * 2;
@@ -156,7 +188,9 @@ uint64_t switchProcess(uint64_t rsp) {
     if(amount > 0 && currProc != nextProc && processes[nextProc] != NULL && processes[nextProc]->state == READY) {
         if(currProc != -1) {
             processes[currProc]->stackTrace = (uint8_t *) rsp;
-            processes[currProc]->state = READY;
+            if(processes[currProc]->state == RUNNING) {
+                processes[currProc]->state = READY;
+            }
         }
         currProc = nextProc;
         checkProcessHealth(currProc);
@@ -228,6 +262,7 @@ int getProcessPriority(int pid) {
     if(isPidValid(pid)) {
         return processes[pid]->priority;
     }
+    return UNDEFINED;
 }
 
 int isProcessInForeground(int pid) {
@@ -280,6 +315,13 @@ void killProcess(int pid) {
     }
     if (isPidValid(pid)) {
         int priority = processes[pid]->priority;
+
+        //because each children removes itself from the parent, c always points to the next child
+        for(cNode c = processes[pid]->children; c != NULL; c = processes[pid]->children) {
+            killProcess(c->pid);
+        }
+        removeChildNode(processes[pid]->parentPid, pid);
+        notifyParent(processes[pid]->parentPid, pid);
 
         closePipe(&processes[pid]->stdin);
         for(int i=0; i<processes[pid]->argc; i++) {
@@ -341,6 +383,12 @@ void listAllProcesses() {
             cPrintHex((uint64_t)processes[i]->stackTrace);
             cPrint(" | rbp: ");
             cPrintHex((uint64_t)processes[i]->stackTop);
+            cPrint(" |");
+            if(processes[i]->state == BLOCKED) {
+                cPrint(" BLOCKED");
+            } else {
+                cPrint(" UNBLOCKED");
+            }
         }
     }
 }
@@ -349,3 +397,123 @@ int isPidValid(int pid) {
     return pid < MAX_PROC && pid >= 0 && processes[pid] != NULL;
 }
 
+void unblockProcess(int pid) {
+    if(isPidValid(pid)){
+        processes[pid]->state = READY;
+    }
+}
+
+void blockProcess(int pid) {
+    if(pid == 0) {
+        return;
+    }
+    if(isPidValid(pid)) {
+        processes[pid]->state = BLOCKED;
+    }
+}
+
+void blockCurrentProcess() {
+    blockProcess(currProc);
+    interruptTick();
+}
+
+void killProcessInForeground() {
+    if(lastFgProc >= 0) {
+        if(doubleBufferingEnabled()) {
+            forceDisableDoubleBuffering(); // in case the fg process had double buffering enabled
+            forceClearScreen();
+            wait(55);
+        }
+        killProcess(fgStack[lastFgProc]);
+    }
+}
+
+//only called within procManager, no checks are performed
+int addChildNode(int parentPid, int childPid) {
+    cNode child = allocate(sizeof(childNode));
+    if(child == NULL) {
+        return -1;
+    }
+    child->pid = childPid;
+    child->next = processes[parentPid]->children;
+    processes[parentPid]->children = child;
+    return 0;
+}
+
+void removeChildNode(int parentPid, int childPid) {
+    if(parentPid == -1 || parentPid == 0) {
+        return;
+    }
+    cNode curr;
+    cNode prev;
+    curr = processes[parentPid]->children;
+    if(curr->pid == childPid) {
+        processes[parentPid]->children = curr->next;
+        return;
+    }
+    while(curr != NULL && curr->pid != childPid) {
+        prev = curr;
+        curr = curr->next;
+    }
+    if(curr == NULL) {
+        return;
+    }
+    prev->next = curr->next;
+    deallocate(curr);
+}
+
+void waitForChild(int pid) {
+    if(!isPidValid(currProc) || pid == 0) {
+        return;
+    }
+    //moves the child process to the front of the list,
+    //every time it's notified it checks if the first position's pid == pid
+    processes[currProc]->waitingForChildren = FALSE;
+
+    cNode curr;
+    cNode prev;
+    curr = processes[currProc]->children;
+
+    if(curr->pid == pid) {
+        processes[currProc]->waitingForChild = pid;
+    } else {
+        prev = curr;
+        curr = curr->next;
+        while(curr != NULL && curr->pid != pid) {
+            curr = curr->next;
+        }
+        if(curr == NULL) {
+            return;
+        }
+        processes[currProc]->waitingForChild = pid;
+        prev->next = curr->next;
+        curr->next = processes[currProc]->children;
+        processes[currProc]->children = curr;
+    }
+
+    while(processes[currProc]->children->pid == pid) {
+        blockCurrentProcess();
+    }
+    processes[currProc]->waitingForChild = FALSE;
+}
+
+void waitForChildren() {
+    if(isPidValid(currProc)) {
+        processes[currProc]->waitingForChildren = TRUE;
+        processes[currProc]->waitingForChild = FALSE;
+        while(processes[currProc]->children != NULL) {
+            blockCurrentProcess();
+        }
+        processes[currProc]->waitingForChildren = FALSE;
+    }
+}
+
+void notifyParent(int parentPid, int childPid) {
+    if(isPidValid(parentPid)) {
+        if(processes[parentPid]->waitingForChildren
+        || processes[parentPid]->waitingForChild == childPid) {
+            removeChildNode(parentPid, childPid);
+            unblockProcess(parentPid);
+        }
+    }
+}

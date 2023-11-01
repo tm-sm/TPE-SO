@@ -40,6 +40,14 @@ void setProcessForeground(int pid, int foreground);
 int isProcessInForeground(int pid);
 int isProcessAlive(int pid);
 void printAllProcesses();
+int getOwnPid();
 void exitProc();
+
+void setProcessPriority(int pid, int priority);
+int isProcessBlocked(int pid);
+void blockProcess(int pid);
+void unblockProcess(int pid);
+void waitForChildren();
+void waitForChild(int pid);
 
 #endif //TPE_ARQUI_SYSTEM_H
