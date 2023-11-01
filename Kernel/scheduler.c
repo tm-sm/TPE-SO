@@ -7,6 +7,7 @@
 typedef struct node{
     int pid;
     struct node * next;
+    int ticks;
 }node;
 
 void roundRobin();
@@ -34,19 +35,29 @@ void dumbSchedule() {
 void roundRobin() {
     node * aux = NULL;
     node * toRun = NULL;
+
     if(runningProc == NULL) {
         return;
     }
+
+    if(getStateFromPid(runningProc->pid) == RUNNING){
+        runningProc->ticks++;
+    }
+    
     for(int i = 0; i < 3;i++){
         if(getPriorityFromPid(runningProc->pid) == i){
             aux = runningProc;
             toRun = runningProc->next;
+           
         } else if(procs[i] != NULL){
             toRun = procs[i]->next;
             aux = procs[i];
-        }
+        } 
+        if(runningProc->ticks == 3){
+                lowerPriority(runningProc);
+            }
         if(aux != NULL && toRun != NULL) {
-            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
+            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {    
                 runningProc = toRun;
                 selectNextProcess(runningProc->pid);
                 return;
@@ -95,13 +106,11 @@ void removeNodefromPriority(node* n ,int p){
 }
 
 void lowerPriority(node* node){
-
     int nextpriority = getPriorityFromPid(node->pid);
+    node->ticks = 0;
     if(nextpriority==LOW)
         return;
-    removeNodefromPriority(node,nextpriority);
-    nextpriority++; //es raro sumar para bajarlo xd
-    addNodeToPriority(node,nextpriority);
+    setProcessPriority(node->pid,nextpriority+1);
     return;
 }
 
