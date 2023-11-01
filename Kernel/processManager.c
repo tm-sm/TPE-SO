@@ -334,15 +334,22 @@ void killProcess(int pid) {
         //the sentinel shouldn't be terminated
         return;
     }
+
     if (isPidValid(pid)) {
         int priority = processes[pid]->priority;
+        int parentPid = processes[pid]->parentPid;
+
+        if(lastFgProc >= 0 && fgStack[lastFgProc] == pid) {
+            forceDisableDoubleBuffering();
+            forceClearScreen();
+        }
 
         //because each children removes itself from the parent, c always points to the next child
         for(cNode c = processes[pid]->children; c != NULL; c = processes[pid]->children) {
             killProcess(c->pid);
         }
         removeChildNode(processes[pid]->parentPid, pid);
-        notifyParent(processes[pid]->parentPid, pid);
+
 
         closePipe(&processes[pid]->stdin);
         for(int i=0; i<processes[pid]->argc; i++) {
@@ -355,6 +362,7 @@ void killProcess(int pid) {
         removeFromFgStack(pid);
         removeFromScheduler(pid, priority);
         amount--;
+        notifyParent(parentPid, pid);
         if (pid == currProc) {
             interruptTick();
         }
@@ -440,14 +448,7 @@ void blockCurrentProcess() {
 }
 
 void killProcessInForeground() {
-    if(lastFgProc >= 0) {
-        if(doubleBufferingEnabled()) {
-            forceDisableDoubleBuffering(); // in case the fg process had double buffering enabled
-            forceClearScreen();
-            wait(55);
-        }
-        killProcess(fgStack[lastFgProc]);
-    }
+    killProcess(fgStack[lastFgProc]);
 }
 
 //only called within procManager, no checks are performed

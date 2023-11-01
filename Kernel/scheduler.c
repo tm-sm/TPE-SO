@@ -62,7 +62,6 @@ void roundRobin() {
             if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
                 runningProc = toRun;
                 selectNextProcess(runningProc->pid);
-                runningProc->ticks++;
                 return;
             }
             while (aux != toRun) {
