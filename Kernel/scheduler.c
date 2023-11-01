@@ -108,6 +108,7 @@ void removeNodefromPriority(node* n ,int p){
 
 void lowerPriority(node* node){
     int nextpriority = getPriorityFromPid(node->pid);
+    node->ticks = 0;
     if(nextpriority==LOW)
         return;
     setProcessPriority(node->pid,nextpriority+1);
