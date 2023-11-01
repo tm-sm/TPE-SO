@@ -421,6 +421,7 @@ int isPidValid(int pid) {
 void unblockProcess(int pid) {
     if(isPidValid(pid)){
         processes[pid]->state = READY;
+        interruptTick();
     }
 }
 
@@ -430,12 +431,12 @@ void blockProcess(int pid) {
     }
     if(isPidValid(pid)) {
         processes[pid]->state = BLOCKED;
+        interruptTick();
     }
 }
 
 void blockCurrentProcess() {
     blockProcess(currProc);
-    interruptTick();
 }
 
 void killProcessInForeground() {
@@ -537,4 +538,8 @@ void notifyParent(int parentPid, int childPid) {
             unblockProcess(parentPid);
         }
     }
+}
+
+void exitProc() {
+    killProcess(currProc);
 }

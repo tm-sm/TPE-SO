@@ -45,6 +45,7 @@ void killProcessInForeground();
 void waitForChild(int pid);
 void waitForChildren();
 void notifyParent(int parentPid, int childPid);
+void exitProc();
 
 int isProcessInForeground(int pid);
 int isCurrentProcessInForeground();

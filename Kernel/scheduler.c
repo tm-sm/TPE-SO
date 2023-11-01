@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <console.h>
 
+#define MAX_TICKS 3
 
 typedef struct node{
     int pid;
@@ -12,12 +13,14 @@ typedef struct node{
 
 void roundRobin();
 void dumbSchedule();
+void lowerPriority(node* node);
 
 
 static node * procs[3] = {NULL};
 static node * procsLast[3] = {NULL};
 
 static node * runningProc = NULL;
+static node sentinel = {0, NULL, 0};
 
 void scheduler() {
     roundRobin();
@@ -35,31 +38,31 @@ void dumbSchedule() {
 void roundRobin() {
     node * aux = NULL;
     node * toRun = NULL;
-
     if(runningProc == NULL) {
         return;
     }
 
-    if(getStateFromPid(runningProc->pid) == RUNNING){
+    if(runningProc->pid != SENTINEL_PID) {
         runningProc->ticks++;
+        if (runningProc->ticks >= MAX_TICKS) {
+            runningProc->ticks = 0;
+            lowerPriority(runningProc);
+        }
     }
-    
+
     for(int i = 0; i < 3;i++){
         if(getPriorityFromPid(runningProc->pid) == i){
             aux = runningProc;
             toRun = runningProc->next;
-           
         } else if(procs[i] != NULL){
             toRun = procs[i]->next;
             aux = procs[i];
-        } 
-        if(runningProc->ticks == 3){
-                lowerPriority(runningProc);
-            }
+        }
         if(aux != NULL && toRun != NULL) {
-            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {    
+            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
                 runningProc = toRun;
                 selectNextProcess(runningProc->pid);
+                runningProc->ticks++;
                 return;
             }
             while (aux != toRun) {
@@ -74,6 +77,7 @@ void roundRobin() {
     }
 
     if(getStateFromPid(runningProc->pid) != RUNNING) {
+        runningProc = &sentinel;
         selectNextProcess(SENTINEL_PID);
     }
 }
@@ -105,13 +109,12 @@ void removeNodefromPriority(node* n ,int p){
     return ;
 }
 
-void lowerPriority(node* node){
-    int nextpriority = getPriorityFromPid(node->pid);
+void lowerPriority(node* node) {
+    int priority = getPriorityFromPid(node->pid);
     node->ticks = 0;
-    if(nextpriority==LOW)
+    if(priority == LOW)
         return;
-    setProcessPriority(node->pid,nextpriority+1);
-    return;
+    setProcessPriority(node->pid, priority + 1);
 }
 
 void changeProcessPriority(int pid, int originalPriority, int newPriority) {
@@ -121,7 +124,6 @@ void changeProcessPriority(int pid, int originalPriority, int newPriority) {
     if(curr == prev && curr->pid == pid) {
         procs[originalPriority] = NULL;
         procsLast[originalPriority] = NULL;
-        return;
     } else {
 
         while((curr->pid != pid) && (curr != procsLast[originalPriority])) {
@@ -147,6 +149,7 @@ void addToScheduler(int pid) {
     int priority = getPriorityFromPid(pid);
     node * new = allocate(sizeof(node));
     new->pid = pid;
+    new->ticks = 0;
     addNodeToPriority(new, priority);
 }
 

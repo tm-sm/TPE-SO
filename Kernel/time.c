@@ -129,8 +129,8 @@ void removeFromWaitingList(int pid) {
     node prev;
     if(curr != NULL && curr->processPid == pid) {
         waitingList = curr->next;
-        unblockProcess(pid);
         deallocate(curr);
+        unblockProcess(pid);
         return;
     }
 
@@ -142,8 +142,8 @@ void removeFromWaitingList(int pid) {
     }
     if(curr != NULL) {
         prev->next = curr->next;
-        unblockProcess(pid);
         deallocate(curr);
+        unblockProcess(pid);
         return;
     }
 }

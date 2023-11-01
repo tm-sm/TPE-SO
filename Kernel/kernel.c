@@ -141,11 +141,8 @@ int main()
 */
 
     int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
-    while(isProcessAlive(shellPid));
-    killProcess(1);
-
-
+    waitForChildren();
     cPrint("[Exiting System]");
     cNewline();
-	return 0;
+	exitProc();
 }
