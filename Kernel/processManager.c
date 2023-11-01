@@ -70,6 +70,10 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     }
 
     if(pid == -1) {
+        for(int j=0; j<argc; j++) {
+            deallocate(argv[j]);
+        }
+        deallocate(argv);
         return -1;
     }
     if (ip == NULL) {
@@ -82,6 +86,10 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid] = (struct process*)allocate(sizeof(struct process));
 
     if(processes[pid] == NULL) {
+        for(int j=0; j<argc; j++) {
+            deallocate(argv[j]);
+        }
+        deallocate(argv);
         return -1;
     }
 
@@ -94,6 +102,10 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid]->stackTop = allocate(stackSize) + stackSize;
 
     if(processes[pid]->stackTop == NULL) {
+        for(int j=0; j<argc; j++) {
+            deallocate(argv[j]);
+        }
+        deallocate(argv);
         deallocate(processes[pid]);
         return -1;
     }
@@ -111,6 +123,10 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     int fds[2];
 
     if (customPipe(fds) == -1) {
+        for(int j=0; j<argc; j++) {
+            deallocate(argv[j]);
+        }
+        deallocate(argv);
         deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         return -1;
@@ -124,6 +140,11 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
         //the sentinel has no children
         if(addChildNode(processes[pid]->parentPid, pid) == -1) {
             //TODO liberar pipes
+            for(int j=0; j<argc; j++) {
+                deallocate(argv[j]);
+            }
+            deallocate(argv);
+            closePipe( &fds[0]);
             deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
             deallocate(processes[pid]);
             return -1;

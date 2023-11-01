@@ -39,7 +39,6 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"time", "prints the current time", displayTime},
         &(struct EXECUTABLE){"date", "prints the current date", displayDate},
         &(struct EXECUTABLE){"sh", "runs the specified process", sh},
-        &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
@@ -52,6 +51,7 @@ static exec pArr[] = {
         &(struct EXECUTABLE){"pong", "runs a virtual ping pong match against the computer", playPong},
         &(struct EXECUTABLE){"beep", "produces a 'beep' sound", playBeep},
         &(struct EXECUTABLE){"repeat", "prints all parameters passed", repeat},
+        &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
         NULL
 
 };
@@ -243,15 +243,11 @@ int sh(ARGS) {
     return -1;
 }
 
-int loopProc(ARGS) {
+int loop(ARGS) {
     while(1) {
         wait(2000);
         printFormat("\nHello from process %d!", getOwnPid());
     }
-}
-
-int loop(ARGS) {
-    return createProcess(loopProc, HIGH, FOREGROUND, "loop", NULL);
 }
 
 int playBubbles(ARGS) {
