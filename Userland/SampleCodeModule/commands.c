@@ -228,7 +228,11 @@ int sh(ARGS) {
                     strcpy(arguments[k], argv[k+1]);
                 }
                 arguments[k] = NULL;
-                return createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, arguments);
+                int ret = createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, arguments);
+                if(fg == BACKGROUND) {
+                    return -1;
+                }
+                return ret;
             }
         }
         proc = argv[1];

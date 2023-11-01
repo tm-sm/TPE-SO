@@ -31,6 +31,7 @@ uint64_t sys_check_process_foreground(BASE_PARAMS); // code 16
 uint64_t sys_print_all_processes(BASE_PARAMS); // code 17
 uint64_t sys_process_priority(BASE_PARAMS); // code 18
 uint64_t sys_process_block(BASE_PARAMS); // code 19
+uint64_t sys_wait_for_children(BASE_PARAMS); // code 20
 
 extern uint64_t* current_regs();
 
@@ -44,7 +45,7 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_create_process, sys_kill_process, sys_set_process_foreground,
                                sys_get_own_pid, sys_is_process_alive, sys_memory_manager,
                                sys_check_process_foreground, sys_print_all_processes,
-                               sys_process_priority, sys_process_block};
+                               sys_process_priority, sys_process_block, sys_wait_for_children};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -319,6 +320,17 @@ uint64_t sys_process_block(BASE_PARAMS) {
             break;
         default:
             break;
+    }
+    return 0;
+}
+
+// ID= 20
+// rsi= 0 -> all children || !0 -> child with specific pid
+uint64_t sys_wait_for_children(BASE_PARAMS) {
+    if(rsi == 0) {
+        waitForChildren();
+    } else {
+        waitForChild((int)rsi);
     }
     return 0;
 }

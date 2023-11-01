@@ -48,9 +48,7 @@ void shellLoop() {
             eraseCursor();
             putChar(c);
             if((pid = parseCommand(prompt)) != -1) {
-                if(isProcessInForeground(pid)) {
-                    while(isProcessAlive(pid));
-                }
+                waitForChild(pid);
             }
             clearPrompt();
             putChar('\n');

@@ -10,6 +10,9 @@
 
 typedef struct childNode* cNode;
 
+#define TRUE 1
+#define FALSE 0
+
 struct childNode {
     int pid;
     cNode next;
@@ -28,6 +31,8 @@ struct process {
     char** argv;
     int argc;
     int parentPid;
+    char waitingForChildren;
+    int waitingForChild;
     cNode children;
 } process;
 
@@ -99,6 +104,9 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid]->totalMemory = (int)stackSize;
     processes[pid]->argv = argv;
     processes[pid]->argc = argc;
+    processes[pid]->children = NULL;
+    processes[pid]->waitingForChildren = FALSE;
+    processes[pid]->waitingForChild = FALSE;
 
     int fds[2];
 
@@ -313,6 +321,7 @@ void killProcess(int pid) {
             killProcess(c->pid);
         }
         removeChildNode(processes[pid]->parentPid, pid);
+        notifyParent(processes[pid]->parentPid, pid);
 
         closePipe(&processes[pid]->stdin);
         for(int i=0; i<processes[pid]->argc; i++) {
@@ -451,4 +460,60 @@ void removeChildNode(int parentPid, int childPid) {
     }
     prev->next = curr->next;
     deallocate(curr);
+}
+
+void waitForChild(int pid) {
+    if(!isPidValid(currProc) || pid == 0) {
+        return;
+    }
+    //moves the child process to the front of the list,
+    //every time it's notified it checks if the first position's pid == pid
+    processes[currProc]->waitingForChildren = FALSE;
+
+    cNode curr;
+    cNode prev;
+    curr = processes[currProc]->children;
+
+    if(curr->pid == pid) {
+        processes[currProc]->waitingForChild = pid;
+    } else {
+        prev = curr;
+        curr = curr->next;
+        while(curr != NULL && curr->pid != pid) {
+            curr = curr->next;
+        }
+        if(curr == NULL) {
+            return;
+        }
+        processes[currProc]->waitingForChild = pid;
+        prev->next = curr->next;
+        curr->next = processes[currProc]->children;
+        processes[currProc]->children = curr;
+    }
+
+    while(processes[currProc]->children->pid == pid) {
+        blockCurrentProcess();
+    }
+    processes[currProc]->waitingForChild = FALSE;
+}
+
+void waitForChildren() {
+    if(isPidValid(currProc)) {
+        processes[currProc]->waitingForChildren = TRUE;
+        processes[currProc]->waitingForChild = FALSE;
+        while(processes[currProc]->children != NULL) {
+            blockCurrentProcess();
+        }
+        processes[currProc]->waitingForChildren = FALSE;
+    }
+}
+
+void notifyParent(int parentPid, int childPid) {
+    if(isPidValid(parentPid)) {
+        if(processes[parentPid]->waitingForChildren
+        || processes[parentPid]->waitingForChild == childPid) {
+            removeChildNode(parentPid, childPid);
+            unblockProcess(parentPid);
+        }
+    }
 }

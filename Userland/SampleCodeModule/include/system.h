@@ -47,5 +47,7 @@ void setProcessPriority(int pid, int priority);
 int isProcessBlocked(int pid);
 void blockProcess(int pid);
 void unblockProcess(int pid);
+void waitForChildren();
+void waitForChild(int pid);
 
 #endif //TPE_ARQUI_SYSTEM_H

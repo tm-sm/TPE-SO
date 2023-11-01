@@ -16,6 +16,7 @@
 #define SYS_PRINT_ALL_PROCESSES 17
 #define SYS_PROCESS_PRIORITY 18
 #define SYS_PROCESS_BLOCK 19
+#define SYS_WAIT_FOR_CHILDREN 20
 
 #define ALLOC_ID 0
 #define REALLOC_ID 1
@@ -106,4 +107,15 @@ void blockProcess(int pid) {
 
 void unblockProcess(int pid) {
     interrupt(SYS_PROCESS_BLOCK, pid, BLOCK_SET, BLOCK_UNBLOCK, 0, 0);
+}
+
+void waitForChildren() {
+    interrupt(SYS_WAIT_FOR_CHILDREN, 0, 0, 0, 0, 0);
+}
+
+void waitForChild(int pid) {
+    if(pid <= 2) {
+        return;
+    }
+    interrupt(SYS_WAIT_FOR_CHILDREN, pid, 0, 0, 0, 0);
 }
