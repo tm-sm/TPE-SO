@@ -12,6 +12,8 @@
 #include <processManager.h>
 #include <scheduler.h>
 #include <process.h>
+#include <fdManager.h>
+
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -112,18 +114,37 @@ int main()
     cPrint("[Kernel finished]");
     cNewline();
     cPrint("Initializing Process Manager");
+    initializeFileDescriptorManager();
     initializeProcessManager();
     startProcess(NULL, LOW, FOREGROUND, "init", 0, NULL); //pid=1
     cNewline();
 
+    static int pipe_fds[2];//4 5
+    static char pipe_buffer[50];
+    static char msg[] = "Message from custom pipe";
+
     /*
-    char** contents = (char**) allocate(sizeof(char*) * 3);
-    *contents = (char*) allocate(sizeof(char) * 3 * 7);
-    cPrint("b");
-     */
+    if (customPipe(pipe_fds) == 0) {
+
+        writeFD(pipe_fds[0], msg, 25);
+        cPrintDec(pipe_fds[0]);
+        cPrintDec(pipe_fds[1]);
+        size_t pipe_bytes_read = readFD(pipe_fds[1], pipe_buffer, 24);
+        pipe_buffer[pipe_bytes_read] = '\0';
+        cPrint(pipe_buffer);
+       // printFormat("Read from custom pipe: %s\n", pipe_buffer);
+
+        // Close the custom pipe
+        closePipe(pipe_fds);
+       // printFormat("Closed custom pipe\n");
+    }
+*/
 
     int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
     while(isProcessAlive(shellPid));
+    killProcess(1);
+
+
     cPrint("[Exiting System]");
     cNewline();
 	return 0;

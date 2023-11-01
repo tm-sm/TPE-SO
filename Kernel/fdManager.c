@@ -5,18 +5,18 @@
 
 #define MAX_FILE_DESCRIPTORS 128
 
-#define PIPE_BUFFER_SIZE 1024
+#define PIPE_BUFFER_SIZE 512
 
 // // TODO AGREGAR SEMAFOROS A LOS PIPES // //
 
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];
-    size_t inputFD;
-    size_t outputFD;
+    unsigned char inputFD;
+    unsigned char outputFD;
 };
 
 struct FileDescriptorEntry {
-    int fd;
+    unsigned char fd;
     void* data;
     char used;
 };
@@ -57,15 +57,6 @@ void closeFD(int fd) {
         manager->entries[fd].used = 0;
         manager->entries[fd].data = NULL;
     }
-}
-
-void killFDManager(){
-    int fd = 0;
-    while(fd < MAX_FILE_DESCRIPTORS){
-        fd++;
-        closeFD(fd);
-    }
-    deallocate(manager);
 }
 
 int customDup2(int oldFD, int newFD) {
