@@ -9,7 +9,9 @@ GLOBAL timer_wait
 GLOBAL get_ip
 GLOBAL prepare_process
 GLOBAL interruptTick
-
+GLOBAL enterSem
+GLOBAL exitSem
+EXTERN blockCurrentProcess
 EXTERN displayRegs
 EXTERN cPrintHex
 EXTERN cNewline
@@ -266,6 +268,19 @@ prepare_process:
 
 get_stack_trace:
     mov rax, rsp
+    ret
+enterSem:
+    mov rdx,1
+    xchg rdx,qword [rdi]
+    cmp rdx,0
+    je isfree
+    call blockCurrentProcess
+    jmp enterSem
+    isfree:
+    ret
+
+exitSem:
+    mov qword [rdi],0
     ret
 
 interruptTick:

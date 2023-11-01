@@ -17,7 +17,8 @@ typedef struct semaphore{
 
 sem semaphores[SEM_MAX_AMOUNT]={NULL};
 
-void exchange(int* lock);
+void enterSem(int* lock);
+void exitSem(int* lock);
 
 sem openSem(char* name,int value){//podria separarse esta funcion para crear y buscar
     for (int i=0;i<SEM_MAX_AMOUNT;i++){
@@ -38,7 +39,7 @@ sem openSem(char* name,int value){//podria separarse esta funcion para crear y b
 }
 
 void postSem(sem s){ //ver uso de xchg
-
+enterSem(&s->lock);
     s->value++;
     if(s->value>=0){
         for(int i=0;i<s->processesBlockedAmount;i++){
@@ -46,11 +47,12 @@ void postSem(sem s){ //ver uso de xchg
         }
         s->processesBlockedAmount=0;
     }
+exitSem(&s->lock);
 }
 
 
 void waitSem(sem s){
-    
+    enterSem(&s->lock);
     s->value--;
     int currentpid=getActiveProcessPid();
     if(s->value<0){
@@ -58,12 +60,13 @@ void waitSem(sem s){
         s->processesBlockedAmount++;
         blockCurrentProcess();
     }
-
+    exitSem(&s->lock);
 }
 void closeSem(char* name){
     for(int i=0;i<SEM_MAX_AMOUNT;i++){
         if(strcmp(semaphores[i]->name,name)==0){
-            deallocate(semaphores[i]);
+            if(semaphores[i]->processesBlockedAmount!=0)
+                deallocate(semaphores[i]);
             return ;
         }
     }
