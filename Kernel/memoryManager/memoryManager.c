@@ -1,6 +1,5 @@
 #include <memoryManager.h>
 #include "lib.h"
-//INTENTO DE ALOCAR MEMORIA ESTATICA DE MANERA DINAMICA (Para un manipular mas facilmente los strings)
 #define MEM_START_ADR 0x0000000000050000
 
 typedef struct BlockHeader {
@@ -16,11 +15,14 @@ typedef struct BlockHeader {
  * Un puntero al siguiente en la lista.
  */
 
+static size_t currentAvailableMemory;
 //Puntero estatico al comienzo del bloque de memoria
 static BlockHeader * first_block;
 
 void createMemoryManager() {
     // Inicializo la cabecera del bloque haciendo que apunte al comienzo del array memory
+    currentAvailableMemory = MEMORY_SIZE - sizeof(BlockHeader);
+
     first_block = (BlockHeader *)MEM_START_ADR;
     first_block->size = MEMORY_SIZE - sizeof(BlockHeader);
     first_block->is_free = 1;
@@ -54,6 +56,7 @@ void * allocate(size_t size) {
                 curr_block->is_free = 0;
             }
 
+            currentAvailableMemory -= curr_block->size;
             // Retorno un puntero a esta seccion del bloque
             return (void*)((char*)curr_block + sizeof(BlockHeader));
         }
@@ -85,6 +88,7 @@ void deallocate(void * ptr) {
         if (curr_block->is_free) {
             if (curr_block->next && curr_block->next->is_free) {
                 curr_block->size += sizeof(BlockHeader) + curr_block->next->size;
+                currentAvailableMemory += sizeof( struct BlockHeader) + curr_block->next->size;
                 curr_block->next = curr_block->next->next;
             }
         }
@@ -128,7 +132,9 @@ size_t convertToPageSize(size_t size, size_t pageSize){
     return pageSize*quotient + pageSize;
 }
 
-
+size_t getCurrentMemSize(){
+    return currentAvailableMemory;
+}
 /*todo
  * AgregarASyscall
  * ConvertirABuddySystem
