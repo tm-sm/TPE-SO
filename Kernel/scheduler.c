@@ -39,25 +39,26 @@ void roundRobin() {
     if(runningProc == NULL) {
         return;
     }
-
+    if(runningProc->ticks == 3){
+        lowerPriority(runningProc);
+        runningProc->ticks=0;
+    }
     if(getStateFromPid(runningProc->pid) == RUNNING){
         runningProc->ticks++;
     }
-    
+
     for(int i = 0; i < 3;i++){
         if(getPriorityFromPid(runningProc->pid) == i){
             aux = runningProc;
             toRun = runningProc->next;
-           
+
         } else if(procs[i] != NULL){
             toRun = procs[i]->next;
             aux = procs[i];
-        } 
-        if(runningProc->ticks == 3){
-                lowerPriority(runningProc);
-            }
+        }
+
         if(aux != NULL && toRun != NULL) {
-            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {    
+            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
                 runningProc = toRun;
                 selectNextProcess(runningProc->pid);
                 return;
