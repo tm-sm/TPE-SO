@@ -11,7 +11,7 @@ GLOBAL prepare_process
 GLOBAL interruptTick
 GLOBAL enterSem
 GLOBAL exitSem
-EXTERN blockCurrentProcess
+EXTERN interruptTick
 EXTERN displayRegs
 EXTERN cPrintHex
 EXTERN cNewline
@@ -269,18 +269,18 @@ prepare_process:
 get_stack_trace:
     mov rax, rsp
     ret
-enterSem:
-    mov rdx,1
-    xchg rdx,qword [rdi]
-    cmp rdx,0
+enterSem: ;semaforo de los semaforos
+    mov edx,1
+    xchg edx,dword [rdi]
+    cmp edx,0
     je isfree
-    call blockCurrentProcess
+    call interruptTick ;TODO cambiar a bloqueo de procesos y agregarlo a una lista auxiliar?
     jmp enterSem
     isfree:
     ret
 
 exitSem:
-    mov qword [rdi],0
+    mov dword [rdi],0
     ret
 
 interruptTick:
