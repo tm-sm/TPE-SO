@@ -281,3 +281,17 @@ int repeat(ARGS) {
     exitProc();
     return 0;
 }
+
+static int isVowel(char c){
+    return c == 'a' || c == 'A' || c == 'e'|| c == 'E' || c == 'i' || c == 'I' || c == 'o'|| c == 'O' || c == 'u' || c == 'U';
+}
+
+int filterUser(char * string){
+    for(int i = 0;i < strlen(string); i ++){
+        char c = string[i];
+        if(!isVowel(c)){
+            putChar(c);
+        }
+    }
+    return 0;
+}
