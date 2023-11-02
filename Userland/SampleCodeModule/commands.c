@@ -282,6 +282,18 @@ int repeat(ARGS) {
     return 0;
 }
 
+
+int wcCount(char * string){
+    int counter = 0;
+    for(int i = 0;i < strlen(string); i ++){
+        char c = string[i];
+            if(c == '\n'){
+                counter += 1;
+            }
+    }
+    return counter;
+}
+
 static int isVowel(char c){
     return c == 'a' || c == 'A' || c == 'e'|| c == 'E' || c == 'i' || c == 'I' || c == 'o'|| c == 'O' || c == 'u' || c == 'U';
 }
