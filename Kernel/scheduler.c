@@ -44,6 +44,7 @@ void roundRobin() {
     }
 
     if(runningProc->pid == SENTINEL_PID) {
+        //faster loop
         for(int i=0; i<3; i++) {
             if(procs[i] != NULL) {
                 aux = procs[i];
@@ -54,6 +55,7 @@ void roundRobin() {
                     selectNextProcess(runningProc->pid);
                     return;
                 }
+
                 toRun = toRun->next;
                 while(toRun != aux) {
                     if(getStateFromPid(toRun->pid) == READY) {

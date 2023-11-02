@@ -6,6 +6,8 @@
 
 extern unsigned char keydown();
 
+#define NONE -1
+
 #define LSHIFT 0x2A
 #define RSHIFT 0x36
 #define LCTRL 0x1D
@@ -27,6 +29,7 @@ static uint8_t caps_lock = FALSE;
 static uint8_t ctrlOperation = FALSE;
 
 static char keyBuffer = NO_INPUT;
+static int blockedProcess = NONE;
 
 const unsigned char kbdusNoShift[128] = {
     0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', '\t',
@@ -77,9 +80,14 @@ static void addToBuffer(uint8_t keycode) {
     uint8_t auxShift = (caps_lock && isLetter)?(!shift):(shift);
     if(auxShift) {
         keyBuffer = kbdusWithShift[keycode];
-        return;
+    } else {
+        keyBuffer = c;
     }
-    keyBuffer = c;
+    if(blockedProcess != NONE) {
+        int pid = blockedProcess;
+        blockedProcess = NONE;
+        unblockProcess(pid);
+    }
 }
 
 static void setKeyMap(uint8_t keycode, uint8_t condition) {
@@ -148,7 +156,8 @@ char getc(){
     if(isCurrentProcessInForeground()) {
         uint8_t c = readBuffer();
         while (c == NO_INPUT) {
-            keyboard_handler(0);
+            blockedProcess = getActiveProcessPid();
+            blockCurrentProcess();
             c = readBuffer();
         }
         return (char) c;

@@ -339,7 +339,7 @@ void killProcess(int pid) {
         int priority = processes[pid]->priority;
         int parentPid = processes[pid]->parentPid;
 
-        if(lastFgProc >= 0 && fgStack[lastFgProc] == pid) {
+        if(lastFgProc >= 0 && fgStack[lastFgProc] == pid && doubleBufferingEnabled()) {
             forceDisableDoubleBuffering();
             forceClearScreen();
         }
@@ -405,7 +405,7 @@ void listAllProcesses() {
                     cPrint(" | LOW PRIO");
                     break;
                 default:
-                    cPrint(" | INV PRIO");
+                    cPrint(" | N/A");
             }
             (fgStack[lastFgProc] == processes[i]->pid) ? (cPrint(" | FOREGROUND")) : (cPrint(" | BACKGROUND"));
             cPrint(" | rsp: ");
@@ -413,10 +413,14 @@ void listAllProcesses() {
             cPrint(" | rbp: ");
             cPrintHex((uint64_t)processes[i]->stackTop);
             cPrint(" |");
-            if(processes[i]->state == BLOCKED) {
-                cPrint(" BLOCKED");
+            if(processes[i]->pid != SENTINEL_PID) {
+                if (processes[i]->state == BLOCKED) {
+                    cPrint(" BLOCKED");
+                } else {
+                    cPrint(" UNBLOCKED");
+                }
             } else {
-                cPrint(" UNBLOCKED");
+                cPrint(" DORMANT");
             }
         }
     }

@@ -15,7 +15,7 @@
 
 struct waitNode {
     int remainingTicks;
-    int processPid;
+    int pid;
     struct waitNode* next;
 }waitNode;
 
@@ -100,7 +100,7 @@ void timer_handler() {
     node curr = waitingList;
     while(curr != NULL) {
         if(curr->remainingTicks <= 0) {
-            removeFromWaitingList(curr->processPid);
+            removeFromWaitingList(curr->pid);
         } else {
             curr->remainingTicks--;
         }
@@ -119,7 +119,7 @@ int seconds_elapsed() {
 void addToWaitingList(int totalTicks, int pid) {
     node n = allocate(sizeof(waitNode));
     n->remainingTicks = totalTicks;
-    n->processPid = pid;
+    n->pid = pid;
     n->next = waitingList;
     waitingList = n;
 }
@@ -127,7 +127,7 @@ void addToWaitingList(int totalTicks, int pid) {
 void removeFromWaitingList(int pid) {
     node curr = waitingList;
     node prev;
-    if(curr != NULL && curr->processPid == pid) {
+    if(curr != NULL && curr->pid == pid) {
         waitingList = curr->next;
         deallocate(curr);
         unblockProcess(pid);
@@ -136,7 +136,7 @@ void removeFromWaitingList(int pid) {
 
     prev = curr;
     curr = curr->next;
-    while(curr != NULL && curr->processPid != pid) {
+    while(curr != NULL && curr->pid != pid) {
         prev = curr;
         curr = curr->next;
     }

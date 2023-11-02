@@ -74,10 +74,8 @@ char getChar(){
     char c;
     //this prevents system calls from being blocked by the sys_read interruption
     while(1) {
-        if(keyPress()) {
-            interrupt(SYSREAD,(uint64_t)&c,0,0,0,0);
-            return c;
-        }
+        interrupt(SYSREAD,(uint64_t)&c,0,0,0,0);
+        return c;
     }
 }
 

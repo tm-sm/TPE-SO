@@ -51,8 +51,6 @@ void cPrintColoredChar(Color c, char character) {
     if (character == '\t') {
         //tab
         cPrintColoredChar(c, ' ');
-        cPrintColoredChar(c, ' ');
-        cPrintColoredChar(c, ' ');
         return;
     }
     putColoredCharAt(c, consoleCursor, height, character);
