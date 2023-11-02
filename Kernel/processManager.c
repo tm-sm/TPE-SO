@@ -56,7 +56,7 @@ int lastFgProc = -1;
 
 void initializeProcessManager() {
     //this should be started at the very beginning, so pid=0 == sentinel
-    startProcess(&processSentinel, LOW, FOREGROUND, "sentinel", 256, NULL);
+    startProcess(&processSentinel, UNDEFINED, FOREGROUND, "sentinel", 1024, NULL);
 }
 
 int startProcess(void* ip, int priority, uint8_t foreground, const char* name, unsigned int stackSize, char* argv[]) {
@@ -226,7 +226,7 @@ int getPriority(proc p) {
 }
 
 int getPriorityFromPid(int pid) {
-    if(!isPidValid(pid)) {
+    if(!isPidValid(pid) || pid == 0) {
         return UNDEFINED;
     }
     return processes[pid]->priority;

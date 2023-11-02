@@ -38,33 +38,61 @@ void dumbSchedule() {
 void roundRobin() {
     node * aux = NULL;
     node * toRun = NULL;
+
     if(runningProc == NULL) {
         return;
     }
 
-    if(runningProc->pid != SENTINEL_PID) {
-        runningProc->ticks++;
-        if (runningProc->ticks >= MAX_TICKS) {
-            runningProc->ticks = 0;
-            lowerPriority(runningProc);
+    if(runningProc->pid == SENTINEL_PID) {
+        for(int i=0; i<3; i++) {
+            if(procs[i] != NULL) {
+                aux = procs[i];
+                toRun = procs[i];
+
+                if(getStateFromPid(toRun->pid) == READY) {
+                    runningProc = toRun;
+                    selectNextProcess(runningProc->pid);
+                    return;
+                }
+                toRun = toRun->next;
+                while(toRun != aux) {
+                    if(getStateFromPid(toRun->pid) == READY) {
+                        runningProc = toRun;
+                        selectNextProcess(runningProc->pid);
+                        return;
+                    }
+                    toRun = toRun->next;
+                }
+            }
         }
     }
 
-    for(int i = 0; i < 3;i++){
-        if(getPriorityFromPid(runningProc->pid) == i){
+    runningProc->ticks++;
+    if(runningProc->ticks >= MAX_TICKS) {
+        runningProc->ticks = 0;
+        lowerPriority(runningProc);
+    }
+
+    for(int i=0; i<3; i++) {
+
+        if (getPriorityFromPid(runningProc->pid) == i) {
             aux = runningProc;
             toRun = runningProc->next;
-        } else if(procs[i] != NULL){
-            toRun = procs[i]->next;
+        } else if(procs[i] != NULL) {
+            toRun = procs[i];
             aux = procs[i];
         }
+
         if(aux != NULL && toRun != NULL) {
-            if (aux == toRun && getStateFromPid(toRun->pid) == READY) {
+
+            if(getStateFromPid(toRun->pid) == READY) {
                 runningProc = toRun;
                 selectNextProcess(runningProc->pid);
                 return;
             }
-            while (aux != toRun) {
+            toRun = toRun->next;
+
+            while(aux != toRun) {
                 if (getStateFromPid(toRun->pid) == READY) {
                     runningProc = toRun;
                     selectNextProcess(runningProc->pid);
