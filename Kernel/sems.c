@@ -42,10 +42,11 @@ void postSem(sem s){
     enterSem(&(s->lock));
     s->value++;
     if(s->value>0){
-        for(int i=0;i<s->processesBlockedAmount;i++){
-            unblockProcess(s->processesBlocked[i]);
+        if(s->processesBlockedAmount>0){
+            int pid=s->processesBlocked[s->processesBlockedAmount-1];
+            s->processesBlockedAmount--;
+            unblockProcess(pid);
         }
-        s->processesBlockedAmount=0;
     }
     exitSem(&(s->lock));
 }
@@ -59,6 +60,9 @@ void waitSem(sem s){
         s->processesBlockedAmount++;
         exitSem(&(s->lock));
         blockCurrentProcess();
+        enterSem(&(s->lock));
+        s->value--;
+        exitSem(&(s->lock));
     }
     else{
         s->value--;
