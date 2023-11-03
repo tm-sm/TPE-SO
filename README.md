@@ -4,7 +4,7 @@ This project builds upon the work started in a previous GitHub repository, where
 
 In this current phase of the project, we are concentrating on the following key features:
 
-- **Memory Manager:** Implementing a memory management system for efficient allocation and deallocation of memory resources.
+- **Memory Manager:** Implementing a memory management system for allocation and deallocation of dynamic memory.
 
 - **Multi-Process System:** Developing the infrastructure for managing multiple processes, enabling concurrent execution.
 
