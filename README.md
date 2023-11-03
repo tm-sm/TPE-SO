@@ -8,9 +8,9 @@ In this current phase of the project, we are concentrating on the following key 
 
 - **Multi-Process System:** Developing the infrastructure for managing multiple processes, enabling concurrent execution.
 
-- **Inter-Process Communication:** Establishing mechanisms for processes to communicate and share data.
+- **Inter-Process Communication:** Implementing pipes for process communication.
 
-- **Semaphores:** Implementing semaphores to manage shared resources and synchronize processes.
+- **Semaphores:** Implementing semaphores to synchronize processes.
 
 
 ## Getting Started ##
