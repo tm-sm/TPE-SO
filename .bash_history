@@ -63,3 +63,11 @@ tgdb
 quit
 quit docker
 exit
+cd root
+gdb
+gdb
+gdb
+gdb
+gdb
+gdb
+exit

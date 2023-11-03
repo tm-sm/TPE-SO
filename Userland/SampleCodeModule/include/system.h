@@ -34,6 +34,7 @@ int createProcess(void* ip, int priority, uint8_t foreground, char* name, char* 
 void* alloc(size_t size);
 void* realloc(void* address, size_t size);
 void dealloc(void* address);
+int getAvailableMemory();
 void killProcess(int pid);
 void setOwnForeground(int foreground);
 void setProcessForeground(int pid, int foreground);

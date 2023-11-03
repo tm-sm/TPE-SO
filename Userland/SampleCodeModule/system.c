@@ -18,9 +18,10 @@
 #define SYS_PROCESS_BLOCK 19
 #define SYS_WAIT_FOR_CHILDREN 20
 
-#define ALLOC_ID 0
-#define REALLOC_ID 1
-#define DEALLOC_ID 2
+#define ALLOC 0
+#define REALLOC 1
+#define DEALLOC 2
+#define GET_AVAILABLE_MEMORY 3
 
 #define BLOCK_GET 0
 #define BLOCK_SET 1
@@ -78,16 +79,21 @@ int isProcessAlive(int pid) {
 }
 
 void* alloc(size_t size) {
-    return (void*)interrupt(SYS_MEMORY_MANAGER, ALLOC_ID, 0, size, 0, 0);
+    return (void*)interrupt(SYS_MEMORY_MANAGER, ALLOC, 0, size, 0, 0);
 }
 
 void* realloc(void* address, size_t size) {
-    return (void*)interrupt(SYS_MEMORY_MANAGER, REALLOC_ID, (uint64_t)address, size, 0, 0);
+    return (void*)interrupt(SYS_MEMORY_MANAGER, REALLOC, (uint64_t)address, size, 0, 0);
 }
 
 void dealloc(void* address) {
-    interrupt(SYS_MEMORY_MANAGER, DEALLOC_ID, (uint64_t)address, 0, 0, 0);
+    interrupt(SYS_MEMORY_MANAGER, DEALLOC, (uint64_t)address, 0, 0, 0);
 }
+
+int getAvailableMemory() {
+    return (int)interrupt(SYS_MEMORY_MANAGER, GET_AVAILABLE_MEMORY, 0, 0, 0, 0);
+}
+
 
 void printAllProcesses() {
     interrupt(SYS_PRINT_ALL_PROCESSES, 0, 0 ,0 ,0, 0);

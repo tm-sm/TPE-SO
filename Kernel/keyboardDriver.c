@@ -155,7 +155,7 @@ void keyboard_handler(uint64_t* registers) {
 char getc(){
     if(isCurrentProcessInForeground()) {
         uint8_t c = readBuffer();
-        while (c == NO_INPUT) {
+        while (c == NO_INPUT && blockedProcess == NONE) {
             blockedProcess = getActiveProcessPid();
             blockCurrentProcess();
             c = readBuffer();

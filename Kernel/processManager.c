@@ -7,6 +7,7 @@
 #include <stddef.h>
 #include <fdManager.h>
 #include <time.h>
+#include "interrupts.h"
 
 typedef struct childNode* cNode;
 
@@ -330,6 +331,8 @@ int isProcessAlive(int pid) {
 }
 
 void killProcess(int pid) {
+    _cli();
+
     if(pid == 0) {
         //the sentinel shouldn't be terminated
         return;
@@ -348,6 +351,7 @@ void killProcess(int pid) {
         for(cNode c = processes[pid]->children; c != NULL; c = processes[pid]->children) {
             killProcess(c->pid);
         }
+        _cli();
         removeChildNode(processes[pid]->parentPid, pid);
 
 
@@ -367,6 +371,7 @@ void killProcess(int pid) {
             interruptTick();
         }
     }
+    _sti();
 }
 
 int findFirstAvailablePid() {

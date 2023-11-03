@@ -29,7 +29,7 @@ extern void invalidOp();
 
 void unknownCommand(char* str);
 
-int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS),
+int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS), nice(ARGS), block(ARGS);
 
 static exec bArr[] = {
@@ -38,6 +38,7 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"test-invalidop", "runs an invalid op", testException6},
         &(struct EXECUTABLE){"time", "prints the current time", displayTime},
         &(struct EXECUTABLE){"date", "prints the current date", displayDate},
+        &(struct EXECUTABLE){"mem", "prints available memory in bytes", mem},
         &(struct EXECUTABLE){"sh", "runs the specified process", sh},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
@@ -137,6 +138,11 @@ int displayTime(ARGS) {
 int displayDate(ARGS) {
     printDate();
     putChar('\n');
+    return 0;
+}
+
+int mem(ARGS) {
+    printFormat("\nAvailable Memory:\n%d bytes\n", getAvailableMemory());
     return 0;
 }
 

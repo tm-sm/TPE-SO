@@ -253,7 +253,7 @@ uint64_t sys_is_process_alive(BASE_PARAMS) {
 }
 
 // ID= 15
-// rsi= 0 -> allocate || 1 -> reallocate || 2 -> deallocate
+// rsi= 0 -> allocate || 1 -> reallocate || 2 -> deallocate || 3 -> get available memory
 // rdx= memory address for reallocate and deallocate
 // rcx= size for allocate and reallocate
 // returns= memory address for allocate and reallocate, 0 for deallocate
@@ -265,6 +265,8 @@ uint64_t sys_memory_manager(BASE_PARAMS) {
             return (uint64_t) reallocate((void*)rdx, rcx);
         case 2:
             deallocate((void*)rdx);
+        case 3:
+            return getCurrentMemSize();
         default:
             return 0;
     }
