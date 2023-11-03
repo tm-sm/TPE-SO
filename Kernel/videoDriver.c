@@ -57,7 +57,7 @@ VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 8
-#define SIZE_MULT 2
+#define SIZE_MULT 1
 
 #define WIDTH_PADDING 2
 #define HEIGHT_PADDING 6
