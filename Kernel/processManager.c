@@ -42,7 +42,6 @@ static int amount = 0;
 static int currProc = -1;
 static int nextProc = -1;
 
-//TODO checkear que pid es valido antes de hacer operaciones
 
 uint8_t* get_ip();
 uint8_t* prepare_process(uint8_t* stack, uint8_t* rip, int argc, char* argv[]);
@@ -140,7 +139,6 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     if(processes[pid]->parentPid >= 1) {
         //the sentinel has no children
         if(addChildNode(processes[pid]->parentPid, pid) == -1) {
-            //TODO liberar pipes
             for(int j=0; j<argc; j++) {
                 deallocate(argv[j]);
             }

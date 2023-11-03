@@ -26,15 +26,6 @@ void scheduler() {
     roundRobin();
 }
 
-void dumbSchedule() {
-    //TODO sacarlo para la entrega, es mas debug
-    //for testing purposes
-    if(runningProc != NULL) {
-        runningProc = runningProc->next;
-        selectNextProcess(runningProc->pid);
-    }
-}
-
 void roundRobin() {
     node * aux = NULL;
     node * toRun = NULL;

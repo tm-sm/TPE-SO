@@ -57,16 +57,16 @@ VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
 #define CHAR_WIDTH 8
 #define CHAR_HEIGHT 8
-#define SIZE_MULT 1
+#define SIZE_MULT 2
 
 #define WIDTH_PADDING 2
 #define HEIGHT_PADDING 6
 
-#define XDIM 96
-#define YDIM 48
-
 #define X_MARGIN 32
 #define Y_MARGIN 48
+
+#define XDIM ((((SCREEN_WIDTH) / CHAR_WIDTH) - X_MARGIN) / SIZE_MULT)
+#define YDIM (48 / SIZE_MULT)
 
 #define TRUE 1
 #define FALSE 0
@@ -116,8 +116,8 @@ void clearBuffer() {
 
 void scrollCharArea() {
     //currently only scrolls up the area reserved by the chars, excluding the margins
-    uint32_t vPixels = CHAR_HEIGHT + HEIGHT_PADDING;
-    uint64_t xLen = (XDIM * (CHAR_WIDTH + WIDTH_PADDING)) * (VBE_mode_info->bpp / 8);
+    uint32_t vPixels = (CHAR_HEIGHT + HEIGHT_PADDING) * SIZE_MULT;
+    uint64_t xLen = (XDIM * (CHAR_WIDTH + WIDTH_PADDING) * SIZE_MULT) * (VBE_mode_info->bpp / 8);
     //goes to the first pixel in the char area
     uint64_t currMem = VBE_mode_info->framebuffer + (VBE_mode_info->bpp/8) * (X_MARGIN + VBE_mode_info->width * Y_MARGIN);
     uint64_t offset = VBE_mode_info->width * vPixels * (VBE_mode_info->bpp / 8);
@@ -293,10 +293,10 @@ void _drawChar(Color c, uint32_t xPixel, uint32_t yPixel, unsigned char characte
             if(chr[j] & (1<<i)) {
                 //it draws rectangles in case size_mult > 1, which is currently not supported
                 //this was left as it is easier to adapt it in case it is supported again
-                drawColoredRectangle(c, (xPixel + i) * SIZE_MULT, (yPixel + j) * SIZE_MULT, SIZE_MULT, SIZE_MULT);
+                drawColoredRectangle(c, (xPixel + (i * SIZE_MULT)), (yPixel + (j * SIZE_MULT)), SIZE_MULT, SIZE_MULT);
             }
             else {
-                drawColoredRectangle(BLACK, (xPixel + i) * SIZE_MULT, (yPixel + j) * SIZE_MULT, SIZE_MULT, SIZE_MULT);
+                drawColoredRectangle(BLACK, (xPixel + (i * SIZE_MULT)), (yPixel + (j * SIZE_MULT)), SIZE_MULT, SIZE_MULT);
                 //turns the pixel "off"
             }
         }
@@ -307,8 +307,8 @@ void putColoredCharAt(Color c, uint32_t x, uint32_t y, char character) {
     if (x > XDIM || y > YDIM || x < 0 || y < 0) {
         return;
     }
-    uint32_t xCoord = (x * (CHAR_WIDTH + WIDTH_PADDING)) + X_MARGIN;
-    uint32_t yCoord = (y * (CHAR_HEIGHT + HEIGHT_PADDING)) + Y_MARGIN;
+    uint32_t xCoord = (x * (CHAR_WIDTH + WIDTH_PADDING) * SIZE_MULT) + X_MARGIN;
+    uint32_t yCoord = (y * (CHAR_HEIGHT + HEIGHT_PADDING) * SIZE_MULT) + Y_MARGIN;
     _drawChar(c, xCoord, yCoord, character);
 }
 

@@ -115,7 +115,6 @@ void printFormat(const char* format, ...) {
                     break;
                 }
                 case 'x':{
-                    format++;
                     uint64_t value =va_arg(args,uint64_t);
                     _printHex(value, buff);
                     break;
