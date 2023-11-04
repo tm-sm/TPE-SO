@@ -4,6 +4,9 @@
 #include <memoryManager.h>
 #include <scheduler.h>
 
+#define TRUE 1
+#define FALSE 0
+
 #define SECONDS 0X00
 #define MINUTES 0X02
 #define HOURS 0x04
@@ -25,6 +28,8 @@ static node waitingList = NULL;
 
 void addToWaitingList(int ticks, int pid);
 void removeFromWaitingList(int pid);
+
+char userInterrupted = FALSE;
 
 extern unsigned char clock(unsigned char mode);
 
@@ -96,16 +101,19 @@ void dateToStr(char * dest){
 static unsigned long ticks = 0;
 
 void timer_handler() {
-    ticks++;
-    node curr = waitingList;
-    while(curr != NULL) {
-        if(curr->remainingTicks <= 0) {
-            removeFromWaitingList(curr->pid);
-        } else {
-            curr->remainingTicks--;
+    if(userInterrupted == FALSE) {
+        ticks++;
+        node curr = waitingList;
+        while(curr != NULL) {
+            if(curr->remainingTicks <= 0) {
+                removeFromWaitingList(curr->pid);
+            } else {
+                curr->remainingTicks--;
+            }
+            curr = curr->next;
         }
-        curr = curr->next;
     }
+    userInterrupted = FALSE;
 }
 
 int ticks_elapsed() {
@@ -153,6 +161,10 @@ void wait(uint64_t milliseconds) {
     int totalTicks = (int)(milliseconds / TICK_MS);
     addToWaitingList(totalTicks, pid);
     blockCurrentProcess();
+}
+
+void raiseUserInterruptedFlag() {
+    userInterrupted = TRUE;
 }
 
 

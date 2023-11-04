@@ -1,10 +1,12 @@
 #include <console.h>
 #include <processManager.h>
+#include <interrupts.h>
 
 
 void processSentinel() {
-    cPrint("Sentinel process started");
-    while(1);
+    while(1) {
+        _hlt();
+    }
 }
 
 void processHello() {

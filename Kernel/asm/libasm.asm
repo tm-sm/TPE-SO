@@ -16,6 +16,7 @@ EXTERN displayRegs
 EXTERN cPrintHex
 EXTERN cNewline
 EXTERN roundRobin
+EXTERN raiseUserInterruptedFlag
 
 section .text
 
@@ -284,5 +285,6 @@ exitSem:
     ret
 
 interruptTick:
+    call raiseUserInterruptedFlag
     int 20h
     ret
