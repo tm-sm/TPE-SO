@@ -10,7 +10,7 @@ void keyboard_handler(uint64_t *registers);
 uint8_t keyPressed();
 
 // gets char, from the keyboard
-void gets(char * s);
+int gets(char * s, size_t bytes);
 
 // gets string, from the keyboard
 char getc();
