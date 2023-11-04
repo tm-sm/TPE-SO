@@ -3,14 +3,20 @@
 #include <sems.h>
 #include <memoryManager.h>
 #include <utils.h>
+#include <console.h>
+#include <keyboardDriver.h>
 
 #define MAX_FILE_DESCRIPTORS 128
 #define PIPE_BUFFER_SIZE 128
+#define STDOUT 1
+#define STDIN 0
 
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];
+
     size_t readingPos;
     size_t writingPos;
+
     char readSemaphore[24];
     char writeSemaphore[24];
 };
@@ -32,6 +38,9 @@ void initializeFileDescriptorManager() {
     for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
         manager->entries[i].used = 0;
     }
+
+    openFD(NULL); //0 STDIN
+    openFD(NULL); //1 STDOUT
 }
 
 int openFD(void* data) {
@@ -84,15 +93,13 @@ int customPipe(int fd[2]) {
     return 0;
 }
 
-void closePipe(int pipeFD[2]) {
-    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD[0]);
+void closePipe(int pipeFD) {
+    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD);
 
     closeSem(pipe->readSemaphore);
     closeSem(pipe->writeSemaphore);
 
     deallocate(pipe);
-    closeFD(pipeFD[0]);
-    closeFD(pipeFD[1]);
 }
 
 int redirectPipe(int oldFd, int newFd){
@@ -119,7 +126,6 @@ int redirectPipe(int oldFd, int newFd){
 size_t readP(int pipeFd[2], void* buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
 
-    while (1) {
         waitSem(pipe->readSemaphore);
 
         size_t bytesToRead = 0;
@@ -138,13 +144,12 @@ size_t readP(int pipeFd[2], void* buff, size_t bytes) {
         }
 
         return bytesToRead;
-    }
 }
 
 size_t writeP(int pipeFd[2], const void* buff, size_t bytes) {
+
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
 
-    while (1) {
         waitSem(pipe->writeSemaphore);
 
         size_t bytesWritten = 0;
@@ -164,5 +169,5 @@ size_t writeP(int pipeFd[2], const void* buff, size_t bytes) {
         }
 
         return bytesWritten;
-    }
+
 }

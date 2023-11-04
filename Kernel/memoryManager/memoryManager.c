@@ -1,10 +1,12 @@
 #include <memoryManager.h>
+#include <processManager.h>
 #include "lib.h"
 #define MEM_START_ADR 0x0000000000050000
 
 typedef struct BlockHeader {
     size_t size;
     size_t is_free;
+    int pid;
     struct BlockHeader *next;
 }BlockHeader;
 
@@ -26,6 +28,7 @@ void createMemoryManager() {
     first_block = (BlockHeader *)MEM_START_ADR;
     first_block->size = MEMORY_SIZE - sizeof(BlockHeader);
     first_block->is_free = 1;
+    first_block->pid = getActiveProcessPid();
     first_block->next = NULL;
 }
 
@@ -51,7 +54,7 @@ void * allocate(size_t size) {
                 curr_block->size = pageTBU;
                 curr_block->is_free = 0;
                 curr_block->next = new_block;
-
+                curr_block->pid = getActiveProcessPid();
             } else {  //tiene el espacio justo para este bloque => lo reservo
                 curr_block->is_free = 0;
             }
@@ -98,6 +101,18 @@ void deallocate(void * ptr) {
         }
         //paso al siguiente
         curr_block = curr_block->next;
+    }
+}
+
+void deallocateAllProcessRelatedMem(int pid){
+    BlockHeader * current = first_block;
+
+    while(current != NULL){
+        if(current->pid == pid){
+            deallocate(current + sizeof(BlockHeader));
+        }
+
+        current = current->next;
     }
 }
 

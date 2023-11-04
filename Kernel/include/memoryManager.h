@@ -15,3 +15,5 @@ void * reallocate(void * ptr, size_t newSize);
 size_t convertToPageSize(size_t size, size_t pageSize);
 
 size_t getCurrentMemSize();
+
+void deallocateAllProcessRelatedMem(int pid);
