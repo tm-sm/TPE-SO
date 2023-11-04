@@ -34,36 +34,12 @@ void roundRobin() {
         return;
     }
 
-    if(runningProc->pid == SENTINEL_PID) {
-        //faster loop
-        for(int i=0; i<3; i++) {
-            if(procs[i] != NULL) {
-                aux = procs[i];
-                toRun = procs[i];
-
-                if(getStateFromPid(toRun->pid) == READY) {
-                    runningProc = toRun;
-                    selectNextProcess(runningProc->pid);
-                    return;
-                }
-
-                toRun = toRun->next;
-                while(toRun != aux) {
-                    if(getStateFromPid(toRun->pid) == READY) {
-                        runningProc = toRun;
-                        selectNextProcess(runningProc->pid);
-                        return;
-                    }
-                    toRun = toRun->next;
-                }
-            }
+    if(runningProc->pid != SENTINEL_PID) {
+        runningProc->ticks++;
+        if (runningProc->ticks >= MAX_TICKS) {
+            runningProc->ticks = 0;
+            lowerPriority(runningProc);
         }
-    }
-
-    runningProc->ticks++;
-    if(runningProc->ticks >= MAX_TICKS) {
-        runningProc->ticks = 0;
-        lowerPriority(runningProc);
     }
 
     for(int i=0; i<3; i++) {

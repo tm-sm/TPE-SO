@@ -318,9 +318,9 @@ uint64_t sys_process_block(BASE_PARAMS) {
         case 0:
             return getStateFromPid((int)rsi) == BLOCKED;
         case 1:
-            if(rdx == 0) {
+            if(rcx == 0) {
                 unblockProcess((int)rsi);
-            } else if(rdx == 1) {
+            } else if(rcx == 1) {
                 blockProcess((int)rsi);
             }
             break;
