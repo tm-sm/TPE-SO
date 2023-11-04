@@ -42,6 +42,9 @@ void unblockProcess(int pid);
 void setProcessPriority(int pid, int priority);
 void killProcessInForeground();
 
+int getStdinFd(int pid);
+int getStdoutFd(int pid);
+
 void waitForChild(int pid);
 void waitForChildren();
 void notifyParent(int parentPid, int childPid);
