@@ -120,20 +120,8 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid]->waitingForChildren = FALSE;
     processes[pid]->waitingForChild = FALSE;
 
-    int fd[2];
-
-    if (customPipe(fd) == -1) {
-        for(int j=0; j<argc; j++) {
-            deallocate(argv[j]);
-        }
-        deallocate(argv);
-        deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
-        deallocate(processes[pid]);
-        return -1;
-    }
-
-    processes[pid]->stdin = fd[0];
-    processes[pid]->stdout = fd[1];
+    processes[pid]->stdin = openFD(NULL);
+    processes[pid]->stdout = openFD(NULL);
 
     processes[pid]->parentPid = currProc;
     if(processes[pid]->parentPid >= 1) {
@@ -143,7 +131,6 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
                 deallocate(argv[j]);
             }
             deallocate(argv);
-            closePipe(fd);
             deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
             deallocate(processes[pid]);
             return -1;
@@ -374,7 +361,11 @@ void killProcess(int pid) {
         removeChildNode(processes[pid]->parentPid, pid);
 
 
-        closePipe(&processes[pid]->stdin);
+        closePipe(processes[pid]->stdin);
+        closePipe(processes[pid]->stdout);
+
+        closeFD(processes[pid]->stdin);
+        closeFD(processes[pid]->stdout);
         for(int i=0; i<processes[pid]->argc; i++) {
             deallocate(processes[pid]->argv[i]);
         }

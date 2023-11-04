@@ -10,7 +10,7 @@ void closeFD(int fd);
 
 int customPipe(int fd[2]);
 
-void closePipe(int pipeFD[2]);
+void closePipe(int pipeFD);
 
 int redirectPipe(int oldfd, int newfd);
 
