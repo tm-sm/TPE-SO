@@ -62,6 +62,10 @@ void closeFD(int fd) {
 int customPipe(int fd[2]) {
     struct CustomPipe* pipe = (struct CustomPipe*)allocate(sizeof(struct CustomPipe));
 
+    if(pipe == NULL){
+        return -1;
+    }
+
     pipe->readingPos = 0;
     pipe->writingPos = 0;
 
