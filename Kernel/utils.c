@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stddef.h>
 
 uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 {
@@ -44,5 +45,22 @@ char * strcpy(char* dest, const char* src) {
     int i = 0;
     while ((dest[i] = src[i])) i++;
 
+    return dest;
+}
+
+
+size_t strlen(const char* str) {
+    size_t len = 0;
+    while(str[len]) len++;
+    return len;
+}
+
+char * strcat(char* dest, const char* src) {
+    size_t dest_len = strlen(dest);
+    int i = 0;
+    while(src[i] != '\0'){
+        dest[dest_len++] = src[i++];
+    }
+    dest[dest_len] = '\0';
     return dest;
 }
