@@ -6,6 +6,7 @@
 #include <sound.h>
 #include <scheduler.h>
 #include <processManager.h>
+#include <sems.h>
 #define BASE_PARAMS uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9
 #define COMPLETE_PARAMS uint64_t rdi, BASE_PARAMS
 
@@ -32,8 +33,11 @@ uint64_t sys_print_all_processes(BASE_PARAMS); // code 17
 uint64_t sys_process_priority(BASE_PARAMS); // code 18
 uint64_t sys_process_block(BASE_PARAMS); // code 19
 uint64_t sys_wait_for_children(BASE_PARAMS); // code 20
+uint64_t sys_open_sem(BASE_PARAMS); // code 21
+uint64_t sys_post_sem(BASE_PARAMS); // code 22
+uint64_t sys_wait_sem(BASE_PARAMS); // code 23
+uint64_t sys_destroy_sem(BASE_PARAMS); //code 24
 
-extern uint64_t* current_regs();
 
 extern void _sti();
 
@@ -45,7 +49,7 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_create_process, sys_kill_process, sys_set_process_foreground,
                                sys_get_own_pid, sys_is_process_alive, sys_memory_manager,
                                sys_check_process_foreground, sys_print_all_processes,
-                               sys_process_priority, sys_process_block, sys_wait_for_children};
+                               sys_process_priority, sys_process_block, sys_wait_for_children,sys_open_sem,sys_post_sem,sys_wait_sem,sys_destroy_sem,};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -336,3 +340,29 @@ uint64_t sys_wait_for_children(BASE_PARAMS) {
     }
     return 0;
 }
+// ID=21
+// rsi=semaphore name
+// rdx= semaphore value
+// returns 1 if a semaphore was created, 2 if it already exists, 0 if it failed
+uint64_t sys_open_sem(BASE_PARAMS){
+    return (uint64_t)openSem((char*)rsi,(int)rdx);
+}
+// ID=22
+// rsi= semaphore name returns 1 if it was posted, 0 if it failed
+uint64_t sys_post_sem(BASE_PARAMS){
+   return (uint64_t)postSem((char*)rsi);
+
+}
+
+// ID=23
+//rsi= semaphore name returns 1 if it was posted, 0 if it failed
+uint64_t sys_wait_sem(BASE_PARAMS){
+    return (uint64_t)waitSem((char*)rsi);
+
+}
+// ID =24
+//rsi = semaphre name returns 1 if it was closed, 0 if it failed
+uint64_t sys_destroy_sem(BASE_PARAMS){
+    return (uint64_t)closeSem((char*)rsi);
+}
+

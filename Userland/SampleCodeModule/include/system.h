@@ -51,4 +51,9 @@ void unblockProcess(int pid);
 void waitForChildren();
 void waitForChild(int pid);
 
+int openSem(char* name, int value);
+int postSem(char* name);
+int waitSem(char* sem);
+int destroySem(char* sem);
+
 #endif //TPE_ARQUI_SYSTEM_H
