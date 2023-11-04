@@ -7,7 +7,7 @@
 #define READY 1
 #define BLOCKED 2
 #define DEAD 3
-#define INIT_STACK_SIZE 2048
+#define INIT_STACK_SIZE 4096
 #define MAX_PROC 11 // 10 processes for the user + sentinel
 
 #define PROC_NAME_LENGTH 20
@@ -41,6 +41,9 @@ void blockProcess(int pid);
 void unblockProcess(int pid);
 void setProcessPriority(int pid, int priority);
 void killProcessInForeground();
+
+int getStdinFd(int pid);
+int getStdoutFd(int pid);
 
 void waitForChild(int pid);
 void waitForChildren();

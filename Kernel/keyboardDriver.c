@@ -168,11 +168,14 @@ char getc(){
 int gets(char * s, size_t bytes) {
     int i = 0;
     char c;
-    while((c=getc())!='\n' && i < bytes - 1) {
+    while(i < bytes - 1 && (c=getc())!='\n') {
         s[i] = c;
         i++;
     }
-    s[i]='\0';
+    if(c == '\n') {
+        s[i++] = '\n';
+        s[i] = '\0';
+    }
 
-    return ++i;
+    return i;
 }

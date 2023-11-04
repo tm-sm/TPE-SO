@@ -27,6 +27,8 @@ void putChar(char c);
  */
 char getChar();
 
+size_t getStrn();
+
 /**
  * Prints a string to screen, can print parameters passed
  * @param format %d for decimal | %x for hexadecimal | %s for string

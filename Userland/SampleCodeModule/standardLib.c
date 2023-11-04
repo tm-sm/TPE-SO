@@ -1,8 +1,8 @@
 #include <standardLib.h>
 #include <stdarg.h>
 #include <system.h>
-#define SYSWRITE 0
-#define SYSREAD 1
+#define SYS_WRITE 0
+#define SYS_READ 1
 
 int getDigits(int n);
 void _printDec(int value, int len, uint8_t padding0, char* buff);
@@ -60,23 +60,25 @@ int atoi(const char* str) {
 }
 
 void putChar(char c){ //a partir del segundo parametro no importa lo que le ponga
-    interrupt(SYSWRITE,(uint64_t) &c,1,0,0,0);
+    interrupt(SYS_WRITE, (uint64_t) &c, 1, 0, 0, 0);
 }
 
 void putStrn(char* s) {
     int i;
-    for(i=0;s[i]!='\0';i++){
+    for(i=0;s[i]!='\0';i++) {
     }
-    interrupt(SYSWRITE, (uint64_t)s, i, 0, 0, 0);
+    interrupt(SYS_WRITE, (uint64_t)s, i, 0, 0, 0);
 }
 
-char getChar(){
-    char c;
+char getChar() {
+    char c[2];
     //this prevents system calls from being blocked by the sys_read interruption
-    while(1) {
-        interrupt(SYSREAD,(uint64_t)&c,0,0,0,0);
-        return c;
-    }
+    interrupt(SYS_READ, (uint64_t)c, 2, 0, 0, 0);
+    return c[0];
+}
+
+size_t getStrn(char* buff, size_t len) {
+    return (size_t)interrupt(SYS_READ, (uint64_t)buff, len, 0, 0, 0);
 }
 
 uint8_t isCharPressed(char c) {

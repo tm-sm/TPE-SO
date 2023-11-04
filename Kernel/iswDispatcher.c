@@ -7,6 +7,8 @@
 #include <scheduler.h>
 #include <processManager.h>
 #include <sems.h>
+#include <fdManager.h>
+
 #define BASE_PARAMS uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9
 #define COMPLETE_PARAMS uint64_t rdi, BASE_PARAMS
 
@@ -62,23 +64,17 @@ uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
 //ID= 0
 //rsi= char* pointing to the start of the string
 //rdx= amount of chars that should be written
-// returns= nothing
+//returns= amount of characters written
 uint64_t sys_write(BASE_PARAMS) {
-  char* s=(char*)rsi;
-  for(int i=0;i<rdx ;i++){
-    if(s[i]=='\0')
-        return 0;
-    cPrintChar(s[i]);
-  }
-  return 0;
+  return write(getStdoutFd(getActiveProcessPid()), (char*)rsi, rdx);
 }
 
 //ID= 1
 //rsi= char* pointing to the tar
-// returns= nothing TODO
+//rdx= amount of chars that should be read
+//returns= amount of characters read
 uint64_t sys_read(BASE_PARAMS) {
-    *(char*)rsi=getc();
-    return 0;
+    return read(getStdinFd(getActiveProcessPid()), (char*)rsi, rdx);
 }
 
 //ID= 2

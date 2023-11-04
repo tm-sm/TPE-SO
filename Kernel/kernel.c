@@ -121,8 +121,8 @@ int main()
     cNewline();
 
 
-    //int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
-
+    int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
+    //startProcess(processHello, HIGH, FOREGROUND, "hello", 0, NULL);
     waitForChildren();
     cPrint("[Exiting System]");
     cNewline();
