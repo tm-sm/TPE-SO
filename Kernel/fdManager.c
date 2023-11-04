@@ -123,51 +123,41 @@ int redirectPipe(int oldFd, int newFd){
     return newFd;
 }
 
-size_t readP(int pipeFd[2], void* buff, size_t bytes) {
-    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
+size_t read(int fd, void* buff, size_t bytes) {
+    if(!manager->entries[fd].used){
+        return 0;
+    }
 
-        waitSem(pipe->readSemaphore);
+    size_t bytesRead = 0;
 
-        size_t bytesToRead = 0;
+    switch(fd){
+        case STDIN:
+            gets(buff);
+            bytesRead = strlen(buff);
+            break;
+        default:
 
-        while (bytesToRead < bytes) {
-            if (pipe->readingPos == pipe->writingPos) {
+            break;
+    }
 
-                waitSem(pipe->readSemaphore);
-            }
-
-            ((char*)buff)[bytesToRead] = pipe->buffer[pipe->readingPos];
-            pipe->readingPos = (pipe->readingPos + 1) % PIPE_BUFFER_SIZE;
-            bytesToRead++;
-
-            postSem(pipe->writeSemaphore);
-        }
-
-        return bytesToRead;
+    return bytesRead;
 }
 
-size_t writeP(int pipeFd[2], const void* buff, size_t bytes) {
+size_t write(int fd, const void* buff, size_t bytes) {
+    if(!manager->entries[fd].used){
+        return 0;
+    }
 
-    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
+    size_t bytesWritten = 0;
 
-        waitSem(pipe->writeSemaphore);
+    switch(fd){
+        case STDOUT:
+            cPrint((char *) buff);
+            bytesWritten = strlen(buff);
+            break;
+        default:
+            break;
+    }
 
-        size_t bytesWritten = 0;
-
-        while (bytesWritten < bytes) {
-            size_t nextWritePos = (pipe->writingPos + 1) % PIPE_BUFFER_SIZE;
-            if (nextWritePos == pipe->readingPos) {
-
-                waitSem(pipe->writeSemaphore);
-            }
-
-            pipe->buffer[pipe->writingPos] = ((char*)buff)[bytesWritten];
-            pipe->writingPos = nextWritePos;
-            bytesWritten++;
-
-            postSem(pipe->readSemaphore);
-        }
-
-        return bytesWritten;
-
+    return bytesWritten;
 }

@@ -115,32 +115,18 @@ int main()
     cNewline();
     cPrint("Initializing Process Manager");
     initializeFileDescriptorManager();
+
     initializeProcessManager();
     startProcess(NULL, LOW, FOREGROUND, "init", 0, NULL); //pid=1
     cNewline();
 
-    static int pipe_fds[2];//4 5
-    static char pipe_buffer[50];
-    static char msg[] = "Message from custom pipe";
 
-    /*
-    if (customPipe(pipe_fds) == 0) {
+    //int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
 
-        writeFD(pipe_fds[0], msg, 25);
-        cPrintDec(pipe_fds[0]);
-        cPrintDec(pipe_fds[1]);
-        size_t pipe_bytes_read = readFD(pipe_fds[1], pipe_buffer, 24);
-        pipe_buffer[pipe_bytes_read] = '\0';
-        cPrint(pipe_buffer);
-       // printFormat("Read from custom pipe: %s\n", pipe_buffer);
+    char *alo = allocate(100);
+    read(0,alo,100);
+    write(1,alo,100);
 
-        // Close the custom pipe
-        closePipe(pipe_fds);
-       // printFormat("Closed custom pipe\n");
-    }
-*/
-
-    int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
     waitForChildren();
     cPrint("[Exiting System]");
     cNewline();

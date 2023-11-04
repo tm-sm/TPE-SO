@@ -8,6 +8,7 @@
 #include <fdManager.h>
 #include <time.h>
 #include "interrupts.h"
+#include <keyboardDriver.h>
 
 typedef struct childNode* cNode;
 
@@ -120,8 +121,8 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid]->waitingForChildren = FALSE;
     processes[pid]->waitingForChild = FALSE;
 
-    processes[pid]->stdin = openFD(NULL);
-    processes[pid]->stdout = openFD(NULL);
+    processes[pid]->stdin = 0;
+    processes[pid]->stdout = 1;
 
     processes[pid]->parentPid = currProc;
     if(processes[pid]->parentPid >= 1) {

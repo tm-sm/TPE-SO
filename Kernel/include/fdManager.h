@@ -14,6 +14,6 @@ void closePipe(int pipeFD);
 
 int redirectPipe(int oldfd, int newfd);
 
-size_t readP(int pipeFd[2], void *buff, size_t bytes);
+size_t read(int fd, void *buff, size_t bytes);
 
-size_t writeP(int pipeFd[2], const void * buff, size_t bytes);
+size_t write(int fd, const void * buff, size_t bytes);
