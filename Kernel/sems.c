@@ -20,10 +20,18 @@ sem semaphores[SEM_MAX_AMOUNT]={NULL};
 void enterSem(int* lock);
 void exitSem(int* lock);
 
-sem openSem(char* name, int value){//podria separarse esta funcion para crear y buscar
+static sem findSem(char* name){
     for (int i=0;i<SEM_MAX_AMOUNT;i++){
-        if(strcmp(semaphores[i]->name,name)==0)
-            return semaphores[i];
+        if(semaphores[i]!=NULL&& strcmp(semaphores[i]->name,name)==0){
+               return semaphores[i];
+        }
+    }
+    return NULL;
+}
+int openSem(char* name, int value){//podria separarse esta funcion para crear y buscar
+    sem aux=findSem(name);
+    if (aux!=NULL){
+        return 2;
     }
     for (int i=0;i<SEM_MAX_AMOUNT;i++){
         if(semaphores[i]==NULL){
@@ -32,13 +40,18 @@ sem openSem(char* name, int value){//podria separarse esta funcion para crear y 
             semaphores[i]->value=value;
             semaphores[i]->lock=0;
             semaphores[i]->processesBlockedAmount=0;
-            return semaphores[i];
+            return 1;
         }
     }
-    return NULL;
+    return 0;
 }
 
-void postSem(sem s){
+
+int postSem(char* name){
+    sem s=findSem(name);
+    if(s==NULL){
+        return 0;
+    }
     enterSem(&(s->lock));
     s->value++;
     if(s->value>0){
@@ -49,10 +62,15 @@ void postSem(sem s){
         }
     }
     exitSem(&(s->lock));
+    return 1;
 }
 
 
-void waitSem(sem s){
+int waitSem(char* name){
+    sem s= findSem(name);
+    if(s==NULL){
+        return 0;
+    }
     enterSem(&(s->lock));
     int currentpid=getActiveProcessPid();
    if(s->value==0){
@@ -68,15 +86,15 @@ void waitSem(sem s){
         s->value--;
         exitSem(&(s->lock));
     }
+    return 1;
 }
-void closeSem(char* name){
-    for(int i=0;i<SEM_MAX_AMOUNT;i++){
-        if(strcmp(semaphores[i]->name,name)==0){
-            if(semaphores[i]->processesBlockedAmount!=0)
-                deallocate(semaphores[i]);
-            return ;
-        }
+int closeSem(char* name){
+    sem s=findSem(name);
+    if(s==NULL){
+        return 0;
     }
+    deallocate(s);
+        return 1;
 }
 
 
