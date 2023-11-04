@@ -95,6 +95,27 @@ void closePipe(int pipeFD[2]) {
     closeFD(pipeFD[1]);
 }
 
+int redirectPipe(int oldFd, int newFd){
+    if (newFd < 0 || newFd >= MAX_FILE_DESCRIPTORS) {
+        return -1;
+    }
+
+    void* data = getFDData(oldFd);
+
+    if (data == NULL) {
+        return -1;
+    }
+
+    if (manager->entries[newFd].used) {
+        closeFD(newFd);
+    }
+
+    manager->entries[newFd].used = 1;
+    manager->entries[newFd].data = data;
+
+    return newFd;
+}
+
 size_t readP(int pipeFd[2], void* buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
 
