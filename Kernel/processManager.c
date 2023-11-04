@@ -60,6 +60,7 @@ void initializeProcessManager() {
 }
 
 int startProcess(void* ip, int priority, uint8_t foreground, const char* name, unsigned int stackSize, char* argv[]) {
+
     int pid = findFirstAvailablePid();
 
     int argc = 0;
@@ -372,7 +373,6 @@ void killProcess(int pid) {
         }
         _cli();
         removeChildNode(processes[pid]->parentPid, pid);
-
 
         closePipe(&processes[pid]->stdin);
         for(int i=0; i<processes[pid]->argc; i++) {

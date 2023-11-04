@@ -168,7 +168,7 @@ char getc(){
 void gets(char * s) {
     int i = 0;
     char c;
-    while((c=keyBuffer)!='\n') {
+    while((c=getc())!='\n') {
         s[i] = c;
         i++;
     }

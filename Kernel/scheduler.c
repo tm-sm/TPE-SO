@@ -12,7 +12,6 @@ typedef struct node{
 }node;
 
 void roundRobin();
-void dumbSchedule();
 void lowerPriority(node* node);
 
 
