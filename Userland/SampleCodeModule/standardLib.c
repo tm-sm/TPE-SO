@@ -65,7 +65,7 @@ void putChar(char c){ //a partir del segundo parametro no importa lo que le pong
 
 void putStrn(char* s) {
     int i;
-    for(i=0;s[i]!='\0';i++){
+    for(i=0;s[i]!='\0';i++) {
     }
     interrupt(SYSWRITE, (uint64_t)s, i, 0, 0, 0);
 }

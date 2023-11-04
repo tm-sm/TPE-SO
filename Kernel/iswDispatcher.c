@@ -7,6 +7,8 @@
 #include <scheduler.h>
 #include <processManager.h>
 #include <sems.h>
+#include <fdManager.h>
+
 #define BASE_PARAMS uint64_t rsi, uint64_t rdx, uint64_t rcx, uint64_t r8, uint64_t r9
 #define COMPLETE_PARAMS uint64_t rdi, BASE_PARAMS
 
@@ -64,13 +66,7 @@ uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
 //rdx= amount of chars that should be written
 // returns= nothing
 uint64_t sys_write(BASE_PARAMS) {
-  char* s=(char*)rsi;
-  for(int i=0;i<rdx ;i++){
-    if(s[i]=='\0')
-        return 0;
-    cPrintChar(s[i]);
-  }
-  return 0;
+  return write(getActiveProcessPid(), );
 }
 
 //ID= 1

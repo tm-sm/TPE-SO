@@ -562,6 +562,20 @@ void notifyParent(int parentPid, int childPid) {
     }
 }
 
+int getStdoutFd(int pid) {
+    if(isPidValid(pid)) {
+        return processes[pid]->stdout;
+    }
+    return 1; //TODO STDOUT
+}
+
+int getStdoutFd(int pid) {
+    if(isPidValid(pid)) {
+        return processes[pid]->stdout;
+    }
+    return 1; //TODO STDOUT
+}
+
 void exitProc() {
     killProcess(currProc);
 }

@@ -10,10 +10,10 @@ void processSentinel() {
 }
 
 void processHello() {
-    for(int i=0; i<10; i++) {
-        cPrint("\nHello");
-    }
-    killProcess(getActiveProcessPid());
+    char* alo = allocate(sizeof(char) * 25);
+    read(0,alo,25);
+    write(1,alo,25);
+    exitProc();
 }
 
 void processHello2(int argc, char* argv[]) {
