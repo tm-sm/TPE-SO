@@ -165,12 +165,14 @@ char getc(){
     return NO_INPUT;
 }
 
-void gets(char * s, ) {
+int gets(char * s, size_t bytes) {
     int i = 0;
     char c;
-    while((c=getc())!='\n') {
+    while((c=getc())!='\n' && i < bytes - 1) {
         s[i] = c;
         i++;
     }
     s[i]='\0';
+
+    return ++i;
 }

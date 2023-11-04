@@ -132,8 +132,7 @@ size_t read(int fd, void* buff, size_t bytes) {
 
     switch(fd){
         case STDIN:
-            gets(buff);
-            bytesRead = strlen(buff);
+            bytesRead = gets(buff, bytes);
             break;
         default:
 
