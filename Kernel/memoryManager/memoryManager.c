@@ -56,7 +56,8 @@ void * allocate(size_t size) {
                 curr_block->is_free = 0;
             }
 
-            currentAvailableMemory -= curr_block->size;
+            currentAvailableMemory -= curr_block->size + sizeof(BlockHeader);
+
             // Retorno un puntero a esta seccion del bloque
             return (void*)((char*)curr_block + sizeof(BlockHeader));
         }
@@ -82,13 +83,16 @@ void deallocate(void * ptr) {
     BlockHeader * block = (BlockHeader *)((char *)ptr - sizeof(BlockHeader));
     block->is_free = 1;
 
+
+    currentAvailableMemory += block->size;
+
     // Fusion de los bloques consecutivos que esten libres
     BlockHeader * curr_block = first_block;    //recorro desde el principio
     while (curr_block) {
         if (curr_block->is_free) {
             if (curr_block->next && curr_block->next->is_free) {
                 curr_block->size += sizeof(BlockHeader) + curr_block->next->size;
-                currentAvailableMemory += sizeof( struct BlockHeader) + curr_block->next->size;
+                currentAvailableMemory += sizeof(struct BlockHeader);
                 curr_block->next = curr_block->next->next;
             }
         }
@@ -116,6 +120,8 @@ void * reallocate(void * ptr, size_t newSize){
         memcpy(newPtr, ptr, copySize);
 
         deallocate(ptr);
+
+        currentAvailableMemory += oldSize - newSize;
         return newPtr;
     } else {
         return NULL;
@@ -135,7 +141,3 @@ size_t convertToPageSize(size_t size, size_t pageSize){
 size_t getCurrentMemSize(){
     return currentAvailableMemory;
 }
-/*todo
- * AgregarASyscall
- * ConvertirABuddySystem
- */
