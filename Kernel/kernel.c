@@ -123,10 +123,6 @@ int main()
 
     //int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
 
-    char *alo = allocate(100);
-    read(0,alo,100);
-    write(1,alo,100);
-
     waitForChildren();
     cPrint("[Exiting System]");
     cNewline();

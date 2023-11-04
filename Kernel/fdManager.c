@@ -156,6 +156,7 @@ size_t write(int fd, const void* buff, size_t bytes) {
             bytesWritten = strlen(buff);
             break;
         default:
+
             break;
     }
 

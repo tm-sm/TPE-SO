@@ -165,7 +165,7 @@ char getc(){
     return NO_INPUT;
 }
 
-void gets(char * s) {
+void gets(char * s, ) {
     int i = 0;
     char c;
     while((c=getc())!='\n') {

@@ -14,6 +14,8 @@ typedef struct childNode* cNode;
 
 #define TRUE 1
 #define FALSE 0
+#define STDOUT 1
+#define STDIN 0
 
 struct childNode {
     int pid;
@@ -121,8 +123,8 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid]->waitingForChildren = FALSE;
     processes[pid]->waitingForChild = FALSE;
 
-    processes[pid]->stdin = 0;
-    processes[pid]->stdout = 1;
+    processes[pid]->stdin = STDIN;
+    processes[pid]->stdout = STDOUT;
 
     processes[pid]->parentPid = currProc;
     if(processes[pid]->parentPid >= 1) {
