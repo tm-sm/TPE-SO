@@ -2,6 +2,7 @@
 #define KEYBOARDDRIVER_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 // handles when a key is pressed
 void keyboard_handler(uint64_t *registers);

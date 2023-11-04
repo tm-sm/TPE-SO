@@ -71,9 +71,9 @@ void putStrn(char* s) {
 }
 
 char getChar() {
-    char c[1];
+    char c[2];
     //this prevents system calls from being blocked by the sys_read interruption
-    interrupt(SYS_READ, (uint64_t)c, 1, 0, 0, 0);
+    interrupt(SYS_READ, (uint64_t)c, 2, 0, 0, 0);
     return c[0];
 }
 
