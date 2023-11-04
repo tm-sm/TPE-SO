@@ -17,6 +17,10 @@
 #define SYS_PROCESS_PRIORITY 18
 #define SYS_PROCESS_BLOCK 19
 #define SYS_WAIT_FOR_CHILDREN 20
+#define SYS_OPEN_SEM 21
+#define SYS_POST_SEM 22
+#define SYS_WAIT_SEM 23
+#define SYS_CLOSE_SEM 24
 
 #define ALLOC 0
 #define REALLOC 1
@@ -94,7 +98,6 @@ int getAvailableMemory() {
     return (int)interrupt(SYS_MEMORY_MANAGER, GET_AVAILABLE_MEMORY, 0, 0, 0, 0);
 }
 
-
 void printAllProcesses() {
     interrupt(SYS_PRINT_ALL_PROCESSES, 0, 0 ,0 ,0, 0);
 }
@@ -125,3 +128,20 @@ void waitForChild(int pid) {
     }
     interrupt(SYS_WAIT_FOR_CHILDREN, pid, 0, 0, 0, 0);
 }
+
+int openSem(char* name,int value){
+    return (int)interrupt(SYS_OPEN_SEM,(uint64_t)name,value,0,0,0);
+}
+
+int postSem(char* name){
+    return (int)interrupt(SYS_POST_SEM,(uint64_t)name,0,0,0,0);
+}
+
+int waitSem(char* name){
+    return (int)interrupt(SYS_WAIT_SEM,(uint64_t)name,0,0,0,0);
+}
+
+int destroySem(char* name){
+    return (int)interrupt(SYS_CLOSE_SEM,(uint64_t)name,0,0,0,0);
+}
+

@@ -275,8 +275,7 @@ enterSem: ;semaforo de los semaforos
     xchg edx,dword [rdi]
     cmp edx,0
     je isfree
-    call interruptTick ;TODO cambiar a bloqueo de procesos y agregarlo a una lista auxiliar?
-    jmp enterSem
+    jmp enterSem ;Spinlock ("legal")
     isfree:
     ret
 
