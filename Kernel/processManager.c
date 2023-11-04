@@ -386,6 +386,7 @@ void killProcess(int pid) {
         removeFromScheduler(pid, priority);
         amount--;
         notifyParent(parentPid, pid);
+        deallocateAllProcessRelatedMem(pid);
         if (pid == currProc) {
             interruptTick();
         }
