@@ -120,9 +120,9 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
     processes[pid]->waitingForChildren = FALSE;
     processes[pid]->waitingForChild = FALSE;
 
-    int fds[2];
+    int fd[2];
 
-    if (customPipe(fds) == -1) {
+    if (customPipe(fd) == -1) {
         for(int j=0; j<argc; j++) {
             deallocate(argv[j]);
         }
@@ -132,8 +132,8 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
         return -1;
     }
 
-    processes[pid]->stdin = fds[0];
-    processes[pid]->stdout = fds[1];
+    processes[pid]->stdin = fd[0];
+    processes[pid]->stdout = fd[1];
 
     processes[pid]->parentPid = currProc;
     if(processes[pid]->parentPid >= 1) {
@@ -143,7 +143,7 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
                 deallocate(argv[j]);
             }
             deallocate(argv);
-            closePipe( &fds[0]);
+            closePipe(fd);
             deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
             deallocate(processes[pid]);
             return -1;
@@ -302,6 +302,27 @@ void addToFgStack(int pid) {
             fgStack[lastFgProc] = pid;
         }
     }
+}
+
+// connects stdout proc1 to stdin proc2
+int connectProcs(int pidProc1, int pidProc2){
+
+    proc proc1 = getProcess(pidProc1);
+    proc proc2 = getProcess(pidProc2);
+
+    int fd[2];
+
+    if(customPipe(fd) == -1){
+        return -1;
+    }
+
+    closeFD(proc1->stdout);
+    closeFD(proc2->stdin);
+
+    proc1->stdout = fd[0];
+    proc2->stdin = fd[1];
+
+    return 0;
 }
 
 void removeFromFgStack(int pid) {

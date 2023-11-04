@@ -1,18 +1,18 @@
 #include <fdManager.h>
 #include <stddef.h>
+#include <sems.h>
 #include <memoryManager.h>
-#include <console.h>
+#include <utils.h>
 
 #define MAX_FILE_DESCRIPTORS 128
-
-#define PIPE_BUFFER_SIZE 512
-
-// // TODO AGREGAR SEMAFOROS A LOS PIPES // //
+#define PIPE_BUFFER_SIZE 128
 
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];
-    unsigned char inputFD;
-    unsigned char outputFD;
+    size_t readingPos;
+    size_t writingPos;
+    char readSemaphore[24];
+    char writeSemaphore[24];
 };
 
 struct FileDescriptorEntry {
@@ -25,7 +25,7 @@ struct FileDescriptorManager {
     struct FileDescriptorEntry entries[MAX_FILE_DESCRIPTORS];
 };
 
-static struct FileDescriptorManager * manager;
+static struct FileDescriptorManager* manager;
 
 void initializeFileDescriptorManager() {
     manager = allocate(sizeof(struct FileDescriptorManager));
@@ -59,84 +59,110 @@ void closeFD(int fd) {
     }
 }
 
-int customDup2(int oldFD, int newFD) {
-    if (oldFD < 0 || oldFD >= MAX_FILE_DESCRIPTORS || newFD < 0 || newFD >= MAX_FILE_DESCRIPTORS || oldFD == newFD) {
-        return -1;
-    }
-
-    struct FileDescriptorEntry* oldEntry = &manager->entries[oldFD];
-
-    if (!oldEntry->used) {
-        return -1;
-    }
-
-    if (manager->entries[newFD].used) {
-        closeFD(newFD);
-    }
-
-
-    manager->entries[newFD] = *oldEntry;
-    return newFD;
-}
-
 int customPipe(int fd[2]) {
-    struct CustomPipe* customPipe = (struct CustomPipe*)allocate(sizeof(struct CustomPipe));
-    if (customPipe == NULL) {
+    struct CustomPipe* pipe = (struct CustomPipe*)allocate(sizeof(struct CustomPipe));
+
+    if(pipe == NULL){
         return -1;
     }
 
-    int fdRead = openFD(customPipe);
-    int fdWrite = openFD(customPipe);
+    pipe->readingPos = 0;
+    pipe->writingPos = 0;
 
-    fd[0] = fdRead;
-    fd[1] = fdWrite;
+    uintToBase((uint64_t)pipe,pipe->readSemaphore,16);
+    uintToBase((uint64_t)pipe,pipe->writeSemaphore,16);
+
+    strcat(pipe->readSemaphore, " read");
+    strcat(pipe->writeSemaphore, " write");
+
+    openSem(pipe->readSemaphore,0);
+    openSem(pipe->writeSemaphore, PIPE_BUFFER_SIZE);
+
+    fd[0] = openFD(pipe);
+    fd[1] = openFD(pipe);
 
     return 0;
 }
 
 void closePipe(int pipeFD[2]) {
-    void*addr = getFDData(pipeFD[0]);
-    
-    if (pipeFD[0] >= 0) {
-        closeFD(pipeFD[0]); 
-        pipeFD[0] = -1;     
-    }
+    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD[0]);
 
-    if (pipeFD[1] >= 0) {
-        closeFD(pipeFD[1]); 
-        pipeFD[1] = -1;     
-    }
-    
-    deallocate(addr);
+    closeSem(pipe->readSemaphore);
+    closeSem(pipe->writeSemaphore);
+
+    deallocate(pipe);
+    closeFD(pipeFD[0]);
+    closeFD(pipeFD[1]);
 }
 
-size_t readFD(int fd, void* buff, size_t bytes) {
-    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
-    if (pipe == NULL) {
-        return 0;
+int redirectPipe(int oldFd, int newFd){
+    if (newFd < 0 || newFd >= MAX_FILE_DESCRIPTORS) {
+        return -1;
     }
 
-    size_t bytesRead = 0;
-    while (bytesRead < bytes) {
-        ((char*)buff)[bytesRead] = pipe->buffer[bytesRead];
-        bytesRead++;
+    void* data = getFDData(oldFd);
+
+    if (data == NULL) {
+        return -1;
     }
 
-    return bytesRead;
+    if (manager->entries[newFd].used) {
+        closeFD(newFd);
+    }
+
+    manager->entries[newFd].used = 1;
+    manager->entries[newFd].data = data;
+
+    return newFd;
 }
 
-size_t writeFD(int fd, const void* buff, size_t bytes) {
-    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
-    if (pipe == NULL) {
-        return 0;
-    }
+size_t readP(int pipeFd[2], void* buff, size_t bytes) {
+    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
 
-    size_t bytesWritten = 0;
-    for (size_t i = 0; i < bytes; i++) {
-            pipe->buffer[bytesWritten] = ((const char*)buff)[i];
+    while (1) {
+        waitSem(pipe->readSemaphore);
+
+        size_t bytesToRead = 0;
+
+        while (bytesToRead < bytes) {
+            if (pipe->readingPos == pipe->writingPos) {
+
+                waitSem(pipe->readSemaphore);
+            }
+
+            ((char*)buff)[bytesToRead] = pipe->buffer[pipe->readingPos];
+            pipe->readingPos = (pipe->readingPos + 1) % PIPE_BUFFER_SIZE;
+            bytesToRead++;
+
+            postSem(pipe->writeSemaphore);
+        }
+
+        return bytesToRead;
+    }
+}
+
+size_t writeP(int pipeFd[2], const void* buff, size_t bytes) {
+    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFd[0]);
+
+    while (1) {
+        waitSem(pipe->writeSemaphore);
+
+        size_t bytesWritten = 0;
+
+        while (bytesWritten < bytes) {
+            size_t nextWritePos = (pipe->writingPos + 1) % PIPE_BUFFER_SIZE;
+            if (nextWritePos == pipe->readingPos) {
+
+                waitSem(pipe->writeSemaphore);
+            }
+
+            pipe->buffer[pipe->writingPos] = ((char*)buff)[bytesWritten];
+            pipe->writingPos = nextWritePos;
             bytesWritten++;
+
+            postSem(pipe->readSemaphore);
+        }
+
+        return bytesWritten;
     }
-
-    return bytesWritten;
 }
-
