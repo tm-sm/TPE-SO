@@ -344,6 +344,7 @@ void killProcess(int pid) {
 
     if(pid == 0) {
         //the sentinel shouldn't be terminated
+        _sti();
         return;
     }
 
@@ -382,6 +383,7 @@ void killProcess(int pid) {
         notifyParent(parentPid, pid);
         deallocateAllProcessRelatedMem(pid);
         if (pid == currProc) {
+            _sti();
             interruptTick();
         }
     }
@@ -452,7 +454,6 @@ int isPidValid(int pid) {
 void unblockProcess(int pid) {
     if(isPidValid(pid)){
         processes[pid]->state = READY;
-        interruptTick();
     }
 }
 
