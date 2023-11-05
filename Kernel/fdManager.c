@@ -30,13 +30,26 @@ struct FileDescriptorManager {
     struct FileDescriptorEntry entries[MAX_FILE_DESCRIPTORS];
 };
 
+struct NamedPipe{
+    char name[24];
+    struct CustomPipe pipe;
+};
+
+struct NamedPipeList{
+    struct NamedPipe * pipe;
+    struct NamedPipeList * next;
+};
+
+
 static struct FileDescriptorManager* manager;
+static struct NamedPipeList * first;
 
 void initializeFileDescriptorManager() {
     manager = allocate(sizeof(struct FileDescriptorManager));
     for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
         manager->entries[i].used = 0;
     }
+    first = allocate(sizeof(struct NamedPipeList));
 
     openFD(NULL); //0 STDIN
     openFD(NULL); //1 STDOUT
@@ -95,6 +108,15 @@ void closePipe(int pipeFD) {
     closeSem(pipe->semaphore);
 
     deallocate(pipe);
+}
+
+int namedPipe(char * name){
+    struct NamedPipeList* current = first;
+}
+
+void closeNamedPipe(char * name){
+    struct NamedPipeList* current = first;
+
 }
 
 int redirectPipe(int oldFd, int newFd){
