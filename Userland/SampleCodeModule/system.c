@@ -24,6 +24,9 @@
 #define SYS_CREATE_PIPE 25
 #define SYS_CLOSE_PIPE 26
 #define SYS_CONNECT_PROCESSES 27
+#define SYS_CREATE_FIFO 28
+#define SYS_CLOSE_FIFO 29
+#define SYS_CONNECT_TO_FIFO 30
 
 #define ALLOC 0
 #define REALLOC 1
@@ -154,6 +157,18 @@ int createPipe(int fd[2]) {
 
 void closePipe(int fd) {
     interrupt(SYS_CLOSE_PIPE, (uint64_t)fd, 0, 0, 0, 0);
+}
+
+int createNamedPipe(const char * name){
+    return (int)interrupt(SYS_CREATE_FIFO, (uint64_t)name, 0, 0, 0, 0);
+}
+
+void closeNamedPipe(const char * name){
+    interrupt(SYS_CLOSE_FIFO,(uint64_t)name,0,0,0,0);
+}
+
+int connectToFIFO(const char * name, int p1, int p2){
+    return (int)interrupt(SYS_CONNECT_TO_FIFO, (uint64_t)name,(uint64_t)p1, (uint64_t)p2, 0, 0);
 }
 
 int connectProcesses(int p1, int p2) {

@@ -60,4 +60,8 @@ int createPipe(int fd[2]);
 void closePipe(int fd);
 int connectProcesses(int p1, int p2);
 
+int createNamedPipe(const char * name);
+void closeNamedPipe(const char * name);
+int connectToFIFO(const char * name, int p1, int p2);
+
 #endif //TPE_ARQUI_SYSTEM_H

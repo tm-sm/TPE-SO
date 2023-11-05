@@ -42,7 +42,9 @@ uint64_t sys_destroy_sem(BASE_PARAMS); //code 24
 uint64_t sys_create_pipe(BASE_PARAMS); // code 25
 uint64_t sys_close_pipe(BASE_PARAMS); // code 26
 uint64_t sys_connect_processes(BASE_PARAMS); // code 27
-
+uint64_t sys_create_FIFO(BASE_PARAMS); // code 28
+uint64_t sys_close_FIFO(BASE_PARAMS); // code 29
+uint64_t sys_connect_to_FIFO(BASE_PARAMS); // code 30
 
 extern void _sti();
 
@@ -56,7 +58,7 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_check_process_foreground, sys_print_all_processes,
                                sys_process_priority, sys_process_block, sys_wait_for_children,
                                sys_open_sem,sys_post_sem,sys_wait_sem,sys_destroy_sem, sys_create_pipe,
-                               sys_close_pipe, sys_connect_processes,};
+                               sys_close_pipe, sys_connect_processes,sys_create_FIFO,sys_close_FIFO,sys_connect_to_FIFO,};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -388,4 +390,18 @@ uint64_t sys_close_pipe(BASE_PARAMS) {
 //returns= 0 on success, -1 on failure
 uint64_t sys_connect_processes(BASE_PARAMS) {
     return connectProcs((int)rsi, (int)rdx);
+}
+
+
+uint64_t sys_create_FIFO(BASE_PARAMS){
+    return namedPipe((const char*)rsi);
+}
+
+uint64_t sys_close_FIFO(BASE_PARAMS){
+    closeNamedPipe((const char*)rsi);
+    return 0;
+}
+
+uint64_t sys_connect_to_FIFO(BASE_PARAMS){
+    return connectToNamedPipe((const char*)rsi,(int)rdx,(int)rcx);
 }
