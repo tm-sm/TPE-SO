@@ -2,12 +2,14 @@
 #include "lib.h"
 #include <stddef.h>
 #include <console.h>
+#include <processManager.h>
 //64 KB libres
 #define MEM_START_ADR 0x0000000000050000
-#define MIN_SIZE 128
+#define MIN_SIZE 512
 
 typedef struct BuddyBlock {
     int size;
+    char pid;
     char isFree;
     char isSplit;
     struct BuddyBlock *left;
@@ -26,6 +28,7 @@ BuddyBlock *createBlock(int size, void *address) {
     block->isSplit = 0;
     block->left = NULL;
     block->right = NULL;
+    block->pid = (char) getActiveProcessPid();
 
     return block;
 }
@@ -97,7 +100,7 @@ void *allocate(size_t size) {
     BuddyBlock *allocatedBlock = allocateRecursive(sizeToUse, node);
 
     if (allocatedBlock != NULL) {
-        currentAvailableMemory -= (sizeof(struct BuddyBlock) + allocatedBlock->size);
+        currentAvailableMemory -= sizeof(struct BuddyBlock) + allocatedBlock->size;
         return (void *)allocatedBlock + sizeof(struct BuddyBlock);
     }
 
@@ -124,12 +127,12 @@ void mergeBlocksRecursive(BuddyBlock *node) {
 }
 
 void mergeBlocks() {
-   // mergeBlocksRecursive(root);
+   mergeBlocksRecursive(root);
 }
 
 
 void deallocate(void *addr) {
-    BuddyBlock *block = (BuddyBlock *)((char*)addr - sizeof(struct BuddyBlock));
+    BuddyBlock *block = (BuddyBlock *)((uintptr_t*)addr - sizeof(struct BuddyBlock));
     currentAvailableMemory += block->size + sizeof(struct BuddyBlock);
     block->isFree = 1;
 
@@ -175,6 +178,22 @@ size_t convertToPageSize(size_t size, size_t pageSize) {
     return pageSize*quotient + pageSize;
 }
 
-void deallocateAllProcessRelatedMem(int pid){
+void deallocateAllProcRecursive(BuddyBlock * node, int pid){
+    if (node == NULL) {
+        return;
+    }
 
+    if (node->isSplit) {
+        deallocateAllProcRecursive(node->left, pid);
+        deallocateAllProcRecursive(node->right, pid);
+
+    } else if (!node->isFree && node->pid == pid) {
+        node->isFree = 1;
+        node->pid = -1;
+    }
+}
+
+void deallocateAllProcessRelatedMem(int pid){
+    deallocateAllProcRecursive(root,pid);
+   mergeBlocks();
 }
