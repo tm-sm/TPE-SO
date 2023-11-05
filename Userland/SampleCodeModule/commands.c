@@ -31,7 +31,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS);
+ps(ARGS), nice(ARGS), block(ARGS),progs(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -46,6 +46,7 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
         &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
+        &(struct EXECUTABLE){"progs", "shows list of all available programs", progs},
         NULL
         };
 
@@ -116,6 +117,15 @@ int help(ARGS) {
     for(int i=0; bArr[i] != NULL; i++){
         putChar('\n');
         printFormat("\t'%s': %s \n", bArr[i]->name, bArr[i]->description);
+        putChar('\n');
+    }
+    return 0;
+}
+
+int progs(ARGS) {
+    for(int i=0; pArr[i] != NULL; i++){
+        putChar('\n');
+        printFormat("\t'%s': %s \n", pArr[i]->name, pArr[i]->description);
         putChar('\n');
     }
     return 0;
