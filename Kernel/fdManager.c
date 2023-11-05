@@ -5,6 +5,7 @@
 #include <utils.h>
 #include <console.h>
 #include <keyboardDriver.h>
+#include <utils.h>
 
 #define MAX_FILE_DESCRIPTORS 128
 #define PIPE_BUFFER_SIZE 128
@@ -76,7 +77,7 @@ void* getFDData(int fd) {
 }
 
 void closeFD(int fd) {
-    if (fd >= 0 && fd < MAX_FILE_DESCRIPTORS) {
+    if (fd >= 2 && fd < MAX_FILE_DESCRIPTORS) {
         manager->entries[fd].used = 0;
         manager->entries[fd].data = NULL;
     }
@@ -191,7 +192,7 @@ void closeNamedPipe(const char * name){
 size_t read(int fd, char * buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
 
-    if((!manager->entries[fd].used || pipe->fdout != fd) && fd != STDIN){
+    if((fd != STDIN) && (pipe == NULL || !manager->entries[fd].used || pipe->fdout != fd)){
         return 0;
     }
 
@@ -204,7 +205,7 @@ size_t read(int fd, char * buff, size_t bytes) {
             break;
         default:
             waitSem(pipe->rSemaphore);
-            for(; i<bytes && pipe->buffer[i] != '\t'; i++) {
+            for(; i < bytes && i < PIPE_BUFFER_SIZE - 1 && pipe->buffer[i] != '\0'; i++) {
                 *(buff++) = pipe->buffer[i];
             }
             *buff = '\0';
@@ -219,12 +220,16 @@ size_t read(int fd, char * buff, size_t bytes) {
 size_t write(int fd, const char* buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
 
-    if((!manager->entries[fd].used || pipe->fdin != fd) && fd != STDOUT){
+    if((fd != STDOUT) && (pipe == NULL || !manager->entries[fd].used || pipe->fdin != fd)){
         return 0;
     }
 
     size_t bytesWritten;
     int i = 0;
+
+    if(bytes >= 1 && buff[0] == EOF) {
+        postSem(pipe->wSemaphore);
+    }
 
     switch(fd){
         case STDOUT:
@@ -233,10 +238,10 @@ size_t write(int fd, const char* buff, size_t bytes) {
             break;
         default:
             waitSem(pipe->wSemaphore);
-            for(; i<bytes; i++) {
+            for(; i < bytes && i < PIPE_BUFFER_SIZE - 1; i++) {
                 pipe->buffer[i] = *(buff++);
             }
-            pipe->buffer[i] = '\t';
+            pipe->buffer[i] = '\0';
             bytesWritten = i;
             postSem(pipe->rSemaphore);
             break;

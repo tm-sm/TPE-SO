@@ -41,6 +41,7 @@ void blockProcess(int pid);
 void unblockProcess(int pid);
 void setProcessPriority(int pid, int priority);
 void killProcessInForeground();
+int getForegroundPid();
 
 
 int getStdinFd(int pid);

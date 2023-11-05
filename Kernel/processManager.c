@@ -7,7 +7,8 @@
 #include <stddef.h>
 #include <fdManager.h>
 #include <time.h>
-#include "interrupts.h"
+#include <utils.h>
+#include <interrupts.h>
 #include <keyboardDriver.h>
 
 typedef struct childNode* cNode;
@@ -375,6 +376,8 @@ void killProcess(int pid) {
         _cli();
         removeChildNode(processes[pid]->parentPid, pid);
 
+        char aux[2] = {EOF, '\0'};
+        write(processes[pid]->stdout, aux, 2);
 
         closePipe(processes[pid]->stdin);
         closePipe(processes[pid]->stdout);
@@ -482,6 +485,13 @@ void blockCurrentProcess() {
     blockProcess(currProc);
 }
 
+int getForegroundPid() {
+    if(lastFgProc != -1) {
+        return fgStack[lastFgProc];
+    }
+    return -1;
+}
+
 void killProcessInForeground() {
     killProcess(fgStack[lastFgProc]);
 }
@@ -537,7 +547,7 @@ void waitForChild(int pid) {
     } else {
         prev = curr;
         curr = curr->next;
-        while(curr != NULL && curr->pid != pid) {
+        while((curr != NULL && curr->pid != pid)) {
             curr = curr->next;
         }
         if(curr == NULL) {

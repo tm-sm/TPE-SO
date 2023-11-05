@@ -3,6 +3,8 @@
 #include <lib.h>
 #include <processManager.h>
 #include <time.h>
+#include <utils.h>
+#include <fdManager.h>
 
 extern unsigned char keydown();
 
@@ -14,6 +16,7 @@ extern unsigned char keydown();
 #define LALT 0x38
 #define CAPS_LOCK 0x3A
 #define C 0x2E
+#define D 0x20
 
 #define F1 0x3B
 
@@ -106,6 +109,7 @@ static void setKeyMap(uint8_t keycode, uint8_t condition) {
 
 void keyboard_handler(uint64_t* registers) {
     unsigned char code = keydown();
+    char aux[2];
     if(code == NO_INPUT) {
         addToBuffer(NO_INPUT);
     }
@@ -121,6 +125,10 @@ void keyboard_handler(uint64_t* registers) {
             case C:
                 killProcessInForeground();
                 return;
+            case D:
+                aux[0] = EOF;
+                aux[1] = '\0';
+                write(getStdinFd(getForegroundPid()), aux, 2);
             default:
                 //continues
         }

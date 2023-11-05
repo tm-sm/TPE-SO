@@ -71,3 +71,11 @@ gdb
 gdb
 gdb
 exit
+cd root
+gdb
+gdb
+gdb
+gdb
+gdb
+y
+gdb

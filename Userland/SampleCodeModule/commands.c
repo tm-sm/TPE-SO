@@ -216,6 +216,7 @@ int sh(ARGS) {
     //TODO hacerla mas linda
     char* proc = NULL;
     if(argc >= 2) {
+        int paramStart = 1;
         if(strcmp(argv[1], SH_HELP) == 0) {
             shHelp();
             return -1;
@@ -238,12 +239,13 @@ int sh(ARGS) {
                         }
                     }
                 }
+
                 if(lastParamPos == 2) {
                     lastParamPos = argc;
                 }
 
                 //creates a copy of the parameters, excluding "sh"
-                int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, 1, lastParamPos);
+                int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, paramStart, lastParamPos);
                 if(fg == BACKGROUND) {
                     return -1;
                 }
@@ -262,10 +264,13 @@ int catProc(ARGS) {
     int size = 128;
     char* buff = alloc(size);
     waitSem("catSem");
-    while(1) {
-        getStrn(buff, size);
+    size_t read = getStrn(buff, size);
+    while(buff[0] != -1 && read != 0) {
         putStrn(buff);
+        getStrn(buff, size);
     }
+    exitProc();
+    return 0;
 }
 
 int cat(ARGS) {
@@ -290,6 +295,8 @@ int loop(ARGS) {
         printFormat("\nHello from process %d!", getOwnPid());
         wait(2000);
     }
+    exitProc();
+    return 0;
 }
 
 int playBubbles(ARGS) {
@@ -320,6 +327,7 @@ int repeat(ARGS) {
     for(int i=0; i<argc; i++) {
         printFormat("\n%s ", argv[i]);
     }
+    printFormat("\n");
     exitProc();
     return 0;
 }
