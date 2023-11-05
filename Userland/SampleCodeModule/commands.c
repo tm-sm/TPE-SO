@@ -121,7 +121,7 @@ void unknownCommand(char* str) {
     printFormat("\nUnknown command:\n\t'%s'\nType 'help' for a list of available commands.\n\n", str);
 }
 
-void unkownProcess(char* str) {
+void unknownProcess(char* str) {
     printFormat("\nUnknown process:\n\t'%s'\nType 'sh %s' for a list of available processes.\n\n", str, SH_HELP);
 }
 
@@ -212,41 +212,65 @@ int shHelp() {
     return 0;
 }
 
-int sh(ARGS) {
-    //TODO hacerla mas linda
+int sh(int argc, char* argv[]) {
+    // TODO make it more readable
     char* proc = NULL;
-    if(argc >= 2) {
+    if (argc >= 2) {
         int paramStart = 1;
-        if(strcmp(argv[1], SH_HELP) == 0) {
+        if (strcmp(argv[1], SH_HELP) == 0) {
             shHelp();
             return -1;
         }
-        for(int i=0; pArr[i]!=NULL; i++) {
-            if(strcmp(pArr[i]->name, argv[1]) == 0) {
-                int fg = FOREGROUND;
-                int lastParamPos = 2;
 
-                for(int j=2; j<argc; j++) {
-                    if(strcmp(argv[j], "&") == 0) {
+        for (int i = 0; pArr[i] != NULL; i++) {
+            if (strcmp(pArr[i]->name, argv[1]) == 0) {
+                int fg = FOREGROUND;
+                int paramEnd = 2;
+
+                for (int j = 2; j < argc; j++) {
+                    if (strcmp(argv[j], "&") == 0) {
                         fg = BACKGROUND;
-                        if(lastParamPos == 2) {
-                            lastParamPos = j + 1;
+                        if (paramEnd == 2) {
+                            paramEnd = j + 1;
                         }
-                    } else if(strcmp(argv[j], "|") == 0) {
-                        //TODO add pipe code
-                        if(lastParamPos == 2) {
-                            lastParamPos = j + 1;
+                    } else if (strcmp(argv[j], "/") == 0) {
+                        int ret1 = createProcessWithParams(pArr[i], HIGH, BACKGROUND, 1, argv, paramStart, paramEnd);
+
+                        if(argc == j) {
+                            killProcess(ret1);
+                            unknownProcess(" ");
+                            return -1;
                         }
+                        paramStart = j + 1;
+                        paramEnd = argc;
+
+                        for (int k = 0; pArr[k] != NULL; k++) {
+                            if (strcmp(pArr[k]->name, argv[j + 1]) == 0) {
+                                int ret2 = createProcessWithParams(pArr[k], HIGH, fg, 1, argv, paramStart, paramEnd);
+
+                                connectProcesses(ret1, ret2);
+                                unblockProcess(ret1);
+                                unblockProcess(ret2);
+                                if (fg == BACKGROUND) {
+                                    return -1;
+                                }
+
+                                return ret2;
+                            }
+                        }
+
+                        killProcess(ret1);
+                        unknownProcess(argv[paramStart]);
+                        return -1;
                     }
                 }
 
-                if(lastParamPos == 2) {
-                    lastParamPos = argc;
+                if (paramEnd == 2) {
+                    paramEnd = argc;
                 }
 
-                //creates a copy of the parameters, excluding "sh"
-                int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, paramStart, lastParamPos);
-                if(fg == BACKGROUND) {
+                int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, paramStart, paramEnd);
+                if (fg == BACKGROUND) {
                     return -1;
                 }
                 return ret;
@@ -256,7 +280,7 @@ int sh(ARGS) {
     } else {
         proc = " ";
     }
-    unkownProcess(proc);
+    unknownProcess(proc);
     return -1;
 }
 
