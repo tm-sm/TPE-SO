@@ -31,7 +31,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS),progs(ARGS);
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -46,7 +46,6 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
         &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
-        &(struct EXECUTABLE){"progs", "shows list of all available programs", progs},
         NULL
         };
 
@@ -56,8 +55,8 @@ static exec pArr[] = {
         &(struct EXECUTABLE){"beep", "produces a 'beep' sound", playBeep},
         &(struct EXECUTABLE){"repeat", "prints all parameters passed", repeat},
         &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
+        &(struct EXECUTABLE){"phylo", "runs the dining philosophers problem", initPhyloReunion},
         NULL
-
 };
 
 int callBuiltin(int argc, char* argv[]) {
@@ -73,6 +72,7 @@ int callBuiltin(int argc, char* argv[]) {
     unknownCommand(" ");
     return 0;
 }
+
 
 int parseCommand(char* str) {
     if (str == NULL) {
@@ -122,14 +122,6 @@ int help(ARGS) {
     return 0;
 }
 
-int progs(ARGS) {
-    for(int i=0; pArr[i] != NULL; i++){
-        putChar('\n');
-        printFormat("\t'%s': %s \n", pArr[i]->name, pArr[i]->description);
-        putChar('\n');
-    }
-    return 0;
-}
 
 int testException0(ARGS) {
    int i=1/0;
