@@ -267,7 +267,7 @@ int cat(ARGS) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
                 openSem("catSem", 0);
                 int catPid = createProcess(catProc, HIGH, FOREGROUND, "cat", NULL);
-                int pid = createProcess(pArr[i]->program, HIGH, BACKGROUND, "cat-view", NULL);
+                int pid = createProcess(pArr[i]->program, LOW, BACKGROUND, "cat-view", NULL);
                 connectProcesses(pid, catPid);
                 postSem("catSem");
                 return catPid;
@@ -279,7 +279,7 @@ int cat(ARGS) {
 
 int loop(ARGS) {
     while(1) {
-        putStrn("\nHello from process");
+        printFormat("\nHello from process %d!", getOwnPid());
         wait(2000);
     }
 }
