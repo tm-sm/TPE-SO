@@ -31,7 +31,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS);
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -55,8 +55,8 @@ static exec pArr[] = {
         &(struct EXECUTABLE){"beep", "produces a 'beep' sound", playBeep},
         &(struct EXECUTABLE){"repeat", "prints all parameters passed", repeat},
         &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
+        &(struct EXECUTABLE){"phylo", "runs the dining philosophers problem", initPhyloReunion},
         NULL
-
 };
 
 int callBuiltin(int argc, char* argv[]) {
@@ -72,6 +72,7 @@ int callBuiltin(int argc, char* argv[]) {
     unknownCommand(" ");
     return 0;
 }
+
 
 int parseCommand(char* str) {
     if (str == NULL) {
@@ -120,6 +121,7 @@ int help(ARGS) {
     }
     return 0;
 }
+
 
 int testException0(ARGS) {
    int i=1/0;
