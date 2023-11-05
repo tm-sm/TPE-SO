@@ -8,6 +8,10 @@ int getDigits(int n);
 void _printDec(int value, int len, uint8_t padding0, char* buff);
 void _printHex(uint64_t value, char* buff);
 
+uint64_t join(uint32_t upper, uint32_t lower) {
+    return ((uint64_t) upper << 32) | lower;
+}
+
 static char * itoa( uint64_t value, char * str, int base )
 // code taken from https://wiki.osdev.org/Printing_To_Screen
 {

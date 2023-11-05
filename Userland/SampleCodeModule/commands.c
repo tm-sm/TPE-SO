@@ -73,6 +73,18 @@ int callBuiltin(int argc, char* argv[]) {
     return 0;
 }
 
+int createProcessWithParams(exec p, int priority, int fg, int isBlocked, char* argv[], int from, int to) {
+    int argc = (to - from) + 1;
+    char** arguments = (char**)alloc(sizeof(char*) * argc);
+    int k = 0;
+    for(; k+1<argc; k++) {
+        arguments[k] = (char*)alloc(sizeof(char) * (strlen(argv[from + k]) + 1));
+        strcpy(arguments[k], argv[from + k]);
+    }
+    arguments[k] = NULL;
+    return createProcess(p->program, priority, fg, isBlocked, p->name, arguments);
+}
+
 
 int parseCommand(char* str) {
     if (str == NULL) {
@@ -231,14 +243,7 @@ int sh(ARGS) {
                 }
 
                 //creates a copy of the parameters, excluding "sh"
-                char** arguments = (char**)alloc(sizeof(char*) * lastParamPos);
-                int k = 0;
-                for(; k+1<lastParamPos; k++) {
-                    arguments[k] = (char*)alloc(sizeof(char) * (strlen(argv[k+1]) + 1));
-                    strcpy(arguments[k], argv[k+1]);
-                }
-                arguments[k] = NULL;
-                int ret = createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, arguments);
+                int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, 1, lastParamPos);
                 if(fg == BACKGROUND) {
                     return -1;
                 }
@@ -264,13 +269,14 @@ int catProc(ARGS) {
 }
 
 int cat(ARGS) {
-    if(argc == 2) {
+    if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
                 openSem("catSem", 0);
-                int catPid = createProcess(catProc, HIGH, FOREGROUND, "cat", NULL);
-                int pid = createProcess(pArr[i]->program, LOW, BACKGROUND, "cat-view", NULL);
+                int catPid = createProcess(catProc, HIGH, FOREGROUND, 0, "cat", NULL);
+                int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
+                unblockProcess(pid);
                 postSem("catSem");
                 return catPid;
             }

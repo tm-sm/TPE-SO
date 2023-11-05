@@ -222,12 +222,14 @@ uint64_t sys_is_char_pressed(BASE_PARAMS) {
 
 // ID= 10
 // rsi= instruction pointer
-// rdx= PRIORITY :: 0 -> HIGH || 1 -> MEDIUM || 2 -> LOW
-// rcx= DRAWING STATE :: define FOREGROUND (1) / define BACKGROUND (0)
+// rdx= upper half PRIORITY :: 0 -> HIGH || 1 -> MEDIUM || 2 -> LOW  DRAWING STATE || lower half define FOREGROUND (1) / define BACKGROUND (0)
+// rcx= isBlocked 0 -> READY || 1 -> BLOCKED
 // r8= char* argv[]
 // returns= pid on success, -1 on fail
 uint64_t sys_create_process(BASE_PARAMS) {
-    return startProcess((void*)rsi, (int)rdx, rcx, (char*)r8, 0, (char**)r9);
+    uint32_t priority = (uint32_t) (rdx >> 32);
+    uint32_t fg = (uint32_t) rdx;
+    return startProcess((void*)rsi, (int)priority, (int)fg, (int)rcx, (char*)r8, 0, (char**)r9);
 }
 
 // ID= 11

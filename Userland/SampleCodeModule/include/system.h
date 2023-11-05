@@ -30,7 +30,7 @@ void wait(uint64_t milliseconds);
  */
 void play_beep(uint32_t frequency, uint32_t milliseconds);
 
-int createProcess(void* ip, int priority, uint8_t foreground, char* name, char* argv[]);
+int createProcess(void* ip, int priority, int foreground, int isBlocked, char* name, char* argv[]);
 void* alloc(size_t size);
 void* realloc(void* address, size_t size);
 void dealloc(void* address);

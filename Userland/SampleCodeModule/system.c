@@ -54,8 +54,9 @@ void play_beep(uint32_t frequency, uint32_t duration) {
     interrupt(SYS_SOUND_ID, frequency, duration,  0, 0, 0);
 }
 
-int createProcess(void* ip, int priority, uint8_t foreground, char* name, char* argv[]) {
-    return (int)interrupt(SYS_CREATE_PROCESS, (uint64_t)ip, priority, foreground, (uint64_t)name, (uint64_t)argv);
+int createProcess(void* ip, int priority, int foreground, int isBlocked, char* name, char* argv[]) {
+    uint64_t aux = join(priority, foreground);
+    return (int)interrupt(SYS_CREATE_PROCESS, (uint64_t)ip, aux, isBlocked, (uint64_t)name, (uint64_t)argv);
 }
 
 void killProcess(int pid) {

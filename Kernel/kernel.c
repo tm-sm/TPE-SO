@@ -117,11 +117,11 @@ int main()
     initializeFileDescriptorManager();
 
     initializeProcessManager();
-    startProcess(NULL, LOW, FOREGROUND, "init", 0, NULL); //pid=1
+    startProcess(NULL, LOW, FOREGROUND, 0, "init", 0, NULL); //pid=1
     cNewline();
 
 
-    int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, "shell", 0, NULL);
+    int shellPid = startProcess(sampleCodeModuleAddress, HIGH, FOREGROUND, 0, "shell", 0, NULL);
     //startProcess(processHello, HIGH, FOREGROUND, "hello", 0, NULL);
     waitForChildren();
     cPrint("[Exiting System]");
