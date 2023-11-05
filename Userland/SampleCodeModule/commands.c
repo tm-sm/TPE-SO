@@ -279,8 +279,8 @@ int cat(ARGS) {
 
 int loop(ARGS) {
     while(1) {
-        wait(2000);
         putStrn("\nHello from process");
+        wait(2000);
     }
 }
 
