@@ -233,8 +233,8 @@ int sh(int argc, char* argv[]) {
                         if (paramEnd == 2) {
                             paramEnd = j + 1;
                         }
-                    } else if (strcmp(argv[j], "/") == 0) {
-                        int ret1 = createProcessWithParams(pArr[i], HIGH, BACKGROUND, 1, argv, paramStart, paramEnd);
+                    } else if (strcmp(argv[j], "|") == 0) {
+                        int ret1 = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, paramStart, paramEnd);
 
                         if(argc == j) {
                             killProcess(ret1);

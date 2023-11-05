@@ -94,6 +94,7 @@ void * initializeKernelBinary()
 int main()
 {
     initializeConsole();
+    initializeScheduler();
     cPrint("[Kernel Main]");
     cNewline();
     cPrint("Initializing Memory Manager");

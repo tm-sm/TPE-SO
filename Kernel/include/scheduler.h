@@ -10,6 +10,7 @@
 #define LOW 2
 #define UNDEFINED 3
 
+void initializeScheduler();
 void scheduler();
 void addToScheduler(int pid);
 void removeFromScheduler(int pid, int priority);
