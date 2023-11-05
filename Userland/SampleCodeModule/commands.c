@@ -30,7 +30,7 @@ extern void invalidOp();
 void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
-sh(ARGS), cat(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
+sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
 ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS);
 
 static exec bArr[] = {
@@ -42,6 +42,8 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"mem", "prints available memory in bytes", mem},
         &(struct EXECUTABLE){"sh", "runs the specified process", sh},
         &(struct EXECUTABLE){"cat", "prints the output of the specified process", cat},
+        &(struct EXECUTABLE){"wc", "prints the number of lines written by the specified process", wc},
+        &(struct EXECUTABLE){"filter", "prints the output of the specified process excluding vowels", filter},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
@@ -213,7 +215,6 @@ int shHelp() {
 }
 
 int sh(int argc, char* argv[]) {
-    // TODO make it more readable
     char* proc = NULL;
     if (argc >= 2) {
         int paramStart = 1;
@@ -288,6 +289,7 @@ int catProc(ARGS) {
     int size = 128;
     char* buff = alloc(size);
     waitSem("catSem");
+    destroySem("catSem");
     size_t read = getStrn(buff, size);
     while(buff[0] != -1 && read != 0) {
         putStrn(buff);
@@ -307,6 +309,94 @@ int cat(ARGS) {
                 connectProcesses(pid, catPid);
                 unblockProcess(pid);
                 postSem("catSem");
+                return catPid;
+            }
+        }
+    }
+    return -1;
+}
+
+int wcProc(ARGS) {
+    int counter = 0;
+    char *buff = alloc(128);
+    waitSem("wcSem");
+    destroySem("wcSem");
+    size_t len = getStrn(buff, 128);
+    while (len != 0 && buff[0] != -1) {
+        for (int i = 0; buff[i] != '\0'; i++) {
+            if (buff[i] == '\n') {
+                counter++;
+            }
+        }
+        len = getStrn(buff, 128);
+    }
+    printFormat("%d lines", counter);
+    exitProc();
+    return 0;
+}
+
+int wc(ARGS) {
+    if(argc >= 2) {
+        for(int i=0; pArr[i] != NULL; i++) {
+            if(strcmp(pArr[i]->name, argv[1]) == 0){
+                openSem("wcSem", 0);
+                int catPid = createProcess(wcProc, HIGH, FOREGROUND, 0, "wc", NULL);
+                int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
+                connectProcesses(pid, catPid);
+                unblockProcess(pid);
+                postSem("wcSem");
+                return catPid;
+            }
+        }
+    }
+    return -1;
+}
+
+static int isVowel(char c){
+    if(c >= 'A' && c <= 'Z') {
+        c -= 'A' - 'a';
+    }
+    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
+}
+
+int filterUser(char * string){
+    for(int i = 0;i < strlen(string); i ++){
+        char c = string[i];
+        if(!isVowel(c)){
+            putChar(c);
+        }
+    }
+    return 0;
+}
+
+int filterProc(ARGS) {
+    int size = 128;
+    char* buff = alloc(size);
+    waitSem("filterSem");
+    destroySem("filterSem");
+    size_t read = getStrn(buff, size);
+    while(buff[0] != -1 && read != 0) {
+        for(int i=0; i<read; i++) {
+            if(!isVowel(buff[i])) {
+                putChar(buff[i]);
+            }
+        }
+        getStrn(buff, size);
+    }
+    exitProc();
+    return 0;
+}
+
+int filter(ARGS) {
+    if(argc >= 2) {
+        for(int i=0; pArr[i] != NULL; i++) {
+            if(strcmp(pArr[i]->name, argv[1]) == 0){
+                openSem("filterSem", 0);
+                int catPid = createProcess(filterProc, HIGH, FOREGROUND, 0, "filter", NULL);
+                int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
+                connectProcesses(pid, catPid);
+                unblockProcess(pid);
+                postSem("filterSem");
                 return catPid;
             }
         }
@@ -353,31 +443,5 @@ int repeat(ARGS) {
     }
     printFormat("\n");
     exitProc();
-    return 0;
-}
-
-
-int wcCount(char * string){
-    int counter = 0;
-    for(int i = 0;i < strlen(string); i ++){
-        char c = string[i];
-            if(c == '\n'){
-                counter += 1;
-            }
-    }
-    return counter;
-}
-
-static int isVowel(char c){
-    return c == 'a' || c == 'A' || c == 'e'|| c == 'E' || c == 'i' || c == 'I' || c == 'o'|| c == 'O' || c == 'u' || c == 'U';
-}
-
-int filterUser(char * string){
-    for(int i = 0;i < strlen(string); i ++){
-        char c = string[i];
-        if(!isVowel(c)){
-            putChar(c);
-        }
-    }
     return 0;
 }
