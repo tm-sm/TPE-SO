@@ -4,7 +4,7 @@
 #include <sems.h>
 #include <utils.h>
 #include <memoryManager.h>
-#define SEM_MAX_AMOUNT 10
+#define SEM_MAX_AMOUNT 20
 #define MAX_PROCESSES_BLOCKED 10
 
 typedef struct semaphore{
