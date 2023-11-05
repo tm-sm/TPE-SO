@@ -42,9 +42,11 @@ void unblockProcess(int pid);
 void setProcessPriority(int pid, int priority);
 void killProcessInForeground();
 
+
 int getStdinFd(int pid);
 int getStdoutFd(int pid);
 int connectProcs(int pidProc1, int pidProc2);
+int connectToNamedPipe(const char * name, int pidProc1, int pidProc2);
 
 void waitForChild(int pid);
 void waitForChildren();

@@ -315,6 +315,11 @@ int connectProcs(int pidProc1, int pidProc2){
     return 0;
 }
 
+//redirects stdout of proc 1 to stdin of named pipe and stdout of named pipe to stdin proc 2
+int connectToNamedPipe(const char * name, int pidProc1, int pidProc2){
+
+}
+
 void removeFromFgStack(int pid) {
     //pid is not checked, as processes are removed from the stack after they are killed
     if (lastFgProc == -1) {

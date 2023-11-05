@@ -120,12 +120,22 @@ void closePipe(int pipeFD) {
 
 int namedPipe(char * name){
     struct NamedPipeList* current = first;
+
+
 }
 
 void closeNamedPipe(char * name){
     struct NamedPipeList* current = first;
 
+
 }
+
+struct NamedPipe getNamedPipe(char * name){
+
+
+
+}
+
 
 int redirectPipe(int oldFd, int newFd){
     if (newFd < 0 || newFd >= MAX_FILE_DESCRIPTORS) {
