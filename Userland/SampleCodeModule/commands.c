@@ -280,7 +280,7 @@ int cat(ARGS) {
 int loop(ARGS) {
     while(1) {
         wait(2000);
-        printFormat("\nHello from process %d!", getOwnPid());
+        putStrn("\nHello from process");
     }
 }
 

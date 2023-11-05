@@ -156,6 +156,7 @@ size_t read(int fd, char * buff, size_t bytes) {
     }
 
     size_t bytesRead = 0;
+    int i=0;
 
     switch(fd){
         case STDIN:
@@ -163,9 +164,11 @@ size_t read(int fd, char * buff, size_t bytes) {
             break;
         default:
             waitSem(pipe->rSemaphore);
-            for(int i=0; i<bytes; i++) {
+            for(; i<bytes && pipe->buffer[i] != '\t'; i++) {
                 *(buff++) = pipe->buffer[i];
             }
+            *buff = '\0';
+            bytesRead = i;
             postSem(pipe->wSemaphore);
             break;
     }
@@ -181,6 +184,7 @@ size_t write(int fd, const char* buff, size_t bytes) {
     }
 
     size_t bytesWritten = 0;
+    int i = 0;
 
     switch(fd){
         case STDOUT:
@@ -189,9 +193,11 @@ size_t write(int fd, const char* buff, size_t bytes) {
             break;
         default:
             waitSem(pipe->wSemaphore);
-            for(int i=0; i<bytes; i++) {
+            for(; i<bytes; i++) {
                 pipe->buffer[i] = *(buff++);
             }
+            pipe->buffer[i] = '\t';
+            bytesWritten = i;
             postSem(pipe->rSemaphore);
             break;
     }
