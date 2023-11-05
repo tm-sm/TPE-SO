@@ -31,7 +31,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS);
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -55,8 +55,8 @@ static exec pArr[] = {
         &(struct EXECUTABLE){"beep", "produces a 'beep' sound", playBeep},
         &(struct EXECUTABLE){"repeat", "prints all parameters passed", repeat},
         &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
+        &(struct EXECUTABLE){"phylo", "runs the dining philosophers problem", initPhyloReunion},
         NULL
-
 };
 
 int callBuiltin(int argc, char* argv[]) {
@@ -72,6 +72,19 @@ int callBuiltin(int argc, char* argv[]) {
     unknownCommand(" ");
     return 0;
 }
+
+int createProcessWithParams(exec p, int priority, int fg, int isBlocked, char* argv[], int from, int to) {
+    int argc = (to - from) + 1;
+    char** arguments = (char**)alloc(sizeof(char*) * argc);
+    int k = 0;
+    for(; k+1<argc; k++) {
+        arguments[k] = (char*)alloc(sizeof(char) * (strlen(argv[from + k]) + 1));
+        strcpy(arguments[k], argv[from + k]);
+    }
+    arguments[k] = NULL;
+    return createProcess(p->program, priority, fg, isBlocked, p->name, arguments);
+}
+
 
 int parseCommand(char* str) {
     if (str == NULL) {
@@ -120,6 +133,7 @@ int help(ARGS) {
     }
     return 0;
 }
+
 
 int testException0(ARGS) {
    int i=1/0;
@@ -229,14 +243,7 @@ int sh(ARGS) {
                 }
 
                 //creates a copy of the parameters, excluding "sh"
-                char** arguments = (char**)alloc(sizeof(char*) * lastParamPos);
-                int k = 0;
-                for(; k+1<lastParamPos; k++) {
-                    arguments[k] = (char*)alloc(sizeof(char) * (strlen(argv[k+1]) + 1));
-                    strcpy(arguments[k], argv[k+1]);
-                }
-                arguments[k] = NULL;
-                int ret = createProcess(pArr[i]->program, HIGH, fg, pArr[i]->name, arguments);
+                int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, 1, lastParamPos);
                 if(fg == BACKGROUND) {
                     return -1;
                 }
@@ -262,13 +269,14 @@ int catProc(ARGS) {
 }
 
 int cat(ARGS) {
-    if(argc == 2) {
+    if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
                 openSem("catSem", 0);
-                int catPid = createProcess(catProc, HIGH, FOREGROUND, "cat", NULL);
-                int pid = createProcess(pArr[i]->program, HIGH, BACKGROUND, "cat-view", NULL);
+                int catPid = createProcess(catProc, HIGH, FOREGROUND, 0, "cat", NULL);
+                int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
+                unblockProcess(pid);
                 postSem("catSem");
                 return catPid;
             }
@@ -279,7 +287,7 @@ int cat(ARGS) {
 
 int loop(ARGS) {
     while(1) {
-        putStrn("\nHello from process");
+        printFormat("\nHello from process %d!", getOwnPid());
         wait(2000);
     }
 }

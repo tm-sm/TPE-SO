@@ -59,10 +59,10 @@ int lastFgProc = -1;
 
 void initializeProcessManager() {
     //this should be started at the very beginning, so pid=0 == sentinel
-    startProcess(&processSentinel, UNDEFINED, FOREGROUND, "sentinel", 1024, NULL);
+    startProcess(&processSentinel, UNDEFINED, FOREGROUND, 0, "sentinel", 1024, NULL);
 }
 
-int startProcess(void* ip, int priority, uint8_t foreground, const char* name, unsigned int stackSize, char* argv[]) {
+int startProcess(void* ip, int priority, int foreground, int isBlocked, const char* name, unsigned int stackSize, char* argv[]) {
     int pid = findFirstAvailablePid();
 
     int argc = 0;
@@ -115,7 +115,7 @@ int startProcess(void* ip, int priority, uint8_t foreground, const char* name, u
 
     processes[pid]->stackTrace = prepare_process(processes[pid]->stackTop, ip, argc, argv);
     processes[pid]->priority = priority;
-    processes[pid]->state = READY;
+    processes[pid]->state = (isBlocked) ? (BLOCKED) : (READY);
     processes[pid]->totalMemory = (int)stackSize;
     processes[pid]->argv = argv;
     processes[pid]->argc = argc;

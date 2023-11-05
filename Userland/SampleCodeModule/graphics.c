@@ -23,10 +23,6 @@ enum BUFFER_ID {
     SWAP_BUFF
 };
 
-uint64_t join(uint32_t upper, uint32_t lower) {
-    return ((uint64_t) upper << 32) | lower;
-}
-
 //draw a pixel at the specified coordinate
 void drawPixel(uint32_t hexColor, uint32_t x, uint32_t y) {
     uint64_t coords = join(x, y);
