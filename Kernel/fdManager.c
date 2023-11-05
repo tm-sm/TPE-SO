@@ -17,7 +17,8 @@ struct CustomPipe {
     unsigned char fdin;
     unsigned char fdout;
 
-    char semaphore[24];
+    char rSemaphore[24];
+    char wSemaphore[24];
 };
 
 struct FileDescriptorEntry {
@@ -74,11 +75,17 @@ int customPipe(int fd[2]) {
         return -1;
     }
 
-    uintToBase((uint64_t)pipe,pipe->semaphore,16);
+    uintToBase((uint64_t)pipe,pipe->wSemaphore,16);
 
-    strcat(pipe->semaphore, " sem");
+    strcat(pipe->wSemaphore, " wSem");
 
-    openSem(pipe->semaphore,0);
+    openSem(pipe->wSemaphore,1);
+
+    uintToBase((uint64_t)pipe,pipe->rSemaphore,16);
+
+    strcat(pipe->rSemaphore, " rSem");
+
+    openSem(pipe->rSemaphore,0);
 
     fd[0] = openFD(pipe);
     fd[1] = openFD(pipe);
@@ -92,7 +99,8 @@ int customPipe(int fd[2]) {
 void closePipe(int pipeFD) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD);
 
-    closeSem(pipe->semaphore);
+    closeSem(pipe->rSemaphore);
+    closeSem(pipe->wSemaphore);
 
     deallocate(pipe);
 }
@@ -121,7 +129,7 @@ int redirectPipe(int oldFd, int newFd){
 size_t read(int fd, char * buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
 
-    if(!manager->entries[fd].used || pipe->fdout != fd){
+    if((!manager->entries[fd].used || pipe->fdout != fd) && fd != STDIN){
         return 0;
     }
 
@@ -132,11 +140,11 @@ size_t read(int fd, char * buff, size_t bytes) {
             bytesRead = gets(buff, bytes);
             break;
         default:
-            waitSem(pipe->semaphore);
+            waitSem(pipe->rSemaphore);
             for(int i=0; i<bytes; i++) {
                 *(buff++) = pipe->buffer[i];
             }
-            postSem(pipe->semaphore);
+            postSem(pipe->wSemaphore);
             break;
     }
 
@@ -146,7 +154,7 @@ size_t read(int fd, char * buff, size_t bytes) {
 size_t write(int fd, const char* buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
 
-    if(!manager->entries[fd].used || pipe->fdin != fd){
+    if((!manager->entries[fd].used || pipe->fdin != fd) && fd != STDOUT){
         return 0;
     }
 
@@ -158,11 +166,11 @@ size_t write(int fd, const char* buff, size_t bytes) {
             bytesWritten = strlen(buff);
             break;
         default:
-            waitSem(pipe->semaphore);
+            waitSem(pipe->wSemaphore);
             for(int i=0; i<bytes; i++) {
                 pipe->buffer[i] = *(buff++);
             }
-            postSem(pipe->semaphore);
+            postSem(pipe->rSemaphore);
             break;
     }
 

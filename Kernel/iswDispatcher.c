@@ -39,6 +39,9 @@ uint64_t sys_open_sem(BASE_PARAMS); // code 21
 uint64_t sys_post_sem(BASE_PARAMS); // code 22
 uint64_t sys_wait_sem(BASE_PARAMS); // code 23
 uint64_t sys_destroy_sem(BASE_PARAMS); //code 24
+uint64_t sys_create_pipe(BASE_PARAMS); // code 25
+uint64_t sys_close_pipe(BASE_PARAMS); // code 26
+uint64_t sys_connect_processes(BASE_PARAMS); // code 27
 
 
 extern void _sti();
@@ -51,7 +54,9 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_create_process, sys_kill_process, sys_set_process_foreground,
                                sys_get_own_pid, sys_is_process_alive, sys_memory_manager,
                                sys_check_process_foreground, sys_print_all_processes,
-                               sys_process_priority, sys_process_block, sys_wait_for_children,sys_open_sem,sys_post_sem,sys_wait_sem,sys_destroy_sem,};
+                               sys_process_priority, sys_process_block, sys_wait_for_children,
+                               sys_open_sem,sys_post_sem,sys_wait_sem,sys_destroy_sem, sys_create_pipe,
+                               sys_close_pipe, sys_connect_processes,};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -362,3 +367,25 @@ uint64_t sys_destroy_sem(BASE_PARAMS){
     return (uint64_t)closeSem((char*)rsi);
 }
 
+//ID= 25
+//rsi= int array of size 2
+//returns= 0 on success, -1 on failure
+uint64_t sys_create_pipe(BASE_PARAMS) {
+    return customPipe((int*)rsi);
+}
+
+//ID= 26
+//rsi= pipe fd
+//returns= nothing
+uint64_t sys_close_pipe(BASE_PARAMS) {
+    closePipe((int)rsi);
+    return 0;
+}
+
+//ID= 27
+//rsi= pid 1
+//rdx= pid 2
+//returns= 0 on success, -1 on failure
+uint64_t sys_connect_processes(BASE_PARAMS) {
+    return connectProcs((int)rsi, (int)rdx);
+}

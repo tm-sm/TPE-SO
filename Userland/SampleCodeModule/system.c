@@ -21,6 +21,9 @@
 #define SYS_POST_SEM 22
 #define SYS_WAIT_SEM 23
 #define SYS_CLOSE_SEM 24
+#define SYS_CREATE_PIPE 25
+#define SYS_CLOSE_PIPE 26
+#define SYS_CONNECT_PROCESSES 27
 
 #define ALLOC 0
 #define REALLOC 1
@@ -143,5 +146,17 @@ int waitSem(char* name){
 
 int destroySem(char* name){
     return (int)interrupt(SYS_CLOSE_SEM,(uint64_t)name,0,0,0,0);
+}
+
+int createPipe(int fd[2]) {
+    return (int)interrupt(SYS_CREATE_PIPE, (uint64_t)fd, 0, 0, 0, 0);
+}
+
+void closePipe(int fd) {
+    interrupt(SYS_CLOSE_PIPE, (uint64_t)fd, 0, 0, 0, 0);
+}
+
+int connectProcesses(int p1, int p2) {
+    return (int)interrupt(SYS_CONNECT_PROCESSES, (uint64_t)p1, (uint64_t)p2, 0, 0, 0);
 }
 

@@ -27,7 +27,7 @@ void putChar(char c);
  */
 char getChar();
 
-size_t getStrn();
+size_t getStrn(char* buff, size_t len);
 
 /**
  * Prints a string to screen, can print parameters passed

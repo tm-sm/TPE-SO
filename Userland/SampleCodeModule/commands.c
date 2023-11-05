@@ -30,7 +30,8 @@ extern void invalidOp();
 void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
-sh(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS), ps(ARGS), nice(ARGS), block(ARGS);
+sh(ARGS), cat(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
+ps(ARGS), nice(ARGS), block(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -40,6 +41,7 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"date", "prints the current date", displayDate},
         &(struct EXECUTABLE){"mem", "prints available memory in bytes", mem},
         &(struct EXECUTABLE){"sh", "runs the specified process", sh},
+        &(struct EXECUTABLE){"cat", "prints the output of the specified process", cat},
         &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
@@ -246,6 +248,32 @@ int sh(ARGS) {
         proc = " ";
     }
     unkownProcess(proc);
+    return -1;
+}
+
+int catProc(ARGS) {
+    int size = 128;
+    char* buff = alloc(size);
+    waitSem("catSem");
+    while(1) {
+        getStrn(buff, size);
+        putStrn(buff);
+    }
+}
+
+int cat(ARGS) {
+    if(argc == 2) {
+        for(int i=0; pArr[i] != NULL; i++) {
+            if(strcmp(pArr[i]->name, argv[1]) == 0){
+                openSem("catSem", 0);
+                int catPid = createProcess(catProc, HIGH, FOREGROUND, "cat", NULL);
+                int pid = createProcess(pArr[i]->program, HIGH, BACKGROUND, "cat-view", NULL);
+                connectProcesses(pid, catPid);
+                postSem("catSem");
+                return catPid;
+            }
+        }
+    }
     return -1;
 }
 

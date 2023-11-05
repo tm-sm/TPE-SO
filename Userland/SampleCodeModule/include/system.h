@@ -56,4 +56,8 @@ int postSem(char* name);
 int waitSem(char* sem);
 int destroySem(char* sem);
 
+int createPipe(int fd[2]);
+void closePipe(int fd);
+int connectProcesses(int p1, int p2);
+
 #endif //TPE_ARQUI_SYSTEM_H
