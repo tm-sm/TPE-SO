@@ -50,7 +50,8 @@ void initializeFileDescriptorManager() {
     for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
         manager->entries[i].used = 0;
     }
-    first = allocate(sizeof(struct NamedPipeList));
+    first = (struct NamedPipeList *)allocate(sizeof(struct NamedPipeList));
+    first->next = NULL; // Initialize the list as empty
 
     openFD(NULL); //0 STDIN
     openFD(NULL); //1 STDOUT
@@ -118,44 +119,73 @@ void closePipe(int pipeFD) {
     deallocate(pipe);
 }
 
-int namedPipe(char * name){
-    struct NamedPipeList* current = first;
-
-
+struct NamedPipe *getNamedPipe(const char * name){
+    struct NamedPipeList *current = first->next;
+    while (current) {
+        if (strcmp(current->pipe->name, name) == 0) {
+            return current->pipe;
+        }
+        current = current->next;
+    }
+    return NULL;
 }
 
-void closeNamedPipe(char * name){
-    struct NamedPipeList* current = first;
-
-
-}
-
-struct NamedPipe getNamedPipe(char * name){
-
-
-
-}
-
-
-int redirectPipe(int oldFd, int newFd){
-    if (newFd < 0 || newFd >= MAX_FILE_DESCRIPTORS) {
+int setToNamedPipeFd(int *proc1, int *proc2, const char * name){
+    struct NamedPipe * pip = getNamedPipe(name);
+    if(pip == NULL){
         return -1;
     }
 
-    void* data = getFDData(oldFd);
+    *proc1 = pip->pipe.fdin;
+    *proc2= pip->pipe.fdout;
+    return 0;
+}
 
-    if (data == NULL) {
+int namedPipe(const char * name){
+    struct NamedPipeList *newPipeEntry = (struct NamedPipeList *)allocate(sizeof(struct NamedPipeList));
+
+    int fd[2];
+
+    if (!newPipeEntry) {
+        // Allocation failed, handle the error
         return -1;
     }
 
-    if (manager->entries[newFd].used) {
-        closeFD(newFd);
+    if (customPipe(fd) != 0) {
+        deallocate(newPipeEntry);
+        closePipe(fd[0]);
+        return -1;
     }
 
-    manager->entries[newFd].used = 1;
-    manager->entries[newFd].data = data;
 
-    return newFd;
+    strcpy(newPipeEntry->pipe->name, name);
+
+    newPipeEntry->next = first->next;
+
+    first->next = newPipeEntry;
+
+    return 0;
+}
+
+void closeNamedPipe(const char * name){
+    struct NamedPipeList *current = first;
+    struct NamedPipeList *previous = NULL;
+
+    while (current) {
+        if (strcmp(current->pipe->name, name) == 0) {
+            closePipe(current->pipe->pipe.fdin);
+            if (previous) {
+                previous->next = current->next;
+            } else {
+                first->next = current->next;
+            }
+            deallocate(current->pipe);
+            deallocate(current);
+            return;
+        }
+        previous = current;
+        current = current->next;
+    }
 }
 
 size_t read(int fd, char * buff, size_t bytes) {
@@ -165,7 +195,7 @@ size_t read(int fd, char * buff, size_t bytes) {
         return 0;
     }
 
-    size_t bytesRead = 0;
+    size_t bytesRead;
     int i=0;
 
     switch(fd){
@@ -193,7 +223,7 @@ size_t write(int fd, const char* buff, size_t bytes) {
         return 0;
     }
 
-    size_t bytesWritten = 0;
+    size_t bytesWritten;
     int i = 0;
 
     switch(fd){

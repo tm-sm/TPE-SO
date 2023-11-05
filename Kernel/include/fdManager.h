@@ -12,13 +12,11 @@ int customPipe(int fd[2]);
 
 void closePipe(int pipeFD);
 
-int namedPipe(char * name);
+int namedPipe(const char* name);
 
-void closeNamedPipe(char * name);
+void closeNamedPipe(const char* name);
 
-struct NamedPipe getNamedPipe(char * name);
-
-int redirectPipe(int oldfd, int newfd);
+int setToNamedPipeFd(int *proc1, int *proc2, const char * name);
 
 size_t read(int pipeFd, char *buff, size_t bytes);
 

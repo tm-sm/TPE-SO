@@ -317,7 +317,13 @@ int connectProcs(int pidProc1, int pidProc2){
 
 //redirects stdout of proc 1 to stdin of named pipe and stdout of named pipe to stdin proc 2
 int connectToNamedPipe(const char * name, int pidProc1, int pidProc2){
+    proc proc1 = getProcess(pidProc1);
+    proc proc2 = getProcess(pidProc2);
 
+    closeFD(proc1->stdout);
+    closeFD(proc2->stdin);
+
+    return setToNamedPipeFd(&proc1->stdout, &proc2->stdin, name);
 }
 
 void removeFromFgStack(int pid) {
