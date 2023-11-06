@@ -39,8 +39,8 @@ void createMemoryManager() {
 }
 
 size_t convertToClosestPowerOf2(size_t size) {
-    if ((size & (size - 1)) == 0) {
-        return size < MIN_SIZE ? MIN_SIZE: size;
+    if (size < MIN_SIZE) {
+        return size <= MIN_SIZE - sizeof(BuddyBlock) ? MIN_SIZE: 2*MIN_SIZE;
     }
 
     size_t power = 1;
@@ -142,9 +142,9 @@ void deallocate(void *addr) {
         cPrintColored(RED,"Illegal Memory free");
         return;
     }
-   BuddyBlock *block = (BuddyBlock *)((char *)addr - sizeof(BuddyBlock));
-   block->isFree = 1;
-   block->pid = -1;
+    BuddyBlock *block = (BuddyBlock *)((char *)addr - sizeof(BuddyBlock));
+    block->isFree = 1;
+    block->pid = -1;
     mergeBlocks();
 }
 
@@ -188,7 +188,7 @@ size_t getCurrentFreeMemRecursively(BuddyBlock * node){
 
         return leftSize + rightSize;
     } else {
-       return 0;
+        return 0;
     }
 }
 

@@ -11,7 +11,7 @@
 
 #define START_IN_BACKGROUND_SYMBOL "&"
 #define CONNECT_WITH_PIPE_SYMBOL "/"
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 80
 
 #define ARGS int argc, char* argv[]
 

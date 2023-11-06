@@ -8,7 +8,7 @@
 #include <utils.h>
 
 #define MAX_FILE_DESCRIPTORS 128
-#define PIPE_BUFFER_SIZE 100
+#define PIPE_BUFFER_SIZE 80
 #define STDOUT 1
 #define STDIN 0
 #define FIFO_COUNT 5
