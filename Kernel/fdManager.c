@@ -11,6 +11,7 @@
 #define PIPE_BUFFER_SIZE 128
 #define STDOUT 1
 #define STDIN 0
+#define FIFO_COUNT 5
 
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];
@@ -37,25 +38,38 @@ struct NamedPipe{
     struct CustomPipe pipe;
 };
 
-struct NamedPipeList{
-    struct NamedPipe * pipe;
-    struct NamedPipeList * next;
+struct FIFOs{
+    struct NamedPipe fifos[FIFO_COUNT];
 };
 
-
 static struct FileDescriptorManager* manager;
-static struct NamedPipeList * first;
+static struct FIFOs * first;
+
+int initNamedPipe(struct CustomPipe * pipe);
 
 void initializeFileDescriptorManager() {
     manager = allocate(sizeof(struct FileDescriptorManager));
     for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
         manager->entries[i].used = 0;
     }
-    first = (struct NamedPipeList *)allocate(sizeof(struct NamedPipeList));
-    first->next = NULL; // Initialize the list as empty
 
     openFD(NULL); //0 STDIN
     openFD(NULL); //1 STDOUT
+
+    first = allocate(sizeof(struct FIFOs));
+    for (int i = 0; i < FIFO_COUNT; i++) {
+        char fifoName[24];
+        char num[2];
+        num[0] = i + '0';
+        num[1] = '\0';
+        strcpy(fifoName,"FIFO");
+        strcat(fifoName,num);
+
+        struct NamedPipe* namedPipe = &first->fifos[i];
+        strcpy(namedPipe->name, fifoName);
+
+        initNamedPipe(&first->fifos[i].pipe);
+    }
 }
 
 int openFD(void* data) {
@@ -117,6 +131,30 @@ int customPipe(int fd[2]) {
     return 0;
 }
 
+int initNamedPipe(struct CustomPipe * pipe){
+    int fd[2];
+
+    uintToBase((uint64_t)pipe,pipe->wSemaphore,16);
+
+    strcat(pipe->wSemaphore, " wSem");
+
+    openSem(pipe->wSemaphore,1);
+
+    uintToBase((uint64_t)pipe,pipe->rSemaphore,16);
+
+    strcat(pipe->rSemaphore, " rSem");
+
+    openSem(pipe->rSemaphore,0);
+
+    fd[0] = openFD(pipe);
+    fd[1] = openFD(pipe);
+
+    pipe->fdin = fd[0];
+    pipe->fdout = fd[1];
+
+    return 0;
+}
+
 void closePipe(int pipeFD) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD);
 
@@ -131,19 +169,17 @@ void closePipe(int pipeFD) {
 }
 
 struct NamedPipe *getNamedPipe(const char * name){
-    struct NamedPipeList *current = first->next;
-    while (current) {
-        if (strcmp(current->pipe->name, name) == 0) {
-            return current->pipe;
+    for (int i = 0; i < FIFO_COUNT; i++) {
+        if (strcmp(first->fifos[i].name, name) == 0) {
+            return &first->fifos[i];
         }
-        current = current->next;
     }
     return NULL;
 }
 
 int setToNamedPipeFd(int *proc1, int *proc2, const char * name){
-    struct NamedPipe * pip = getNamedPipe(name);
-    if(pip == NULL){
+    struct NamedPipe* pip = getNamedPipe(name);
+    if (pip == NULL) {
         return -1;
     }
 
@@ -152,51 +188,14 @@ int setToNamedPipeFd(int *proc1, int *proc2, const char * name){
     return 0;
 }
 
-int namedPipe(const char * name){
-    struct NamedPipeList *newPipeEntry = (struct NamedPipeList *)allocate(sizeof(struct NamedPipeList));
-
-    int fd[2];
-
-    if (!newPipeEntry) {
-        // Allocation failed, handle the error
-        return -1;
+void displayFIFO(){
+    cPrint("Named Pipes (FIFOs):\n");
+    for (int i = 0; i < FIFO_COUNT; i++) {
+        struct NamedPipe* namedPipe = &first->fifos[i];
+        cPrint(namedPipe->name);
+        cPrint(" ");
     }
-
-    if (customPipe(fd) != 0) {
-        deallocate(newPipeEntry);
-        closePipe(fd[0]);
-        return -1;
-    }
-
-
-    strcpy(newPipeEntry->pipe->name, name);
-
-    newPipeEntry->next = first->next;
-
-    first->next = newPipeEntry;
-
-    return 0;
-}
-
-void closeNamedPipe(const char * name){
-    struct NamedPipeList *current = first;
-    struct NamedPipeList *previous = NULL;
-
-    while (current) {
-        if (strcmp(current->pipe->name, name) == 0) {
-            closePipe(current->pipe->pipe.fdin);
-            if (previous) {
-                previous->next = current->next;
-            } else {
-                first->next = current->next;
-            }
-            deallocate(current->pipe);
-            deallocate(current);
-            return;
-        }
-        previous = current;
-        current = current->next;
-    }
+    cNewline();
 }
 
 size_t read(int fd, char * buff, size_t bytes) {

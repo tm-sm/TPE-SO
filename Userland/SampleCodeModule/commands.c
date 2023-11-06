@@ -31,7 +31,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS);
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS);
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
@@ -48,6 +48,8 @@ static exec bArr[] = {
         &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
         &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
         &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
+        &(struct EXECUTABLE){"FIFO", "Displays the FIFO list", displayFIFOList},
+        &(struct EXECUTABLE){"connectFIFO", "connects two process to each end of a FIFO, requires pids and a FIFO", connectProcsToFIFO},
         NULL
         };
 
@@ -443,5 +445,15 @@ int repeat(ARGS) {
     }
     printFormat("\n");
     exitProc();
+    return 0;
+}
+
+int displayFIFOList(ARGS){
+    displayFIFOs();
+    return 0;
+}
+
+int connectProcsToFIFO(ARGS){
+    connectToFIFO(argv[0],atoi(argv[1]),atoi(argv[2]));
     return 0;
 }

@@ -12,11 +12,9 @@ int customPipe(int fd[2]);
 
 void closePipe(int pipeFD);
 
-int namedPipe(const char* name);
-
-void closeNamedPipe(const char* name);
-
 int setToNamedPipeFd(int *proc1, int *proc2, const char * name);
+
+void displayFIFO();
 
 size_t read(int pipeFd, char *buff, size_t bytes);
 
