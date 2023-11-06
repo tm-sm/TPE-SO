@@ -9,6 +9,9 @@
 #define INIT_PID 1
 #define SHELL_PID 2
 
+#define START_IN_BACKGROUND_SYMBOL "&"
+#define CONNECT_WITH_PIPE_SYMBOL "/"
+
 #define ARGS int argc, char* argv[]
 
 typedef int (*functionPtr)(ARGS);
@@ -229,12 +232,12 @@ int sh(int argc, char* argv[]) {
                 int paramEnd = 2;
 
                 for (int j = 2; j < argc; j++) {
-                    if (strcmp(argv[j], "&") == 0) {
+                    if (strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
                         fg = BACKGROUND;
                         if (paramEnd == 2) {
                             paramEnd = j + 1;
                         }
-                    } else if (strcmp(argv[j], "|") == 0) {
+                    } else if (strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
                         int ret1 = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, paramStart, paramEnd);
 
                         if(argc == j) {
