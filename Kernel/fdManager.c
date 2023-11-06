@@ -114,6 +114,10 @@ int customPipe(int fd[2]) {
 void closePipe(int pipeFD) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD);
 
+    if(pipe == NULL){
+        return;
+    }
+
     closeSem(pipe->rSemaphore);
     closeSem(pipe->wSemaphore);
 
