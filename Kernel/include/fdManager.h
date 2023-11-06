@@ -6,6 +6,8 @@ int openFD(void* data);
 
 void* getFDData(int fd);
 
+int getOtherEndOfPipe(int fd);
+
 void closeFD(int fd);
 
 int customPipe(int fd[2]);

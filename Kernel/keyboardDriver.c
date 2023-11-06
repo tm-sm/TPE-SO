@@ -128,7 +128,10 @@ void keyboard_handler(uint64_t* registers) {
             case D:
                 aux[0] = EOF;
                 aux[1] = '\0';
-                write(getStdinFd(getForegroundPid()), aux, 2);
+                int fd = getOtherEndOfPipe(getStdinFd(getForegroundPid()));
+                if(fd != -1) {
+                    write(fd, aux, 2);
+                }
             default:
                 //continues
         }

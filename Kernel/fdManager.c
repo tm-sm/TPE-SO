@@ -91,6 +91,20 @@ void* getFDData(int fd) {
     return NULL;
 }
 
+int getOtherEndOfPipe(int fd) {
+    struct CustomPipe* pipe = getFDData(fd);
+    if(pipe == NULL) {
+        return -1;
+    }
+    if(fd == pipe->fdin) {
+        return pipe->fdout;
+    } else if(fd == pipe->fdout) {
+        return pipe->fdin;
+    } else {
+        return -1;
+    }
+}
+
 void closeFD(int fd) {
     if(fd <= FIFO_COUNT*2 + 2){
         return;
