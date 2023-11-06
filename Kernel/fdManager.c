@@ -225,7 +225,6 @@ size_t read(int fd, char * buff, size_t bytes) {
             postSem(pipe->wSemaphore);
             break;
     }
-
     return bytesRead;
 }
 
