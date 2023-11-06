@@ -10,6 +10,9 @@
 #include <utils.h>
 #include <interrupts.h>
 #include <keyboardDriver.h>
+#include <sems.h>
+
+#define MUTEX "processManagerMutex"
 
 typedef struct childNode* cNode;
 
@@ -60,10 +63,12 @@ int lastFgProc = -1;
 
 void initializeProcessManager() {
     //this should be started at the very beginning, so pid=0 == sentinel
+    openSem(MUTEX, 1);
     startProcess(&processSentinel, UNDEFINED, FOREGROUND, 0, "sentinel", 1024, NULL);
 }
 
 int startProcess(void* ip, int priority, int foreground, int isBlocked, const char* name, unsigned int stackSize, char* argv[]) {
+    waitSem(MUTEX);
     int pid = findFirstAvailablePid();
 
     int argc = 0;
@@ -78,6 +83,7 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
             deallocate(argv[j]);
         }
         deallocate(argv);
+        postSem(MUTEX);
         return -1;
     }
     if (ip == NULL) {
@@ -94,6 +100,7 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
             deallocate(argv[j]);
         }
         deallocate(argv);
+        postSem(MUTEX);
         return -1;
     }
 
@@ -111,6 +118,7 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
         }
         deallocate(argv);
         deallocate(processes[pid]);
+        postSem(MUTEX);
         return -1;
     }
 
@@ -137,6 +145,7 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
             deallocate(argv);
             deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
             deallocate(processes[pid]);
+            postSem(MUTEX);
             return -1;
         }
     }
@@ -148,9 +157,12 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
     }
 
     if(foreground) {
+        postSem(MUTEX);
         addToFgStack(pid);
+        waitSem(MUTEX);
     }
 
+    postSem(MUTEX);
     interruptTick();
     return pid;
 }
@@ -190,12 +202,15 @@ int checkProcessHealth(int pid) {
 }
 
 void selectNextProcess(int pid) {
+    waitSem(MUTEX);
     if(isPidValid(pid)) {
         nextProc = pid;
     }
+    postSem(MUTEX);
 }
 
 uint64_t switchProcess(uint64_t rsp) {
+    waitSem(MUTEX);
     if(amount > 0 && currProc != nextProc && processes[nextProc] != NULL && processes[nextProc]->state == READY) {
         if(currProc != -1) {
             processes[currProc]->stackTrace = (uint8_t *) rsp;
@@ -206,8 +221,10 @@ uint64_t switchProcess(uint64_t rsp) {
         currProc = nextProc;
         checkProcessHealth(currProc);
         processes[currProc]->state = RUNNING;
+        postSem(MUTEX);
         return (uint64_t)processes[currProc]->stackTrace;
     }
+    postSem(MUTEX);
     return 0;
 }
 
@@ -238,13 +255,17 @@ int getSpace() {
 }
 
 proc getProcess(int pid) {
+    waitSem(MUTEX);
     if(isPidValid(pid)) {
+        postSem(MUTEX);
         return processes[pid];
     }
+    postSem(MUTEX);
     return NULL;
 }
 
 void setProcessForeground(int pid, int foreground) {
+    waitSem(MUTEX);
     if(isPidValid(pid)) {
         switch (foreground) {
             case FOREGROUND:
@@ -256,24 +277,30 @@ void setProcessForeground(int pid, int foreground) {
                 removeFromFgStack(pid);
                 break;
             default:
-                return;
+                break;
         }
     }
+    postSem(MUTEX);
 }
 
 void setProcessPriority(int pid, int priority) {
+    waitSem(MUTEX);
     if(isPidValid(pid) && (priority == LOW || priority == MED || priority == HIGH) ) {
         int oldPriority = processes[pid]->priority;
         processes[pid]->priority = priority;
         changeProcessPriority(pid, oldPriority, priority);
     }
+    postSem(MUTEX);
 }
 
 int getProcessPriority(int pid) {
+    waitSem(MUTEX);
+    int priority = UNDEFINED;
     if(isPidValid(pid)) {
-        return processes[pid]->priority;
+        priority = processes[pid]->priority;
     }
-    return UNDEFINED;
+    postSem(MUTEX);
+    return priority;
 }
 
 int isProcessInForeground(int pid) {
@@ -287,16 +314,18 @@ int isCurrentProcessInForeground() {
 }
 
 void addToFgStack(int pid) {
+    waitSem(MUTEX);
     if(isPidValid(pid)) {
         if (lastFgProc < MAX_PROC) {
             lastFgProc++;
             fgStack[lastFgProc] = pid;
         }
     }
+    postSem(MUTEX);
 }
 
 // connects stdout proc1 to stdin proc2
-int connectProcs(int pidProc1, int pidProc2){
+int connectProcs(int pidProc1, int pidProc2) {
 
     proc proc1 = getProcess(pidProc1);
     proc proc2 = getProcess(pidProc2);
@@ -317,7 +346,7 @@ int connectProcs(int pidProc1, int pidProc2){
 }
 
 //redirects stdout of proc 1 to stdin of named pipe and stdout of named pipe to stdin proc 2
-int connectToNamedPipe(const char * name, int pidProc1, int pidProc2){
+int connectToNamedPipe(const char* name, int pidProc1, int pidProc2) {
     proc proc1 = getProcess(pidProc1);
     proc proc2 = getProcess(pidProc2);
 
@@ -329,7 +358,9 @@ int connectToNamedPipe(const char * name, int pidProc1, int pidProc2){
 
 void removeFromFgStack(int pid) {
     //pid is not checked, as processes are removed from the stack after they are killed
+    waitSem(MUTEX);
     if (lastFgProc == -1) {
+        postSem(MUTEX);
         return;
     }
     if (fgStack[lastFgProc] == pid) {
@@ -342,20 +373,26 @@ void removeFromFgStack(int pid) {
             }
         }
     }
+    postSem(MUTEX);
 }
 
 int isProcessAlive(int pid) {
+    waitSem(MUTEX);
+    int ret = 0;
     if (isPidValid(pid)) {
-        return processes[pid] != NULL;
+        ret = processes[pid] != NULL;
     }
-    return 0;
+    postSem(MUTEX);
+    return ret;
 }
 
 void killProcess(int pid) {
-    _cli();
+    _cli(); //blocks interruptions to prevent a process flagged for being killed being ran
+    waitSem(MUTEX);
 
     if(pid == 0) {
         //the sentinel shouldn't be terminated
+        postSem(MUTEX);
         _sti();
         return;
     }
@@ -381,27 +418,34 @@ void killProcess(int pid) {
 
         closeFD(processes[pid]->stdin);
         closeFD(processes[pid]->stdout);
-        for(int i=0; i<processes[pid]->argc; i++) {
-            deallocate(processes[pid]->argv[i]);
+
+        if(processes[pid]->argv != NULL) {
+            for(int i=0; i<processes[pid]->argc; i++) {
+                deallocate(processes[pid]->argv[i]);
+            }
+            deallocate(processes[pid]->argv);
         }
-        deallocate(processes[pid]->argv);
+
         deallocate(processes[pid]->stackTop - processes[pid]->totalMemory);
         deallocate(processes[pid]);
         processes[pid] = NULL;
         removeFromFgStack(pid);
         removeFromScheduler(pid, priority);
         amount--;
-        notifyParent(parentPid, pid);
         deallocateAllProcessRelatedMem(pid);
+        notifyParent(parentPid, pid);
         if (pid == currProc) {
+            postSem(MUTEX);
             _sti();
             interruptTick();
         }
     }
+    postSem(MUTEX);
     _sti();
 }
 
 int findFirstAvailablePid() {
+    //no mutex as it is only called in startProcess (which already has a mutex)
     if(amount == MAX_PROC) {
         return -1;
     }
@@ -411,12 +455,12 @@ int findFirstAvailablePid() {
             return i;
         }
     }
-
     return -1;
 }
 
 int getActiveProcessPid() {
-    return currProc;
+    int ret = currProc;
+    return ret;
 }
 
 void listAllProcesses() {
@@ -459,7 +503,8 @@ void listAllProcesses() {
 }
 
 int isPidValid(int pid) {
-    return pid < MAX_PROC && pid >= 0 && processes[pid] != NULL;
+    int ret = pid < MAX_PROC && pid >= 0 && processes[pid] != NULL;
+    return ret;
 }
 
 void unblockProcess(int pid) {
@@ -474,7 +519,14 @@ void blockProcess(int pid) {
     }
     if(isPidValid(pid)) {
         processes[pid]->state = BLOCKED;
+        if(getSemValue(MUTEX) == 0) {
+            postSem(MUTEX);
+        }
         interruptTick();
+        if(getSemValue(MUTEX) == 1) {
+            waitSem(MUTEX);
+        }
+
     }
 }
 
@@ -483,9 +535,12 @@ void blockCurrentProcess() {
 }
 
 int getForegroundPid() {
+    waitSem(MUTEX);
     if(lastFgProc != -1) {
+        postSem(MUTEX);
         return fgStack[lastFgProc];
     }
+    postSem(MUTEX);
     return -1;
 }
 
@@ -495,6 +550,7 @@ void killProcessInForeground() {
 
 //only called within procManager, no checks are performed
 int addChildNode(int parentPid, int childPid) {
+    //no mutex, read findFistAvailablePid
     cNode child = allocate(sizeof(childNode));
     if(child == NULL) {
         return -1;
@@ -506,7 +562,9 @@ int addChildNode(int parentPid, int childPid) {
 }
 
 void removeChildNode(int parentPid, int childPid) {
+    waitSem(MUTEX);
     if(parentPid == -1 || parentPid == 0) {
+        postSem(MUTEX);
         return;
     }
     cNode curr;
@@ -514,6 +572,7 @@ void removeChildNode(int parentPid, int childPid) {
     curr = processes[parentPid]->children;
     if(curr->pid == childPid) {
         processes[parentPid]->children = curr->next;
+        postSem(MUTEX);
         return;
     }
     while(curr != NULL && curr->pid != childPid) {
@@ -521,14 +580,18 @@ void removeChildNode(int parentPid, int childPid) {
         curr = curr->next;
     }
     if(curr == NULL) {
+        postSem(MUTEX);
         return;
     }
     prev->next = curr->next;
     deallocate(curr);
+    postSem(MUTEX);
 }
 
 void waitForChild(int pid) {
+    waitSem(MUTEX);
     if(!isPidValid(currProc) || pid == 0) {
+        postSem(MUTEX);
         return;
     }
     //moves the child process to the front of the list,
@@ -548,6 +611,7 @@ void waitForChild(int pid) {
             curr = curr->next;
         }
         if(curr == NULL) {
+            postSem(MUTEX);
             return;
         }
         processes[currProc]->waitingForChild = pid;
@@ -557,27 +621,36 @@ void waitForChild(int pid) {
     }
 
     while(processes[currProc]->children->pid == pid) {
+        postSem(MUTEX);
         blockCurrentProcess();
+        waitSem(MUTEX);
     }
     processes[currProc]->waitingForChild = FALSE;
+    postSem(MUTEX);
 }
 
 void waitForChildren() {
+    waitSem(MUTEX);
     if(isPidValid(currProc)) {
         processes[currProc]->waitingForChildren = TRUE;
         processes[currProc]->waitingForChild = FALSE;
         while(processes[currProc]->children != NULL) {
+            postSem(MUTEX);
             blockCurrentProcess();
+            waitSem(MUTEX);
         }
         processes[currProc]->waitingForChildren = FALSE;
     }
+    postSem(MUTEX);
 }
 
 void notifyParent(int parentPid, int childPid) {
+    waitSem(MUTEX);
     if(isPidValid(parentPid)) {
         if(processes[parentPid]->waitingForChildren
         || processes[parentPid]->waitingForChild == childPid) {
             removeChildNode(parentPid, childPid);
+            postSem(MUTEX);
             unblockProcess(parentPid);
         }
     }
