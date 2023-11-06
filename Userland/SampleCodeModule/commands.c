@@ -308,7 +308,7 @@ int cat(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
-                int catPid = createProcess(catProc, HIGH, FOREGROUND, 0, "cat", NULL);
+                int catPid = createProcess(catProc, HIGH, FOREGROUND, 1, "cat", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
                 unblockProcess(pid);
@@ -342,12 +342,12 @@ int wc(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
-                int catPid = createProcess(wcProc, HIGH, FOREGROUND, 1, "wc", NULL);
+                int wcPid = createProcess(wcProc, HIGH, FOREGROUND, 1, "wc", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
-                connectProcesses(pid, catPid);
-                unblockProcess(catPid);
+                connectProcesses(pid, wcPid);
+                unblockProcess(wcPid);
                 unblockProcess(pid);
-                return catPid;
+                return wcPid;
             }
         }
     }
@@ -392,12 +392,12 @@ int filter(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
-                int catPid = createProcess(filterProc, HIGH, FOREGROUND, 1, "filter", NULL);
+                int filterPid = createProcess(filterProc, HIGH, FOREGROUND, 1, "filter", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
-                connectProcesses(pid, catPid);
-                unblockProcess(catPid);
+                connectProcesses(pid, filterPid);
+                unblockProcess(filterPid);
                 unblockProcess(pid);
-                return catPid;
+                return filterPid;
             }
         }
     }
