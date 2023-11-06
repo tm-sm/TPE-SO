@@ -29,6 +29,7 @@ static philo philosophers[MAX_PHILOSOPHERS];
 void philosopherActivity(int argc,char* argv[]){
     waitSem(tablemutex);
     int philoNumber=philoAmount;
+    philoAmount++;
     postSem(tablemutex);
     while(1){
         takeForks(philoNumber);
@@ -48,7 +49,6 @@ void initPhyloReunion(int argc,char* argv[]){
         strcpy(philosophers[i]->name,philosophersName[i]);
         philosophers[i]->state=HUNGRY;
         philosophers[i]->pid=createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
-        philoAmount++;
     }
     postSem(tablemutex);
     while(1){
