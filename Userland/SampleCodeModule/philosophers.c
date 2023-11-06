@@ -13,6 +13,12 @@ void initPhyloReunion();
 //aka semaphoreName
 char philosophersName [MAX_PHILOSOPHERS][24]={"Aristoteles","Platon","Socrates","Descartes","Kant","Nietzsche"};
 
+void test(int philoNum);
+void takeForks(int philoNum);
+void putForks(int philoNum);
+void eat(int philoNumber);
+void think(int philoNumber);
+
 static const char tablemutex[]="TableMutex";
 typedef struct philosopher{
     char name[24];
@@ -20,74 +26,83 @@ typedef struct philosopher{
     int pid;
 }philosopher;
 
-static int philoAmount=INIT_PHILOSOPHERS;
+static int philoAmount = 0;
 typedef struct philosopher* philo;
 
 static philo philosophers[MAX_PHILOSOPHERS];
 
 
-void philosopherActivity(int argc,char* argv[]){
+void philosopherActivity(int argc,char* argv[]) {
     waitSem(tablemutex);
     int philoNumber=philoAmount;
     philoAmount++;
     postSem(tablemutex);
-    while(1){
+    while(1) {
+        think(philoNumber);
         takeForks(philoNumber);
-        philosophers[philoNumber]->state=EATING;
+        eat(philoNumber);
         putForks(philoNumber);
     }
 }
 
-void initPhyloReunion(int argc,char* argv[]){
+void initPhyloReunion(int argc,char* argv[]) {
     destroySem(tablemutex);
     openSem(tablemutex,1);
     philoAmount=0;
-    for(int i=0;i<MAX_PHILOSOPHERS;i++){
+    for(int i=0;i<MAX_PHILOSOPHERS;i++) {
         destroySem(philosophersName[i]);
-        openSem(philosophersName[i],0);
+        openSem(philosophersName[i],1);
     }
     waitSem(tablemutex);
-    for(int i=0;i<INIT_PHILOSOPHERS;i++){
+    for(int i=0;i<INIT_PHILOSOPHERS;i++) {
+        philosophers[i] = alloc(sizeof(philosopher));
         strcpy(philosophers[i]->name,philosophersName[i]);
-        philosophers[i]->state=HUNGRY;
-        philosophers[i]->pid=createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
+        philosophers[i]->state = THINKING;
+        philosophers[i]->pid = createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
     }
     postSem(tablemutex);
     while(1){
+        wait(1000);
         waitSem(tablemutex);
         for(int i=0;i<philoAmount;i++){
-            if(philosophers[i]->state==EATING)
+            if(philosophers[i]->state == EATING)
                 printFormat("E");
             else
                 printFormat(".");
         }
         printFormat("\n");
         postSem(tablemutex);
-        wait(1000);
     }
+    exitProc();
 }
 
-void takeForks(int philoNum){
+void eat(int philoNumber) {
+    wait(1200);
+}
+
+void think(int philoNumber) {
+    wait(3000);
+}
+
+void takeForks(int philoNum) {
     waitSem(tablemutex);
-    philosophers[philoNum]->state=HUNGRY;
+    philosophers[philoNum]->state = HUNGRY;
     test(philoNum);
     postSem(tablemutex);
     waitSem(philosophersName[philoNum]);
 }
 
-void putForks(int philoNum){
+void putForks(int philoNum) {
     waitSem(tablemutex);
-    philosophers[philoNum]->state=THINKING;
-    test(philoNum%philoAmount);
-    test((philoNum+1)%philoAmount);
+    philosophers[philoNum]->state = THINKING;
+    test((philoNum + philoAmount - 1) % philoAmount);
+    test((philoNum + 1) % philoAmount);
     postSem(tablemutex);
 }
 
 void test(int philoNum){
-    if(philosophers[(philoNum+philoAmount-1)%philoAmount]->state !=EATING && philosophers[(philoNum+1)%philoAmount]->state!=EATING){
+    if((philosophers[philoNum]->state == HUNGRY) && (philosophers[(philoNum + philoAmount - 1) % philoAmount]->state != EATING) && (philosophers[(philoNum + 1) % philoAmount]->state != EATING)) {
         philosophers[philoNum]->state=EATING;
         postSem(philosophersName[philoNum]);
     }
 }
-
-
