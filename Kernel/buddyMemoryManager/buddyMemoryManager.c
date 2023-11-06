@@ -123,8 +123,6 @@ void *allocate(size_t size) {
 
     size_t sizeToUse = convertToClosestPowerOf2(size);
     BuddyBlock *node = root;
-    cPrintDec(sizeToUse);
-    cNewline();
     mergeBlocks();
     BuddyBlock *allocatedBlock = allocateRecursive(sizeToUse, node);
 
