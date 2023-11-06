@@ -54,10 +54,14 @@ int postSem(char* name){
     }
     enterSem(&(s->lock));
     s->value++;
-    if(s->value>0){
-        if(s->processesBlockedAmount>0){
-            int pid=s->processesBlocked[s->processesBlockedAmount-1];
+    if(s->value > 0){
+        if(s->processesBlockedAmount > 0){
+            int pid = s->processesBlocked[0];
+            for(int i=1; i<s->processesBlockedAmount; i++) {
+                s->processesBlocked[i-1] = s->processesBlocked[i];
+            }
             s->processesBlockedAmount--;
+            exitSem(&(s->lock));
             unblockProcess(pid);
         }
     }
@@ -72,20 +76,16 @@ int waitSem(char* name){
         return 0;
     }
     enterSem(&(s->lock));
-    int currentpid=getActiveProcessPid();
-   if(s->value==0){
-        s->processesBlocked[s->processesBlockedAmount]=currentpid;
+    int currentPid=getActiveProcessPid();
+   while(s->value == 0){
+        s->processesBlocked[s->processesBlockedAmount] = currentPid;
         s->processesBlockedAmount++;
         exitSem(&(s->lock));
         blockCurrentProcess();
         enterSem(&(s->lock));
-        s->value--;
-        exitSem(&(s->lock));
     }
-    else{
-        s->value--;
-        exitSem(&(s->lock));
-    }
+    s->value--;
+    exitSem(&(s->lock));
     return 1;
 }
 int closeSem(char* name){
