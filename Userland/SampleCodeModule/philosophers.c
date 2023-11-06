@@ -77,11 +77,11 @@ void initPhyloReunion(int argc,char* argv[]) {
 }
 
 void eat(int philoNumber) {
-    wait(1200);
+    wait(55 * (1+ philoNumber));
 }
 
 void think(int philoNumber) {
-    wait(3000);
+    wait(110 * (1+ philoNumber));
 }
 
 void takeForks(int philoNum) {
