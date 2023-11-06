@@ -5,7 +5,6 @@
 #include <sems.h>
 
 #define MAX_TICKS 3
-#define MUTEX "schedulerMutex"
 
 typedef struct node{
     int pid;
@@ -24,7 +23,6 @@ static node * runningProc = NULL;
 static node sentinel = {0, NULL, 0};
 
 void initializeScheduler() {
-    openSem(MUTEX, 1);
 }
 
 void scheduler() {
@@ -88,7 +86,6 @@ int getRunningPid(){
 }
 
 void addNodeToPriority(node * n, int priority) {
-    waitSem(MUTEX);
     if(procs[priority] == NULL) {
         procs[priority] = n;
         procsLast[priority] = n;
@@ -102,7 +99,6 @@ void addNodeToPriority(node * n, int priority) {
     if(runningProc == NULL) {
         runningProc = n;
     }
-    postSem(MUTEX);
 }
 void removeNodefromPriority(node* n ,int p){
     node* aux = procs[p];
@@ -113,19 +109,15 @@ void removeNodefromPriority(node* n ,int p){
 }
 
 void lowerPriority(node* node) {
-    waitSem(MUTEX);
     int priority = getPriorityFromPid(node->pid);
     node->ticks = 0;
     if(priority == LOW) {
-        postSem(MUTEX);
         return;
     }
     setProcessPriority(node->pid, priority + 1);
-    postSem(MUTEX);
 }
 
 void changeProcessPriority(int pid, int originalPriority, int newPriority) {
-    waitSem(MUTEX);
     node* curr = procs[originalPriority];
     node* prev = procsLast[originalPriority];
 
@@ -141,44 +133,36 @@ void changeProcessPriority(int pid, int originalPriority, int newPriority) {
 
         if(curr->pid != pid) {
             //finished the whole list and didn't find anything
-            postSem(MUTEX);
             return;
         } else if(curr == procsLast[originalPriority]) {
             procsLast[originalPriority] = prev;
             prev->next = curr->next;
-            postSem(MUTEX);
             return;
         } else {
             prev->next = curr->next;
         }
     }
-    postSem(MUTEX);
     addNodeToPriority(curr, newPriority);
 }
 
 void addToScheduler(int pid) {
-    waitSem(MUTEX);
     int priority = getPriorityFromPid(pid);
     node * new = allocate(sizeof(node));
     new->pid = pid;
     new->ticks = 0;
     addNodeToPriority(new, priority);
-    postSem(MUTEX);
 }
 
 void removeFromScheduler(int pid, int priority) {
-    waitSem(MUTEX);
     if(pid == procs[priority]->pid && procs[priority] == procsLast[priority]) {
         deallocate(procs[priority]);
         procs[priority] = procsLast[priority] = NULL;
-        postSem(MUTEX);
         return;
     }
     node *prev = procs[priority];
     node *n = procs[priority]->next;
     while(n->pid != pid) {
         if(n == procsLast[priority]) {
-            postSem(MUTEX);
             return;
         }
         prev = n;
@@ -188,7 +172,6 @@ void removeFromScheduler(int pid, int priority) {
     procsLast[priority] = prev;
     procs[priority] = prev->next;
     deallocate(n);
-    postSem(MUTEX);
 }
 
 void printPriorityList(int priority) {
