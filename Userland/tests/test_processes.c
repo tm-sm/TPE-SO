@@ -75,7 +75,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
       // Randomly unblocks processes
       for (rq = 0; rq < max_processes; rq++)
         if (p_rqs[rq].state == BLOCKED && GetUniform(100) % 2) {
-          if (my_unblock(p_rqs[rq].pid) == -1) {
+          if (unblockProcess(p_rqs[rq].pid) == -1) {
             printf("test_processes: ERROR unblocking process\n");
             return -1;
           }
