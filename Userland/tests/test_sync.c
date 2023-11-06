@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "syscall.h"
+#include "system.h"
+#include "standardLib.h"
 #include "test_util.h"
 
 #define SEM_ID "sem"
@@ -31,22 +32,22 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
     return -1;
 
   if (use_sem)
-    if (!my_sem_open(SEM_ID, 1)) {
-      printf("test_sync: ERROR opening semaphore\n");
+    if (!openSem(SEM_ID, 1)) {
+      printFormat("test_sync: ERROR opening semaphore\n");
       return -1;
     }
 
   uint64_t i;
   for (i = 0; i < n; i++) {
     if (use_sem)
-      my_sem_wait(SEM_ID);
+      waitSem(SEM_ID);
     slowInc(&global, inc);
     if (use_sem)
-      my_sem_post(SEM_ID);
+      postSem(SEM_ID);
   }
 
   if (use_sem)
-    my_sem_close(SEM_ID);
+    destroySem(SEM_ID);
 
   return 0;
 }
@@ -62,15 +63,16 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   global = 0;
 
+  //wtf is process_inc
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    pids[i] = my_create_process("my_process_inc", 3, argvDec);
-    pids[i + TOTAL_PAIR_PROCESSES] = my_create_process("my_process_inc", 3, argvInc);
+    pids[i] = createProcess(my_process_inc, 0,BACKGROUND,0,"process_inc", argvDec);
+    pids[i + TOTAL_PAIR_PROCESSES] = my_create_process(my_process_inc, 2,BACKGROUND,0,"process_inc", argvInc);
   }
-
+  //No clue
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
-    my_wait(pids[i]);
-    my_wait(pids[i + TOTAL_PAIR_PROCESSES]);
+    waitForChild(pids[i]);
+    waitForChild(pids[i + TOTAL_PAIR_PROCESSES]);
   }
 
   printf("Final value: %d\n", global);
