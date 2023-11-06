@@ -6,6 +6,9 @@
 #define HUNGRY 0
 #define EATING 1
 #define THINKING 2
+
+#define MUTEX "phyloMutex"
+
 void initPhyloReunion();
 //not HEAVILY inspired by tanenbaum at all :P
 //                                         ^ AI made it
@@ -13,13 +16,14 @@ void initPhyloReunion();
 //aka semaphoreName
 char philosophersName [MAX_PHILOSOPHERS][24]={"Aristoteles","Platon","Socrates","Descartes","Kant","Nietzsche"};
 
+void getInput();
+void addPhilo(int i);
 void test(int philoNum);
 void takeForks(int philoNum);
 void putForks(int philoNum);
 void eat(int philoNumber);
 void think(int philoNumber);
 
-static const char tablemutex[]="TableMutex";
 typedef struct philosopher{
     char name[24];
     int state;
@@ -33,10 +37,10 @@ static philo philosophers[MAX_PHILOSOPHERS];
 
 
 void philosopherActivity(int argc,char* argv[]) {
-    waitSem(tablemutex);
+    waitSem(MUTEX);
     int philoNumber=philoAmount;
     philoAmount++;
-    postSem(tablemutex);
+    postSem(MUTEX);
     while(1) {
         think(philoNumber);
         takeForks(philoNumber);
@@ -46,24 +50,22 @@ void philosopherActivity(int argc,char* argv[]) {
 }
 
 void initPhyloReunion(int argc,char* argv[]) {
-    destroySem(tablemutex);
-    openSem(tablemutex,1);
+    destroySem(MUTEX);
+    openSem(MUTEX,1);
     philoAmount=0;
     for(int i=0;i<MAX_PHILOSOPHERS;i++) {
         destroySem(philosophersName[i]);
         openSem(philosophersName[i],1);
     }
-    waitSem(tablemutex);
+    waitSem(MUTEX);
     for(int i=0;i<INIT_PHILOSOPHERS;i++) {
-        philosophers[i] = alloc(sizeof(philosopher));
-        strcpy(philosophers[i]->name,philosophersName[i]);
-        philosophers[i]->state = THINKING;
-        philosophers[i]->pid = createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
+        addPhilo(i);
     }
-    postSem(tablemutex);
+    postSem(MUTEX);
     while(1){
-        wait(1000);
-        waitSem(tablemutex);
+        getInput();
+        wait(500);
+        waitSem(MUTEX);
         for(int i=0;i<philoAmount;i++){
             if(philosophers[i]->state == EATING)
                 printFormat("E");
@@ -71,9 +73,29 @@ void initPhyloReunion(int argc,char* argv[]) {
                 printFormat(".");
         }
         printFormat("\n");
-        postSem(tablemutex);
+        postSem(MUTEX);
     }
     exitProc();
+}
+
+void addPhilo(int i) {
+    philosophers[i] = alloc(sizeof(philosopher));
+    strcpy(philosophers[i]->name,philosophersName[i]);
+    philosophers[i]->state = THINKING;
+    philosophers[i]->pid = createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
+}
+
+void getInput() {
+    waitSem(MUTEX);
+    if(isCharPressed('r') && philoAmount > 0) {
+        int pid = philosophers[philoAmount - 1]->pid;
+        philoAmount--;
+        killProcess(pid);
+    } else if(isCharPressed('a') && philoAmount < MAX_PHILOSOPHERS) {
+        addPhilo(philoAmount);
+        philoAmount++;
+    }
+    postSem(MUTEX);
 }
 
 void eat(int philoNumber) {
@@ -85,19 +107,19 @@ void think(int philoNumber) {
 }
 
 void takeForks(int philoNum) {
-    waitSem(tablemutex);
+    waitSem(MUTEX);
     philosophers[philoNum]->state = HUNGRY;
     test(philoNum);
-    postSem(tablemutex);
+    postSem(MUTEX);
     waitSem(philosophersName[philoNum]);
 }
 
 void putForks(int philoNum) {
-    waitSem(tablemutex);
+    waitSem(MUTEX);
     philosophers[philoNum]->state = THINKING;
     test((philoNum + philoAmount - 1) % philoAmount);
     test((philoNum + 1) % philoAmount);
-    postSem(tablemutex);
+    postSem(MUTEX);
 }
 
 void test(int philoNum){
