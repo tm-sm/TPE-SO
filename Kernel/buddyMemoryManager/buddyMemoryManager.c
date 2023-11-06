@@ -7,7 +7,7 @@
 
 //64 KB libres
 #define MEM_START_ADR 0x0000000000050000
-#define MIN_SIZE 128
+#define MIN_SIZE 64
 
 typedef struct BuddyBlock {
     int size;
