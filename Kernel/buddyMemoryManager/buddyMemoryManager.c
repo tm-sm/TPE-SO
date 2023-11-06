@@ -63,6 +63,28 @@ void splitBlock(BuddyBlock *block) {
     block->right = createBlock(block->size / 2, (void*)((char *)block + block->size/2));
 }
 
+void mergeBlocksRecursive(BuddyBlock *node) {
+    if(node == NULL){
+        return;
+    }
+
+    if (node->isSplit) {
+        mergeBlocksRecursive(node->left);
+        mergeBlocksRecursive(node->right);
+
+        if (node->left->isFree && node->right->isFree) {
+            node->isSplit = 0;
+            node->isFree = 1;
+            node->left = NULL;
+            node->right = NULL;
+        }
+    }
+}
+
+void mergeBlocks() {
+    mergeBlocksRecursive(root);
+}
+
 //El size ya es el size que se va reservar por el sistema
 BuddyBlock* allocateRecursive(size_t size, BuddyBlock* node) {
     if(node == NULL || (!node->isFree && !node->isSplit)){
@@ -102,6 +124,7 @@ void *allocate(size_t size) {
     size_t sizeToUse = convertToClosestPowerOf2(size);
     BuddyBlock *node = root;
 
+    mergeBlocks();
     BuddyBlock *allocatedBlock = allocateRecursive(sizeToUse, node);
 
     if (allocatedBlock != NULL) {
@@ -109,27 +132,6 @@ void *allocate(size_t size) {
     }
 
     return NULL;
-}
-
-void mergeBlocksRecursive(BuddyBlock *node) {
-    if (node->isSplit) {
-        if (node->left->isSplit) {
-            mergeBlocksRecursive(node->left);
-        }
-        if (node->right->isSplit) {
-            mergeBlocksRecursive(node->right);
-        }
-        if (node->left->isFree && node->right->isFree) {
-            node->isSplit = 0;
-            node->isFree = 1;
-            node->left = NULL;
-            node->right = NULL;
-        }
-    }
-}
-
-void mergeBlocks() {
-   mergeBlocksRecursive(root);
 }
 
 void deallocate(void *addr) {
@@ -172,7 +174,7 @@ void * reallocate(void * ptr, size_t newSize) {
     }
 }
 
-int getCurrentFreeMemRecursively(BuddyBlock * node){
+size_t getCurrentFreeMemRecursively(BuddyBlock * node){
     if (node == NULL) {
         return 0;
     }
@@ -187,7 +189,7 @@ int getCurrentFreeMemRecursively(BuddyBlock * node){
 
         return leftSize + rightSize;
     } else {
-       return -sizeof(BuddyBlock);;
+       return 0;
     }
 }
 
