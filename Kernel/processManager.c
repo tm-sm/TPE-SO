@@ -379,9 +379,6 @@ void killProcess(int pid) {
         char aux[2] = {EOF, '\0'};
         write(processes[pid]->stdout, aux, 2);
 
-        closePipe(processes[pid]->stdin);
-        closePipe(processes[pid]->stdout);
-
         closeFD(processes[pid]->stdin);
         closeFD(processes[pid]->stdout);
         for(int i=0; i<processes[pid]->argc; i++) {

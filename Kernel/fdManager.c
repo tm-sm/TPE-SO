@@ -77,6 +77,12 @@ void* getFDData(int fd) {
 }
 
 void closeFD(int fd) {
+
+    struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
+    if(pipe != NULL){
+        closePipe(fd);
+    }
+
     if (fd >= 2 && fd < MAX_FILE_DESCRIPTORS) {
         manager->entries[fd].used = 0;
         manager->entries[fd].data = NULL;
@@ -113,6 +119,10 @@ int customPipe(int fd[2]) {
 
 void closePipe(int pipeFD) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD);
+
+    if(pipe == NULL){
+        return;
+    }
 
     closeSem(pipe->rSemaphore);
     closeSem(pipe->wSemaphore);

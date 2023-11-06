@@ -163,7 +163,7 @@ int displayDate(ARGS) {
 }
 
 int mem(ARGS) {
-    printFormat("\nAvailable Memory:\n%d bytes\n", getAvailableMemory());
+    printFormat("\nTotal Memory: %d bytes\nAvailable Memory: %d bytes\n", 65536 ,getAvailableMemory());
     return 0;
 }
 
