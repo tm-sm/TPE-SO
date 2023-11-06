@@ -117,7 +117,7 @@ BuddyBlock* allocateRecursive(size_t size, BuddyBlock* node) {
 }
 
 void *allocate(size_t size) {
-    if(size >= MEMORY_SIZE){
+    if(size >= MEMORY_SIZE || size >= getCurrentMemSize()){
         return NULL;
     }
 

@@ -31,6 +31,10 @@ void createMemoryManager() {
 }
 
 void * allocate(size_t size) {
+    if(size > MEMORY_SIZE || size >= getCurrentMemSize()){
+        return NULL;
+    }
+
     size_t pageTBU = convertToPageSize(size, PAGE_SIZE);
     // Ahora la idea es buscar un bloque con suficiente espacio
     BlockHeader* curr_block = first_block;
