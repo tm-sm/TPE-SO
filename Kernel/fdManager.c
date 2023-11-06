@@ -8,7 +8,7 @@
 #include <utils.h>
 
 #define MAX_FILE_DESCRIPTORS 128
-#define PIPE_BUFFER_SIZE 128
+#define PIPE_BUFFER_SIZE 100
 #define STDOUT 1
 #define STDIN 0
 #define FIFO_COUNT 5
@@ -70,6 +70,7 @@ void initializeFileDescriptorManager() {
 
         initNamedPipe(&first->fifos[i].pipe);
     }
+
 }
 
 int openFD(void* data) {
@@ -91,7 +92,7 @@ void* getFDData(int fd) {
 }
 
 void closeFD(int fd) {
-    if(fd <= FIFO_COUNT*2 + 2 ){
+    if(fd <= FIFO_COUNT*2 + 2){
         return;
     }
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
@@ -99,7 +100,7 @@ void closeFD(int fd) {
         closePipe(fd);
     }
 
-    if (fd < MAX_FILE_DESCRIPTORS) {
+    if ( fd < MAX_FILE_DESCRIPTORS) {
         manager->entries[fd].used = 0;
         manager->entries[fd].data = NULL;
     }
