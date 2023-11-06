@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <console.h>
 #include <processManager.h>
+#include <videoDriver.h>
+
 //64 KB libres
 #define MEM_START_ADR 0x0000000000050000
 #define MIN_SIZE 256
@@ -131,6 +133,14 @@ void mergeBlocks() {
 }
 
 void deallocate(void *addr) {
+    if(addr == NULL){
+        return;
+    }
+
+    if((uintptr_t)addr < 0x50000 || (uintptr_t)addr > 0x60000){
+        cPrintColored(RED,"Illegal Memory free");
+        return;
+    }
    BuddyBlock *block = (BuddyBlock *)((char *)addr - sizeof(BuddyBlock));
    block->isFree = 1;
    block->pid = -1;
@@ -162,13 +172,13 @@ void * reallocate(void * ptr, size_t newSize) {
     }
 }
 
-size_t getCurrentFreeMemRecursively(BuddyBlock * node){
+int getCurrentFreeMemRecursively(BuddyBlock * node){
     if (node == NULL) {
         return 0;
     }
 
     if (node->isFree) {
-        return node->size;
+        return node->size - sizeof(BuddyBlock);
     }
 
     if (node->isSplit) {
@@ -177,7 +187,7 @@ size_t getCurrentFreeMemRecursively(BuddyBlock * node){
 
         return leftSize + rightSize;
     } else {
-       return 0;
+       return -sizeof(BuddyBlock);;
     }
 }
 
