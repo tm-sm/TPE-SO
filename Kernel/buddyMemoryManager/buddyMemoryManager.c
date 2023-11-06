@@ -9,19 +9,19 @@
 #define MEM_START_ADR 0x0000000000050000
 #define MIN_SIZE 64
 
-typedef struct BuddyBlock {
+typedef struct Buddyblock {
     int size;
     char pid;
     char isFree;
     char isSplit;
-    struct BuddyBlock *left;
-    struct BuddyBlock *right;
-} BuddyBlock;
+    struct Buddyblock *left;
+    struct Buddyblock *right;
+} Buddyblock;
 
-static BuddyBlock *root = NULL;
+static Buddyblock *root = NULL;
 
-BuddyBlock *createBlock(int size, void *address) {
-    BuddyBlock * block = (BuddyBlock *) address;
+Buddyblock *createBlock(int size, void *address) {
+    Buddyblock * block = (Buddyblock *) address;
 
     block->size = size;
     block->isFree = 1;
@@ -40,7 +40,7 @@ void createMemoryManager() {
 
 size_t convertToClosestPowerOf2(size_t size) {
     if (size < MIN_SIZE) {
-        return size <= MIN_SIZE - sizeof(BuddyBlock) ? MIN_SIZE: 2*MIN_SIZE;
+        return size <= MIN_SIZE - sizeof(Buddyblock) ? MIN_SIZE: 2*MIN_SIZE;
     }
 
     size_t power = 1;
@@ -51,7 +51,7 @@ size_t convertToClosestPowerOf2(size_t size) {
     return power < MIN_SIZE ? MIN_SIZE: power;
 }
 
-void splitBlock(BuddyBlock *block) {
+void splitBlock(Buddyblock *block) {
     if(block->size == MIN_SIZE){
         return;
     }
@@ -59,11 +59,11 @@ void splitBlock(BuddyBlock *block) {
     block->isSplit = 1;
     block->isFree = 0;
     block->pid = -2;
-    block->left = createBlock(block->size / 2, (void*)((char *)block + sizeof(struct BuddyBlock)));
+    block->left = createBlock(block->size / 2, (void*)((char *)block + sizeof(struct Buddyblock)));
     block->right = createBlock(block->size / 2, (void*)((char *)block + block->size/2));
 }
 
-void mergeBlocksRecursive(BuddyBlock *node) {
+void mergeBlocksRecursive(Buddyblock *node) {
     if(node == NULL){
         return;
     }
@@ -86,7 +86,7 @@ void mergeBlocks() {
 }
 
 //El size ya es el size que se va reservar por el sistema
-BuddyBlock* allocateRecursive(size_t size, BuddyBlock* node) {
+Buddyblock* allocateRecursive(size_t size, Buddyblock* node) {
     if(node == NULL || (!node->isFree && !node->isSplit)){
         return NULL;
     }
@@ -96,8 +96,8 @@ BuddyBlock* allocateRecursive(size_t size, BuddyBlock* node) {
         return node;
     }
 
-    BuddyBlock * left;
-    BuddyBlock * right;
+    Buddyblock * left;
+    Buddyblock * right;
 
     if(!node->isSplit && node->isFree && node->size/2 >= MIN_SIZE){
         splitBlock(node);
@@ -122,12 +122,12 @@ void *allocate(size_t size) {
     }
 
     size_t sizeToUse = convertToClosestPowerOf2(size);
-    BuddyBlock *node = root;
+    Buddyblock *node = root;
     mergeBlocks();
-    BuddyBlock *allocatedBlock = allocateRecursive(sizeToUse, node);
+    Buddyblock *allocatedBlock = allocateRecursive(sizeToUse, node);
 
     if (allocatedBlock != NULL) {
-        return (void*)((char*)allocatedBlock + sizeof(BuddyBlock));
+        return (void*)((char*)allocatedBlock + sizeof(Buddyblock));
     }
 
     return NULL;
@@ -142,7 +142,7 @@ void deallocate(void *addr) {
         cPrintColored(RED,"Illegal Memory free");
         return;
     }
-    BuddyBlock *block = (BuddyBlock *)((char *)addr - sizeof(BuddyBlock));
+    Buddyblock *block = (Buddyblock *)((char *)addr - sizeof(Buddyblock));
     block->isFree = 1;
     block->pid = -2;
 
@@ -163,7 +163,7 @@ void * reallocate(void * ptr, size_t newSize) {
     void * newPtr = allocate(newSize);
 
     if (newPtr) {
-        size_t oldSize = ((BuddyBlock *)(ptr - sizeof(BuddyBlock)))->size;
+        size_t oldSize = ((Buddyblock *)(ptr - sizeof(Buddyblock)))->size;
         size_t copySize = (oldSize < newSize) ? oldSize : newSize;  //Copio lo minimo para no excederme del tamano, ESTO PUEDE CAUSAR PERDIDAS DE MEMORIA
         memcpy(newPtr, ptr, copySize);
 
@@ -174,13 +174,13 @@ void * reallocate(void * ptr, size_t newSize) {
     }
 }
 
-size_t getCurrentFreeMemRecursively(BuddyBlock * node){
+size_t getCurrentFreeMemRecursively(Buddyblock * node){
     if (node == NULL) {
         return 0;
     }
 
     if (node->isFree) {
-        return node->size - sizeof(BuddyBlock);
+        return node->size - sizeof(Buddyblock);
     }
 
     if (node->isSplit) {
@@ -207,7 +207,7 @@ size_t convertToPageSize(size_t size, size_t pageSize) {
     return pageSize*quotient + pageSize;
 }
 
-void deallocateAllProcRecursive(BuddyBlock * node, int pid){
+void deallocateAllProcRecursive(Buddyblock * node, int pid){
     if (node == NULL) {
         return;
     }
