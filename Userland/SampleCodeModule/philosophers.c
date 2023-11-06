@@ -39,10 +39,12 @@ void philosopherActivity(int argc,char* argv[]){
 }
 
 void initPhyloReunion(int argc,char* argv[]){
+    destroySem(tablemutex);
     openSem(tablemutex,1);
     philoAmount=0;
     for(int i=0;i<MAX_PHILOSOPHERS;i++){
-        openSem(philosophersName[i],1);
+        destroySem(philosophersName[i]);
+        openSem(philosophersName[i],0);
     }
     waitSem(tablemutex);
     for(int i=0;i<INIT_PHILOSOPHERS;i++){
@@ -60,8 +62,8 @@ void initPhyloReunion(int argc,char* argv[]){
                 printFormat(".");
         }
         printFormat("\n");
-        wait(1000);
         postSem(tablemutex);
+        wait(1000);
     }
 }
 

@@ -474,7 +474,6 @@ int isPidValid(int pid) {
 void unblockProcess(int pid) {
     if(isPidValid(pid)){
         processes[pid]->state = READY;
-        interruptTick();
     }
 }
 
