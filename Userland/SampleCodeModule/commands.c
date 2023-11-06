@@ -11,6 +11,7 @@
 
 #define START_IN_BACKGROUND_SYMBOL "&"
 #define CONNECT_WITH_PIPE_SYMBOL "/"
+#define BUFFER_SIZE 100
 
 #define ARGS int argc, char* argv[]
 
@@ -291,7 +292,7 @@ int sh(int argc, char* argv[]) {
 }
 
 int catProc(ARGS) {
-    int size = 128;
+    int size = BUFFER_SIZE;
     char* buff = alloc(size);
     size_t read = getStrn(buff, size);
     while(buff[0] != -1 && read != 0) {
@@ -321,15 +322,15 @@ int cat(ARGS) {
 
 int wcProc(ARGS) {
     int counter = 0;
-    char *buff = alloc(128);
-    size_t len = getStrn(buff, 128);
+    char *buff = alloc(BUFFER_SIZE);
+    size_t len = getStrn(buff, BUFFER_SIZE);
     while (len != 0 && buff[0] != -1) {
         for (int i = 0; buff[i] != '\0'; i++) {
             if (buff[i] == '\n') {
                 counter++;
             }
         }
-        len = getStrn(buff, 128);
+        len = getStrn(buff, BUFFER_SIZE);
     }
     printFormat("%d lines", counter);
     dealloc(buff);
@@ -371,7 +372,7 @@ int filterUser(char * string){
 }
 
 int filterProc(ARGS) {
-    int size = 128;
+    int size = BUFFER_SIZE;
     char* buff = alloc(size);
     size_t read = getStrn(buff, size);
     while(buff[0] != -1 && read != 0) {
