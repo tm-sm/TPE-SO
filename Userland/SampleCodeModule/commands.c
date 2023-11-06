@@ -9,6 +9,9 @@
 #define INIT_PID 1
 #define SHELL_PID 2
 
+#define START_IN_BACKGROUND_SYMBOL "&"
+#define CONNECT_WITH_PIPE_SYMBOL "/"
+
 #define ARGS int argc, char* argv[]
 
 typedef int (*functionPtr)(ARGS);
@@ -231,12 +234,12 @@ int sh(int argc, char* argv[]) {
                 int paramEnd = 2;
 
                 for (int j = 2; j < argc; j++) {
-                    if (strcmp(argv[j], "&") == 0) {
+                    if (strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
                         fg = BACKGROUND;
                         if (paramEnd == 2) {
                             paramEnd = j + 1;
                         }
-                    } else if (strcmp(argv[j], "|") == 0) {
+                    } else if (strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
                         int ret1 = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, paramStart, paramEnd);
 
                         if(argc == j) {
@@ -290,13 +293,12 @@ int sh(int argc, char* argv[]) {
 int catProc(ARGS) {
     int size = 128;
     char* buff = alloc(size);
-    waitSem("catSem");
-    destroySem("catSem");
     size_t read = getStrn(buff, size);
     while(buff[0] != -1 && read != 0) {
         putStrn(buff);
         getStrn(buff, size);
     }
+    dealloc(buff);
     exitProc();
     return 0;
 }
@@ -305,12 +307,11 @@ int cat(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
-                openSem("catSem", 0);
                 int catPid = createProcess(catProc, HIGH, FOREGROUND, 0, "cat", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
                 unblockProcess(pid);
-                postSem("catSem");
+                unblockProcess(catPid);
                 return catPid;
             }
         }
@@ -321,8 +322,6 @@ int cat(ARGS) {
 int wcProc(ARGS) {
     int counter = 0;
     char *buff = alloc(128);
-    waitSem("wcSem");
-    destroySem("wcSem");
     size_t len = getStrn(buff, 128);
     while (len != 0 && buff[0] != -1) {
         for (int i = 0; buff[i] != '\0'; i++) {
@@ -333,6 +332,7 @@ int wcProc(ARGS) {
         len = getStrn(buff, 128);
     }
     printFormat("%d lines", counter);
+    dealloc(buff);
     exitProc();
     return 0;
 }
@@ -341,12 +341,11 @@ int wc(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
-                openSem("wcSem", 0);
-                int catPid = createProcess(wcProc, HIGH, FOREGROUND, 0, "wc", NULL);
+                int catPid = createProcess(wcProc, HIGH, FOREGROUND, 1, "wc", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
+                unblockProcess(catPid);
                 unblockProcess(pid);
-                postSem("wcSem");
                 return catPid;
             }
         }
@@ -354,9 +353,9 @@ int wc(ARGS) {
     return -1;
 }
 
-static int isVowel(char c){
+int isVowel(char c){
     if(c >= 'A' && c <= 'Z') {
-        c -= 'A' - 'a';
+        c = c - 'A' + 'a';
     }
     return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
 }
@@ -374,8 +373,6 @@ int filterUser(char * string){
 int filterProc(ARGS) {
     int size = 128;
     char* buff = alloc(size);
-    waitSem("filterSem");
-    destroySem("filterSem");
     size_t read = getStrn(buff, size);
     while(buff[0] != -1 && read != 0) {
         for(int i=0; i<read; i++) {
@@ -385,6 +382,7 @@ int filterProc(ARGS) {
         }
         getStrn(buff, size);
     }
+    dealloc(buff);
     exitProc();
     return 0;
 }
@@ -393,12 +391,11 @@ int filter(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
             if(strcmp(pArr[i]->name, argv[1]) == 0){
-                openSem("filterSem", 0);
-                int catPid = createProcess(filterProc, HIGH, FOREGROUND, 0, "filter", NULL);
+                int catPid = createProcess(filterProc, HIGH, FOREGROUND, 1, "filter", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
+                unblockProcess(catPid);
                 unblockProcess(pid);
-                postSem("filterSem");
                 return catPid;
             }
         }

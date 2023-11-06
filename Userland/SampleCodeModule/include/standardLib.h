@@ -17,6 +17,8 @@ uint64_t interrupt(uint64_t rdi, uint64_t rsi, uint64_t rdx, uint64_t rcx, uint6
 
 uint64_t join(uint32_t upper, uint32_t lower);
 
+static char * itoa( uint64_t value, char * str, int base );
+
 /**
  * Writes a character in the console
  * @param c

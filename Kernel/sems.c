@@ -4,7 +4,7 @@
 #include <sems.h>
 #include <utils.h>
 #include <memoryManager.h>
-#define SEM_MAX_AMOUNT 20
+#define SEM_MAX_AMOUNT 50
 #define MAX_PROCESSES_BLOCKED 10
 
 typedef struct semaphore{
@@ -95,6 +95,14 @@ int closeSem(char* name){
     }
     deallocate(s);
         return 1;
+}
+
+int getSemValue(char* name) {
+    sem s=findSem(name);
+    if(s==NULL) {
+        return 0;
+    }
+    return s->value;
 }
 
 
