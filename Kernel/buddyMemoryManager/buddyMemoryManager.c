@@ -7,7 +7,7 @@
 
 //64 KB libres
 #define MEM_START_ADR 0x0000000000050000
-#define MIN_SIZE 256
+#define MIN_SIZE 128
 
 typedef struct BuddyBlock {
     int size;
@@ -58,7 +58,7 @@ void splitBlock(BuddyBlock *block) {
 
     block->isSplit = 1;
     block->isFree = 0;
-    block->pid = -1;
+    block->pid = -2;
     block->left = createBlock(block->size / 2, (void*)((char *)block + sizeof(struct BuddyBlock)));
     block->right = createBlock(block->size / 2, (void*)((char *)block + block->size/2));
 }
@@ -117,7 +117,7 @@ BuddyBlock* allocateRecursive(size_t size, BuddyBlock* node) {
 }
 
 void *allocate(size_t size) {
-    if(size >= MEMORY_SIZE || size >= getCurrentMemSize()){
+    if(size >= MEMORY_SIZE){
         return NULL;
     }
 
@@ -144,7 +144,8 @@ void deallocate(void *addr) {
     }
     BuddyBlock *block = (BuddyBlock *)((char *)addr - sizeof(BuddyBlock));
     block->isFree = 1;
-    block->pid = -1;
+    block->pid = -2;
+
     mergeBlocks();
 }
 
