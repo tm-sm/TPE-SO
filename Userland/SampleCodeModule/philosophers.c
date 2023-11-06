@@ -82,18 +82,34 @@ void addPhilo(int i) {
     philosophers[i] = alloc(sizeof(philosopher));
     strcpy(philosophers[i]->name,philosophersName[i]);
     philosophers[i]->state = THINKING;
-    philosophers[i]->pid = createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
+    int pid= createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
+    if(pid==-1){
+        printFormat("Error creating philosopher %s\n",philosophersName[i]);
+    }
+    else{
+        philosophers[i]->pid=pid;
+    }
 }
 
 void getInput() {
     waitSem(MUTEX);
-    if(isCharPressed('r') && philoAmount > 0) {
+    if(isCharPressed('r') ) {
+        if(philoAmount > 0){
         int pid = philosophers[philoAmount - 1]->pid;
         philoAmount--;
         killProcess(pid);
-    } else if(isCharPressed('a') && philoAmount < MAX_PHILOSOPHERS) {
+        }
+        else{
+            printFormat("No philosophers to kill\n");
+        }
+    } else if(isCharPressed('a')) {
+        if(philoAmount < MAX_PHILOSOPHERS){
         addPhilo(philoAmount);
         philoAmount++;
+        }
+        else {
+            printFormat("Max philosophers reached\n");
+        }
     }
     postSem(MUTEX);
 }
