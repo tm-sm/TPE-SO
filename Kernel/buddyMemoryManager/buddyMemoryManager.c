@@ -133,7 +133,7 @@ void mergeBlocks() {
 void deallocate(void *addr) {
    BuddyBlock *block = (BuddyBlock *)((char *)addr - sizeof(BuddyBlock));
    block->isFree = 1;
-
+   block->pid = -1;
     mergeBlocks();
 }
 
