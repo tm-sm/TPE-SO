@@ -17,13 +17,11 @@ typedef struct BlockHeader {
  * Un puntero al siguiente en la lista.
  */
 
-static size_t currentAvailableMemory;
 //Puntero estatico al comienzo del bloque de memoria
 static BlockHeader * first_block;
 
 void createMemoryManager() {
     // Inicializo la cabecera del bloque haciendo que apunte al comienzo del array memory
-    currentAvailableMemory = MEMORY_SIZE - sizeof(BlockHeader);
 
     first_block = (BlockHeader *)MEM_START_ADR;
     first_block->size = MEMORY_SIZE - sizeof(BlockHeader);
@@ -59,7 +57,6 @@ void * allocate(size_t size) {
                 curr_block->is_free = 0;
             }
 
-            currentAvailableMemory -= curr_block->size + sizeof(BlockHeader);
 
             // Retorno un puntero a esta seccion del bloque
             return (void*)((char*)curr_block + sizeof(BlockHeader));
@@ -87,15 +84,12 @@ void deallocate(void * ptr) {
     block->is_free = 1;
 
 
-    currentAvailableMemory += block->size;
-
     // Fusion de los bloques consecutivos que esten libres
     BlockHeader * curr_block = first_block;    //recorro desde el principio
     while (curr_block) {
         if (curr_block->is_free) {
             if (curr_block->next && curr_block->next->is_free) {
                 curr_block->size += sizeof(BlockHeader) + curr_block->next->size;
-                currentAvailableMemory += sizeof(struct BlockHeader);
                 curr_block->next = curr_block->next->next;
             }
         }
@@ -136,7 +130,6 @@ void * reallocate(void * ptr, size_t newSize){
 
         deallocate(ptr);
 
-        currentAvailableMemory += oldSize - newSize;
         return newPtr;
     } else {
         return NULL;
@@ -154,5 +147,16 @@ size_t convertToPageSize(size_t size, size_t pageSize){
 }
 
 size_t getCurrentMemSize(){
-    return currentAvailableMemory;
+    size_t currentAvailable = 0;
+
+    BlockHeader * current = first_block;
+
+    while(current){
+        if(current->is_free){
+            currentAvailable+=current->size;
+        }
+        current = current->next;
+    }
+
+    return currentAvailable;
 }
