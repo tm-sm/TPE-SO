@@ -19,15 +19,15 @@ typedef int (*functionPtr)(ARGS);
 
 #define SH_HELP "help"
 
-struct EXECUTABLE {
+struct Executable {
     char* name;
     char* description;
     functionPtr program;
-}EXECUTABLE;
+}Executable;
 
 //TODO agregar mensajes de error para parametros mal pasados
 
-typedef struct EXECUTABLE* exec;
+typedef struct Executable* exec;
 
 extern void invalidOp();
 
@@ -35,46 +35,42 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),test_mm(ARGS),test_sync(ARGS) ;
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS);
 
 static exec bArr[] = {
-        &(struct EXECUTABLE){"help", "displays all available commands", help},
-        &(struct EXECUTABLE){"test-div0", "runs a zero division", testException0},
-        &(struct EXECUTABLE){"test-invalidop", "runs an invalid op", testException6},
-        &(struct EXECUTABLE){"time", "prints the current time", displayTime},
-        &(struct EXECUTABLE){"date", "prints the current date", displayDate},
-        &(struct EXECUTABLE){"mem", "prints available memory in bytes", mem},
-        &(struct EXECUTABLE){"sh", "runs the specified process", sh},
-        &(struct EXECUTABLE){"cat", "prints the output of the specified process", cat},
-        &(struct EXECUTABLE){"wc", "prints the number of lines written by the specified process", wc},
-        &(struct EXECUTABLE){"filter", "prints the output of the specified process excluding vowels", filter},
-        &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
-        &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
-        &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
-        &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
-        &(struct EXECUTABLE){"FIFO", "Displays the FIFO list", displayFIFOList},
-        &(struct EXECUTABLE){"connectFIFO", "connects two process to each end of a FIFO, requires pids and a FIFO", connectProcsToFIFO},
+        &(struct Executable){"help", "displays all available commands", help},
+        &(struct Executable){"test-div0", "runs a zero division", testException0},
+        &(struct Executable){"test-invalidop", "runs an invalid op", testException6},
+        &(struct Executable){"time", "prints the current time", displayTime},
+        &(struct Executable){"date", "prints the current date", displayDate},
+        &(struct Executable){"mem", "prints available memory in bytes", mem},
+        &(struct Executable){"sh", "runs the specified process", sh},
+        &(struct Executable){"cat", "prints the output of the specified process", cat},
+        &(struct Executable){"wc", "prints the number of lines written by the specified process", wc},
+        &(struct Executable){"filter", "prints the output of the specified process excluding vowels", filter},
+        &(struct Executable){"kill", "kills a process given its pid", kill},
+        &(struct Executable){"ps", "shows a list of all current existing processes", ps},
+        &(struct Executable){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
+        &(struct Executable){"block", "blocks or unblocks a process given its pid", block},
+        &(struct Executable){"FIFO", "Displays the FIFO list", displayFIFOList},
+        &(struct Executable){"connectFIFO", "connects two process to each end of a FIFO, requires pids and a FIFO", connectProcsToFIFO},
         NULL
         };
 
 static exec pArr[] = {
-        &(struct EXECUTABLE){"bubbles", "shows colored bubbles on the screen", playBubbles},
-        &(struct EXECUTABLE){"pong", "runs a virtual ping pong match against the computer", playPong},
-        &(struct EXECUTABLE){"beep", "produces a 'beep' sound", playBeep},
-        &(struct EXECUTABLE){"repeat", "prints all parameters passed", repeat},
-        &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
-        &(struct EXECUTABLE){"phylo", "runs the dining philosophers problem", initPhyloReunion},
-        &(struct EXECUTABLE){"testmm","tests memory management",test_mm},
-        &(struct EXECUTABLE){"testsync","tests synchronization",test_sync},
-
-
+        &(struct Executable){"bubbles", "shows colored bubbles on the screen", playBubbles},
+        &(struct Executable){"pong", "runs a virtual ping pong match against the computer", playPong},
+        &(struct Executable){"beep", "produces a 'beep' sound", playBeep},
+        &(struct Executable){"repeat", "prints all parameters passed", repeat},
+        &(struct Executable){"loop", "prints its own pid every 2 seconds", loop},
+        &(struct Executable){"phylo", "runs the dining philosophers problem", initPhyloReunion},
         NULL
 };
 
 int callBuiltin(int argc, char* argv[]) {
-    if (argc >= 1) {
-        for (int i = 0; bArr[i] != NULL; i++) {
-            if (strcmp(bArr[i]->name, argv[0]) == 0) {
+    if(argc >= 1) {
+        for(int i = 0; bArr[i] != NULL; i++) {
+            if(strcmp(bArr[i]->name, argv[0]) == 0) {
                 return bArr[i]->program(argc, argv);
             }
         }
@@ -99,7 +95,7 @@ int createProcessWithParams(exec p, int priority, int fg, int isBlocked, char* a
 
 
 int parseCommand(char* str) {
-    if (str == NULL) {
+    if(str == NULL) {
         return -1;
     }
 
@@ -108,7 +104,7 @@ int parseCommand(char* str) {
     int i = 0;
     char *token = strtok(str, " ");
 
-    while (token != NULL && i < MAX_PARAMS) {
+    while(token != NULL && i < MAX_PARAMS) {
         commands[i] = (char *)alloc(strlen(token) + 1);
         strcpy(commands[i], token);
         i++;
@@ -120,7 +116,7 @@ int parseCommand(char* str) {
 
     //no process was created, signal the shell to not wait for any process
 
-    for (int k = 0; k < i; k++) {
+    for(int k = 0; k < i; k++) {
         dealloc((void *) commands[k]);
     }
 
@@ -228,23 +224,23 @@ int sh(int argc, char* argv[]) {
     char* proc = NULL;
     if(argc >= 2) {
         int paramStart = 1;
-        if (strcmp(argv[1], SH_HELP) == 0) {
+        if(strcmp(argv[1], SH_HELP) == 0) {
             shHelp();
             return -1;
         }
 
         for(int i = 0; pArr[i] != NULL; i++) {
-            if (strcmp(pArr[i]->name, argv[1]) == 0) {
+            if(strcmp(pArr[i]->name, argv[1]) == 0) {
                 int fg = FOREGROUND;
                 int paramEnd = 2;
 
                 for(int j = 2; j < argc; j++) {
-                    if (strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
+                    if(strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
                         fg = BACKGROUND;
-                        if (paramEnd == 2) {
+                        if(paramEnd == 2) {
                             paramEnd = j + 1;
                         }
-                    } else if (strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
+                    } else if(strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
                         int ret1 = createProcessWithParams(pArr[i], HIGH, BACKGROUND, 1, argv, paramStart, paramEnd);
 
                         if(argc == j) {
@@ -256,13 +252,13 @@ int sh(int argc, char* argv[]) {
                         paramEnd = argc;
 
                         for(int k = 0; pArr[k] != NULL; k++) {
-                            if (strcmp(pArr[k]->name, argv[j + 1]) == 0) {
+                            if(strcmp(pArr[k]->name, argv[j + 1]) == 0) {
                                 int ret2 = createProcessWithParams(pArr[k], HIGH, fg, 1, argv, paramStart, paramEnd);
 
                                 connectProcesses(ret1, ret2);
                                 unblockProcess(ret1);
                                 unblockProcess(ret2);
-                                if (fg == BACKGROUND) {
+                                if(fg == BACKGROUND) {
                                     return -1;
                                 }
 
@@ -328,9 +324,9 @@ int wcProc(ARGS) {
     int counter = 0;
     char *buff = alloc(BUFFER_SIZE);
     size_t len = getStrn(buff, BUFFER_SIZE);
-    while (len != 0 && buff[0] != -1) {
-        for (int i = 0; buff[i] != '\0'; i++) {
-            if (buff[i] == '\n') {
+    while(len != 0 && buff[0] != -1) {
+        for(int i = 0; buff[i] != '\0'; i++) {
+            if(buff[i] == '\n') {
                 counter++;
             }
         }
@@ -365,7 +361,7 @@ int isVowel(char c){
     return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
 }
 
-int filterUser(char * string){
+int filterUser(char* string){
     for(int i = 0;i < strlen(string); i ++){
         char c = string[i];
         if(!isVowel(c)){
