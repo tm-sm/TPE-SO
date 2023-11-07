@@ -222,19 +222,19 @@ int shHelp() {
 
 int sh(int argc, char* argv[]) {
     char* proc = NULL;
-    if (argc >= 2) {
+    if(argc >= 2) {
         int paramStart = 1;
         if (strcmp(argv[1], SH_HELP) == 0) {
             shHelp();
             return -1;
         }
 
-        for (int i = 0; pArr[i] != NULL; i++) {
+        for(int i = 0; pArr[i] != NULL; i++) {
             if (strcmp(pArr[i]->name, argv[1]) == 0) {
                 int fg = FOREGROUND;
                 int paramEnd = 2;
 
-                for (int j = 2; j < argc; j++) {
+                for(int j = 2; j < argc; j++) {
                     if (strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
                         fg = BACKGROUND;
                         if (paramEnd == 2) {
@@ -251,7 +251,7 @@ int sh(int argc, char* argv[]) {
                         paramStart = j + 1;
                         paramEnd = argc;
 
-                        for (int k = 0; pArr[k] != NULL; k++) {
+                        for(int k = 0; pArr[k] != NULL; k++) {
                             if (strcmp(pArr[k]->name, argv[j + 1]) == 0) {
                                 int ret2 = createProcessWithParams(pArr[k], HIGH, fg, 1, argv, paramStart, paramEnd);
 
@@ -272,12 +272,12 @@ int sh(int argc, char* argv[]) {
                     }
                 }
 
-                if (paramEnd == 2) {
+                if(paramEnd == 2) {
                     paramEnd = argc;
                 }
 
                 int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, paramStart, paramEnd);
-                if (fg == BACKGROUND) {
+                if(fg == BACKGROUND) {
                     return -1;
                 }
                 return ret;

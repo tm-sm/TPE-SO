@@ -207,13 +207,11 @@ void update_player_user(game* g) {
         g->user.v_bar.y -= BARSPEED;
         g->user.v_bar.dir = -1;
         moved = 1;
-    }
-    else if (isCharPressed('s') || isCharPressed('S')) {
+    } else if (isCharPressed('s') || isCharPressed('S')) {
         g->user.v_bar.y += BARSPEED;
         g->user.v_bar.dir = 1;
         moved = 1;
-    }
-    else {
+    } else {
         g->user.v_bar.dir = 0;
     }
     if(!moved) {
