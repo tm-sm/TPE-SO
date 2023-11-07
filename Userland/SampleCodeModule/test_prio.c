@@ -4,8 +4,8 @@
 #include "standardLib.h"
 #include "test_util.h"
 
-#define MINOR_WAIT 1000000 // TODO: Change this value to prevent a process from flooding the screen
-#define WAIT 10000000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
+#define MINOR_WAIT 1000 // TODO: Change this value to prevent a process from flooding the screen
+#define WAIT 3000      // TODO: Change this value to make the wait long enough to see theese processes beeing run at least twice
 
 #define TOTAL_PROCESSES 3
 #define LOWEST 2 // TODO: Change as required
@@ -39,7 +39,7 @@ void test_prio() {
   for (i = 0; i < TOTAL_PROCESSES; i++)
     setProcessPriority(pids[i], MEDIUM);
 
-  printf("UNBLOCKING...\n");
+  printFormat("UNBLOCKING...\n");
 
   for (i = 0; i < TOTAL_PROCESSES; i++)
     unblockProcess(pids[i]);

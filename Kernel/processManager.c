@@ -227,6 +227,9 @@ proc getProcess(int pid) {
     postSem(MUTEX);
     return NULL;
 }
+void yieldProcess(){
+    interruptTick();
+}
 
 void setProcessForeground(int pid, int foreground) {
     waitSem(MUTEX);

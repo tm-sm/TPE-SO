@@ -44,7 +44,7 @@ uint64_t sys_close_pipe(BASE_PARAMS); // code 26
 uint64_t sys_connect_processes(BASE_PARAMS); // code 27
 uint64_t sys_display_FIFO(BASE_PARAMS); // code 28
 uint64_t sys_connect_to_FIFO(BASE_PARAMS); // code 29
-
+uint64_t sys_yield_process(BASE_PARAMS); // code 30
 extern void _sti();
 
 //TODO cambiar las funciones que usaban punteros para retornar a que usen rax
@@ -57,7 +57,7 @@ functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_check_process_foreground, sys_print_all_processes,
                                sys_process_priority, sys_process_block, sys_wait_for_children,
                                sys_open_sem,sys_post_sem,sys_wait_sem,sys_destroy_sem, sys_create_pipe,
-                               sys_close_pipe, sys_connect_processes,sys_display_FIFO,sys_connect_to_FIFO,};
+                               sys_close_pipe, sys_connect_processes,sys_display_FIFO,sys_connect_to_FIFO,sys_yield_process};
 
 uint64_t swInterruptDispatcher(COMPLETE_PARAMS) {
     if(rdi >= sizeof(interruptions)) {
@@ -407,4 +407,9 @@ uint64_t sys_display_FIFO(BASE_PARAMS) {
 //returns= 0 on success, -1 on failure
 uint64_t sys_connect_to_FIFO(BASE_PARAMS){
     return connectToNamedPipe((const char*)rsi,(int)rdx,(int)rcx);
+}
+
+uint64_t sys_yield_process(BASE_PARAMS){
+    yieldProcess();
+    return 0;
 }
