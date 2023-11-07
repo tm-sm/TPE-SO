@@ -8,13 +8,13 @@ typedef struct BlockHeader {
     struct BlockHeader *next;
 }BlockHeader;
 
-int memoryAllocTest(){
+int memoryAllocTest() {
     char * mem1 = allocate(500);
     char * mem2 = allocate(2603);
 
     if((uint64_t)mem1 == 0x0000000000050018 && (uint64_t)mem2 == 0x0000000000050230
     && ((BlockHeader *)(mem1 - sizeof(BlockHeader)))->size == convertToPageSize(500,PAGE_SIZE)
-    && ((BlockHeader *)(mem2 - sizeof(BlockHeader)))->size == convertToPageSize(2603,PAGE_SIZE)){
+    && ((BlockHeader *)(mem2 - sizeof(BlockHeader)))->size == convertToPageSize(2603,PAGE_SIZE)) {
 
         cPrintBase(((BlockHeader *)(mem1 - sizeof(BlockHeader)))->size,10);
         cNewline();
@@ -34,14 +34,14 @@ int memoryAllocTest(){
    return 0;
 }
 
-int memoryDeallocTest(){
+int memoryDeallocTest() {
     char * mem3 = allocate(60000);
     cPrintBase(((BlockHeader *)(mem3 - sizeof(BlockHeader)))->size,10);
     cNewline();
     deallocate(mem3);
 }
 
-int memoryProperInitSelfCheck(){
+int memoryProperInitSelfCheck() {
     createMemoryManager();
     memoryAllocTest();
     memoryDeallocTest();

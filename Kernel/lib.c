@@ -83,10 +83,9 @@ void displayRegs(uint64_t* exregs) {
     int margin = 3;
     moveGlobalCursor(0, linesToWrite+margin);
     while(!(getGlobalCursorX() == 0 && getGlobalCursorY() == 0)) {
-        //clears the screen that is going to be written at
         gErase();
     }
-    moveGlobalCursor(0, margin);//adds a bit of margin
+    moveGlobalCursor(0, margin);
     for(int i=0;i<linesToWrite;i++) {
         gPrint(regs[i]);
         gPrint("0x");
