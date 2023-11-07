@@ -5,7 +5,6 @@
 #include <utils.h>
 #include <console.h>
 #include <keyboardDriver.h>
-#include <utils.h>
 
 #define MAX_FILE_DESCRIPTORS 128
 #define PIPE_BUFFER_SIZE 100
@@ -49,7 +48,7 @@ int initNamedPipe(struct CustomPipe * pipe);
 
 void initializeFileDescriptorManager() {
     manager = allocate(sizeof(struct FileDescriptorManager));
-    for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
         manager->entries[i].used = 0;
     }
 
@@ -57,7 +56,7 @@ void initializeFileDescriptorManager() {
     openFD(NULL); //1 STDOUT
 
     first = allocate(sizeof(struct FIFOs));
-    for (int i = 0; i < FIFO_COUNT; i++) {
+    for(int i = 0; i < FIFO_COUNT; i++) {
         char fifoName[24];
         char num[2];
         num[0] = i + '0';
@@ -74,8 +73,8 @@ void initializeFileDescriptorManager() {
 }
 
 int openFD(void* data) {
-    for (int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
-        if (!manager->entries[i].used) {
+    for(int i = 0; i < MAX_FILE_DESCRIPTORS; i++) {
+        if(!manager->entries[i].used) {
             manager->entries[i].used = 1;
             manager->entries[i].data = data;
             return manager->entries[i].fd = i;
@@ -85,7 +84,7 @@ int openFD(void* data) {
 }
 
 void* getFDData(int fd) {
-    if (fd >= 0 && fd < MAX_FILE_DESCRIPTORS && manager->entries[fd].used) {
+    if(fd >= 0 && fd < MAX_FILE_DESCRIPTORS && manager->entries[fd].used) {
         return manager->entries[fd].data;
     }
     return NULL;
@@ -110,7 +109,7 @@ void closeFD(int fd) {
         return;
     }
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
-    if(pipe != NULL){
+    if(pipe != NULL) {
         closePipe(fd);
     }
 
@@ -123,7 +122,7 @@ void closeFD(int fd) {
 int customPipe(int fd[2]) {
     struct CustomPipe* pipe = (struct CustomPipe*)allocate(sizeof(struct CustomPipe));
 
-    if(pipe == NULL){
+    if(pipe == NULL) {
         return -1;
     }
 
@@ -175,7 +174,7 @@ int initNamedPipe(struct CustomPipe * pipe){
 void closePipe(int pipeFD) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(pipeFD);
 
-    if(pipe == NULL){
+    if(pipe == NULL) {
         return;
     }
 
@@ -185,9 +184,9 @@ void closePipe(int pipeFD) {
     deallocate(pipe);
 }
 
-struct NamedPipe *getNamedPipe(const char * name){
-    for (int i = 0; i < FIFO_COUNT; i++) {
-        if (strcmp(first->fifos[i].name, name) == 0) {
+struct NamedPipe *getNamedPipe(const char * name) {
+    for(int i = 0; i < FIFO_COUNT; i++) {
+        if(strcmp(first->fifos[i].name, name) == 0) {
             return &first->fifos[i];
         }
     }
@@ -205,9 +204,9 @@ int setToNamedPipeFd(int *proc1, int *proc2, const char * name){
     return 0;
 }
 
-void displayFIFO(){
+void displayFIFO() {
     cPrint("Named Pipes (FIFOs):\n");
-    for (int i = 0; i < FIFO_COUNT; i++) {
+    for(int i = 0; i < FIFO_COUNT; i++) {
         struct NamedPipe* namedPipe = &first->fifos[i];
         cPrint(namedPipe->name);
         cPrint(" ");
@@ -218,14 +217,14 @@ void displayFIFO(){
 size_t read(int fd, char * buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
 
-    if((fd != STDIN) && (pipe == NULL || !manager->entries[fd].used || pipe->fdout != fd)){
+    if((fd != STDIN) && (pipe == NULL || !manager->entries[fd].used || pipe->fdout != fd)) {
         return 0;
     }
 
     size_t bytesRead;
     int i=0;
 
-    switch(fd){
+    switch(fd) {
         case STDIN:
             bytesRead = gets(buff, bytes);
             break;
@@ -245,7 +244,7 @@ size_t read(int fd, char * buff, size_t bytes) {
 size_t write(int fd, const char* buff, size_t bytes) {
     struct CustomPipe* pipe = (struct CustomPipe*)getFDData(fd);
 
-    if((fd != STDOUT) && (pipe == NULL || !manager->entries[fd].used || pipe->fdin != fd)){
+    if((fd != STDOUT) && (pipe == NULL || !manager->entries[fd].used || pipe->fdin != fd)) {
         return 0;
     }
 

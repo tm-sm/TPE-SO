@@ -75,7 +75,7 @@ static char readBuffer() {
 }
 
 static void addToBuffer(uint8_t keycode) {
-    if (keycode == NO_INPUT) {
+    if(keycode == NO_INPUT) {
         keyBuffer = NO_INPUT;
     }
     unsigned char c = (kbdusNoShift[keycode]);
@@ -94,7 +94,7 @@ static void addToBuffer(uint8_t keycode) {
 }
 
 static void setKeyMap(uint8_t keycode, uint8_t condition) {
-    if (keycode == NO_INPUT) {
+    if(keycode == NO_INPUT) {
         return;
     }
     unsigned char c = (kbdusNoShift[keycode]);
@@ -135,30 +135,24 @@ void keyboard_handler(uint64_t* registers) {
             default:
                 //continues
         }
-    }else if(!ctrl){
+    } else if(!ctrl){
         ctrlOperation = FALSE;
     }
 
     if(keycode == LCTRL) {
         ctrl = (keyRelease)?(FALSE):(TRUE);
-    }
-    else if(keycode == LALT) {
+    } else if(keycode == LALT) {
         alt = (keyRelease)?(FALSE):(TRUE);
-    }
-    else if(keycode == LSHIFT || keycode == RSHIFT) {
+    } else if(keycode == LSHIFT || keycode == RSHIFT) {
         shift = (keyRelease)?(FALSE):(TRUE);
-    }
-    else if(keycode == CAPS_LOCK) {
+    } else if(keycode == CAPS_LOCK) {
         caps_lock = (keyRelease)?(caps_lock):(!caps_lock);
-    }
-    else if(keycode == F1) {
+    } else if(keycode == F1) {
         displayRegs(registers);
-    }
-    else if(!keyRelease) {
+    } else if(!keyRelease) {
         addToBuffer(keycode);
         setKeyMap(keycode, TRUE);
-    }
-    else if(keyRelease) {
+    } else if(keyRelease) {
         setKeyMap(keycode, FALSE);
     }
 }
@@ -166,12 +160,12 @@ void keyboard_handler(uint64_t* registers) {
 char getc(){
     if(isCurrentProcessInForeground()) {
         uint8_t c = readBuffer();
-        while (c == NO_INPUT && blockedProcess == NONE) {
+        while(c == NO_INPUT && blockedProcess == NONE) {
             blockedProcess = getActiveProcessPid();
             blockCurrentProcess();
             c = readBuffer();
         }
-        return (char) c;
+        return (char)c;
     }
     return NO_INPUT;
 }
@@ -187,6 +181,5 @@ int gets(char * s, size_t bytes) {
         s[i++] = '\n';
         s[i] = '\0';
     }
-
     return i;
 }

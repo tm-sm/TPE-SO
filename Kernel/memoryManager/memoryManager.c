@@ -3,6 +3,8 @@
 #include "lib.h"
 #define MEM_START_ADR 0x0000000000050000
 
+size_t convertToPageSize(size_t size, size_t pageSize);
+
 typedef struct BlockHeader {
     size_t size;
     size_t isFree;
