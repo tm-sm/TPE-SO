@@ -5,10 +5,10 @@
 #include <processManager.h>
 #include <videoDriver.h>
 
-//64 KB libres
 #define MEM_START_ADR 0x0000000000050000
-#define MIN_SIZE 64
+#define MIN_SIZE 64   // MIN_SIZE == 64 -> sh phylo works fine after sh loop. 128 <= MIN_SIZE for some reason sh phylo does not work as intended
 
+//Tree styled struct
 typedef struct Buddyblock {
     int size;
     char pid;
@@ -38,6 +38,7 @@ void createMemoryManager() {
     root = createBlock(MEMORY_SIZE, memory);
 }
 
+//Will calculate appropiate size for buddy block
 size_t convertToClosestPowerOf2(size_t size) {
     if (size < MIN_SIZE) {
         return size <= MIN_SIZE - sizeof(Buddyblock) ? MIN_SIZE: 2*MIN_SIZE;
@@ -51,6 +52,7 @@ size_t convertToClosestPowerOf2(size_t size) {
     return power < MIN_SIZE ? MIN_SIZE: power;
 }
 
+
 void splitBlock(Buddyblock *block) {
     if(block->size == MIN_SIZE){
         return;
@@ -63,6 +65,7 @@ void splitBlock(Buddyblock *block) {
     block->right = createBlock(block->size / 2, (void*)((char *)block + block->size/2));
 }
 
+//Recursive function call to merge 'buddies' if mergeable as to reduce fragmentation and increase the general memory pool
 void mergeBlocksRecursive(Buddyblock *node) {
     if(node == NULL){
         return;
@@ -85,7 +88,7 @@ void mergeBlocks() {
     mergeBlocksRecursive(root);
 }
 
-//El size ya es el size que se va reservar por el sistema
+//DFS styled function to make the tree grow as more memory is needed.
 Buddyblock* allocateRecursive(size_t size, Buddyblock* node) {
     if(node == NULL || (!node->isFree && !node->isSplit)){
         return NULL;
@@ -150,12 +153,11 @@ void deallocate(void *addr) {
 }
 
 void * reallocate(void * ptr, size_t newSize) {
-    //Equivalente a un dealloc
     if (newSize == 0) {
         deallocate(ptr);
         return NULL;
     }
-    //Si no hay nada, es como un allocate
+
     if (ptr == NULL) {
         return allocate(newSize);
     }
@@ -164,7 +166,7 @@ void * reallocate(void * ptr, size_t newSize) {
 
     if (newPtr) {
         size_t oldSize = ((Buddyblock *)(ptr - sizeof(Buddyblock)))->size;
-        size_t copySize = (oldSize < newSize) ? oldSize : newSize;  //Copio lo minimo para no excederme del tamano, ESTO PUEDE CAUSAR PERDIDAS DE MEMORIA
+        size_t copySize = (oldSize < newSize) ? oldSize : newSize;
         memcpy(newPtr, ptr, copySize);
 
         deallocate(ptr);
@@ -174,6 +176,7 @@ void * reallocate(void * ptr, size_t newSize) {
     }
 }
 
+//Recursive function call to go over the whole tree in order to check free memory and sum it up
 size_t getCurrentFreeMemRecursively(Buddyblock * node){
     if (node == NULL) {
         return 0;
@@ -197,6 +200,7 @@ size_t getCurrentMemSize(){
     return getCurrentFreeMemRecursively(root);
 }
 
+//Recursive function call to go over the whole tree in order to check pids and dealloc if needed
 void deallocateAllProcRecursive(Buddyblock * node, int pid){
     if (node == NULL) {
         return;
