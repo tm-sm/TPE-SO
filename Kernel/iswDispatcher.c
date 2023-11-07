@@ -47,8 +47,6 @@ uint64_t sys_connect_to_FIFO(BASE_PARAMS); // code 29
 uint64_t sys_yield_process(BASE_PARAMS); // code 30
 extern void _sti();
 
-//TODO cambiar las funciones que usaban punteros para retornar a que usen rax
-
 functionPtr interruptions[] = {sys_write, sys_read, sys_draw, sys_double_buffer,
                                sys_get_time, sys_detect_key_press,
                                sys_wait, sys_sound, sys_nop, sys_is_char_pressed,

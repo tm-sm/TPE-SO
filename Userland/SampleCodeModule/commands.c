@@ -25,7 +25,6 @@ struct EXECUTABLE {
     functionPtr program;
 }EXECUTABLE;
 
-//TODO agregar mensajes de error para parametros mal pasados
 
 typedef struct EXECUTABLE* exec;
 
@@ -39,8 +38,10 @@ ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS),
 
 static exec bArr[] = {
         &(struct EXECUTABLE){"help", "displays all available commands", help},
+        /* deprecated for now, as proper exception handling hasn't been implemented with processes
         &(struct EXECUTABLE){"test-div0", "runs a zero division", testException0},
         &(struct EXECUTABLE){"test-invalidop", "runs an invalid op", testException6},
+         */
         &(struct EXECUTABLE){"time", "prints the current time", displayTime},
         &(struct EXECUTABLE){"date", "prints the current date", displayDate},
         &(struct EXECUTABLE){"mem", "prints available memory in bytes", mem},
@@ -196,22 +197,33 @@ int nice(ARGS) {
     if(argc == 3) {
         int pid = atoi(argv[1]);
         int priority = atoi(argv[2]);
+        if(pid == SENTINEL_PID || pid == INIT_PID || pid == SHELL_PID || pid < 0) {
+            printFormat("\nForbidden\n");
+            return -1;
+        }
         if(priority <= 3 && priority >= 0) {
             setProcessPriority(pid, priority);
+            return 0;
         }
     }
-    return 0;
+    printFormat("\nInvalid parameters\n");
+    return -1;
 }
 
 int block(ARGS) {
     if(argc == 2) {
         int pid = atoi(argv[1]);
+        if(pid == SENTINEL_PID || pid == INIT_PID || pid == SHELL_PID || pid < 0) {
+            printFormat("\nForbidden\n");
+            return -1;
+        }
         if(isProcessBlocked(pid)) {
             unblockProcess(pid);
         } else {
             blockProcess(pid);
         }
     }
+    printFormat("\nInvalid parameters\n");
     return 0;
 }
 
@@ -311,7 +323,7 @@ int catProc(ARGS) {
 int cat(ARGS) {
     if(argc >= 2) {
         for(int i=0; pArr[i] != NULL; i++) {
-            if(strcmp(pArr[i]->name, argv[1]) == 0){
+            if (strcmp(pArr[i]->name, argv[1]) == 0) {
                 int catPid = createProcess(catProc, HIGH, FOREGROUND, 1, "cat", NULL);
                 int pid = createProcessWithParams(pArr[i], LOW, BACKGROUND, 1, argv, 1, argc);
                 connectProcesses(pid, catPid);
@@ -320,6 +332,7 @@ int cat(ARGS) {
                 return catPid;
             }
         }
+        unknownProcess(argv[1]);
     }
     return -1;
 }
@@ -354,6 +367,7 @@ int wc(ARGS) {
                 return wcPid;
             }
         }
+        unknownProcess(argv[1]);
     }
     return -1;
 }
@@ -404,6 +418,7 @@ int filter(ARGS) {
                 return filterPid;
             }
         }
+        unknownProcess(argv[1]);
     }
     return -1;
 }

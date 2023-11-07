@@ -136,19 +136,19 @@ void waitForChild(int pid) {
     interrupt(SYS_WAIT_FOR_CHILDREN, pid, 0, 0, 0, 0);
 }
 
-int openSem(char* name,int value){
+int openSem(char* name,int value) {
     return (int)interrupt(SYS_OPEN_SEM,(uint64_t)name,value,0,0,0);
 }
 
-int postSem(char* name){
+int postSem(char* name) {
     return (int)interrupt(SYS_POST_SEM,(uint64_t)name,0,0,0,0);
 }
 
-int waitSem(char* name){
+int waitSem(char* name) {
     return (int)interrupt(SYS_WAIT_SEM,(uint64_t)name,0,0,0,0);
 }
 
-int destroySem(char* name){
+int destroySem(char* name) {
     return (int)interrupt(SYS_CLOSE_SEM,(uint64_t)name,0,0,0,0);
 }
 
@@ -160,11 +160,11 @@ void closePipe(int fd) {
     interrupt(SYS_CLOSE_PIPE, (uint64_t)fd, 0, 0, 0, 0);
 }
 
-int connectToFIFO(const char * name, int p1, int p2){
+int connectToFIFO(const char * name, int p1, int p2) {
     return (int)interrupt(SYS_CONNECT_TO_FIFO, (uint64_t)name,(uint64_t)p1, (uint64_t)p2, 0, 0);
 }
 
-int displayFIFOs(){
+int displayFIFOs() {
     return (int)interrupt(SYS_DISPLAY_FIFO, 0,0, 0, 0, 0);
 }
 
@@ -172,6 +172,6 @@ int connectProcesses(int p1, int p2) {
     return (int)interrupt(SYS_CONNECT_PROCESSES, (uint64_t)p1, (uint64_t)p2, 0, 0, 0);
 }
 
-int yield(){
+int yield() {
     return (int)interrupt(SYS_YIELD_PROCESS, 0, 0, 0, 0, 0);
 }

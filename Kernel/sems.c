@@ -11,7 +11,7 @@ typedef struct Semaphore{
     int value;
     char name[24];
     int lock;
-    int processesBlocked[MAX_PROCESSES_BLOCKED]; //TODO maybe cambiar por lista
+    int processesBlocked[MAX_PROCESSES_BLOCKED];
     int processesBlockedAmount;
 }Semaphore;
 
