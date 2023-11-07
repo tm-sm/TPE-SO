@@ -26,6 +26,7 @@
 #define SYS_CONNECT_PROCESSES 27
 #define SYS_DISPLAY_FIFO 28
 #define SYS_CONNECT_TO_FIFO 29
+#define SYS_YIELD_PROCESS 30
 
 #define ALLOC 0
 #define REALLOC 1
@@ -171,3 +172,6 @@ int connectProcesses(int p1, int p2) {
     return (int)interrupt(SYS_CONNECT_PROCESSES, (uint64_t)p1, (uint64_t)p2, 0, 0, 0);
 }
 
+int yield(){
+    return (int)interrupt(SYS_YIELD_PROCESS, 0, 0, 0, 0, 0);
+}

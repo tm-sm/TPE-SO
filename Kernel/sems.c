@@ -7,13 +7,13 @@
 #define SEM_MAX_AMOUNT 50
 #define MAX_PROCESSES_BLOCKED 10
 
-typedef struct semaphore{
+typedef struct Semaphore{
     int value;
     char name[24];
     int lock;
     int processesBlocked[MAX_PROCESSES_BLOCKED]; //TODO maybe cambiar por lista
     int processesBlockedAmount;
-}semaphore;
+}Semaphore;
 
 sem semaphores[SEM_MAX_AMOUNT]={NULL};
 
@@ -35,7 +35,7 @@ int openSem(char* name, int value){//podria separarse esta funcion para crear y 
     }
     for (int i=0;i<SEM_MAX_AMOUNT;i++){
         if(semaphores[i]==NULL){
-            semaphores[i]=allocate(sizeof(semaphore));
+            semaphores[i]=allocate(sizeof(Semaphore));
             strcpy(semaphores[i]->name,name);
             semaphores[i]->value=value;
             semaphores[i]->lock=0;

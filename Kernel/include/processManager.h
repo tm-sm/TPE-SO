@@ -123,6 +123,8 @@ void blockProcess(int pid);
 // Unblock a specific process using its process ID (pid)
 void unblockProcess(int pid);
 
+void yieldProcess();
+
 // Connect two processes by their process IDs (pids)
 int connectProcs(int pidProc1, int pidProc2);
 

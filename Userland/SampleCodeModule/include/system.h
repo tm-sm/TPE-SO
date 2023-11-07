@@ -173,6 +173,7 @@ void waitForChildren();
  * @param pid Process ID (pid) of the child process to wait for
  */
 void waitForChild(int pid);
+void yieldProcess();
 
 /**
  * Open or create a semaphore with a given name and initial value.
