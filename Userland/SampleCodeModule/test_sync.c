@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "system.h"
+#include <system.h>
 #include "standardLib.h"
 #include "test_util.h"
 
@@ -11,7 +11,7 @@ int64_t global; // shared memory
 
 void slowInc(int64_t *p, int64_t inc) {
   uint64_t aux = *p;
-  my_yield(); // This makes the race condition highly probable
+  yield();  // This makes the race condition highly probable
   aux += inc;
   *p = aux;
 }
@@ -67,7 +67,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   uint64_t i;
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
     pids[i] = createProcess(my_process_inc, 0,BACKGROUND,0,"process_inc", argvDec);
-    pids[i + TOTAL_PAIR_PROCESSES] = my_create_process(my_process_inc, 2,BACKGROUND,0,"process_inc", argvInc);
+    pids[i + TOTAL_PAIR_PROCESSES] = createProcess(my_process_inc, 2,BACKGROUND,0,"process_inc", argvInc);
   }
   //No clue
   for (i = 0; i < TOTAL_PAIR_PROCESSES; i++) {
@@ -75,7 +75,7 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
     waitForChild(pids[i + TOTAL_PAIR_PROCESSES]);
   }
 
-  printf("Final value: %d\n", global);
+  printFormat("Final value: %d\n", global);
 
   return 0;
 }

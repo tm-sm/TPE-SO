@@ -50,6 +50,7 @@ void blockProcess(int pid);
 void unblockProcess(int pid);
 void waitForChildren();
 void waitForChild(int pid);
+void yieldProcess();
 
 int openSem(char* name, int value);
 int postSem(char* name);
