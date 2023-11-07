@@ -21,19 +21,19 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   int8_t use_sem;
 
   if (argc != 3)
-    exitProc();
+    return -1;
 
   if ((n = satoi(argv[1])) <= 0)
-    exitProc();
+    return -1;
   if ((inc = satoi(argv[2])) == 0)
-    exitProc();
+    return -1;
   if ((use_sem = satoi(argv[3])) < 0)
-    exitProc();
+    return -1;
 
   if (use_sem)
     if (my_sem_open(SEM_ID, 1)) {
       printFormat("test_sync: ERROR opening semaphore\n");
-      exitProc();
+      return -1;
     }
 
   uint64_t i;
@@ -48,14 +48,14 @@ uint64_t my_process_inc(uint64_t argc, char *argv[]) {
   if (use_sem)
     my_sem_close(SEM_ID);
 
-exitProc();
+return 0;
 }
 
 uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
   uint64_t pids[2 * TOTAL_PAIR_PROCESSES];
 
   if (argc != 3)
-    exitProc();
+    return -1;
 
   char *argvDec[] = {argv[1], "-1", argv[2], NULL};
   char *argvInc[] = {argv[1], "1", argv[2], NULL};
@@ -75,5 +75,5 @@ uint64_t test_sync(uint64_t argc, char *argv[]) { //{n, use_sem, 0}
 
   printFormat("Final value: %d \n", global);
 
-  exitProc();
+  return 0;
 }

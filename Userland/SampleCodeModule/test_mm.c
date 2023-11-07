@@ -20,10 +20,10 @@ uint64_t test_mm(int argc, char *argv[]) {
   uint64_t max_memory;
 
   if (argc != 1)
-    exitProc();
+    return -1;
 
   if ((max_memory = satoi(argv[1])) <= 0)
-    exitProc();
+    return -1;
 
   while (1) {
     rq = 0;
@@ -51,7 +51,7 @@ uint64_t test_mm(int argc, char *argv[]) {
       if (mm_rqs[i].address)
         if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) {
           printFormat("test_mm ERROR\n");
-          exitProc();
+          return -1;
         }
 
     // Free

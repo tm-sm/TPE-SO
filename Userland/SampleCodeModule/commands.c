@@ -35,7 +35,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),test_mm(ARGS),test_sync(ARGS),test_processes(ARGS),test_prio(ARGS); ;
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),testMemory(ARGS),testSync(ARGS),testProcesses(ARGS),testPriority(ARGS); ;
 
 static exec bArr[] = {
         &(struct Executable){"help", "displays all available commands", help},
@@ -66,10 +66,10 @@ static exec pArr[] = {
         &(struct Executable){"repeat", "prints all parameters passed", repeat},
         &(struct Executable){"loop", "prints its own pid every 2 seconds", loop},
         &(struct Executable){"phylo", "runs the dining philosophers problem", initPhyloReunion},
-        &(struct Executable){"testmm","tests memory management",test_mm},
-        &(struct Executable){"testsync","tests synchronization",test_sync},
-        &(struct Executable){"testproc","tests processes",test_processes},
-        &(struct Executable){"testprio","tests priorities",test_prio},
+        &(struct Executable){"testmm","tests memory management",testMemory},
+        &(struct Executable){"testsync","tests synchronization",testSync},
+        &(struct Executable){"testproc","tests processes",testProcesses},
+        &(struct Executable){"testprio","tests priorities",testPriority},
         NULL
 };
 
@@ -441,12 +441,33 @@ int playBubbles(ARGS) {
     exitProc();
     return 0;
 }
+int testPriority(ARGS){
+    test_prio();
+    exitProc();
+    return 0;
+}
 
 int playPong(ARGS) {
     enableDoubleBuffering();
     pong();
     clearScreen();
     disableDoubleBuffering();
+    exitProc();
+    return 0;
+}
+
+int testMemory(ARGS) {
+    test_mm(argc, argv);
+    exitProc();
+    return 0;
+}
+int testSync(ARGS) {
+    test_sync(argc, argv);
+    exitProc();
+    return 0;
+}
+int testProcesses(ARGS) {
+    test_processes(argc, argv);
     exitProc();
     return 0;
 }

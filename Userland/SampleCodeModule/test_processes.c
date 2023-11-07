@@ -20,10 +20,10 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
   char *argvAux[] = {0};
 
   if (argc != 2)
-    exitProc();
+   return -1;
 
   if ((max_processes = satoi(argv[1])) <= 0)
-    exitProc();
+    return -1;
 
   p_rq p_rqs[max_processes];
 
@@ -62,7 +62,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
             if (p_rqs[rq].state == RUNNING) {
               if (my_block(p_rqs[rq].pid) == -1) {
                 printFormat("test_processes: ERROR blocking process\n");
-                exitProc();
+                return -1;
               }
               p_rqs[rq].state = BLOCKED;
             }
@@ -74,7 +74,7 @@ int64_t test_processes(uint64_t argc, char *argv[]) {
         if (p_rqs[rq].state == BLOCKED && GetUniform(100) % 2) {
           if (my_unblock(p_rqs[rq].pid) == -1) {
             printFormat("test_processes: ERROR unblocking process\n");
-            exitProc();
+            return -1;
           }
           p_rqs[rq].state = RUNNING;
         }
