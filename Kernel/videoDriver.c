@@ -170,8 +170,12 @@ void drawColoredLine(Color c, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1
         putPixel(c, x0, y0);
         if (x0 == x1 && y0 == y1) break;
         e2 = 2 * err;
-        if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
-        if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+        if (e2 >= dy) { 
+            err += dy; x0 += sx; 
+            } /* e_xy+e_x > 0 */
+        if (e2 <= dx) { 
+            err += dx; y0 += sy; 
+            } /* e_xy+e_y < 0 */
     }
 }
 
