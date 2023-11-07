@@ -182,21 +182,6 @@ void _printHex(uint64_t value, char* buff) {
     putStrn(itoa(value,buff,16));
 }
 
-int compString(const char*s1,const char*s2){
-    while (*s1 == *s2++)
-		if (*s1++ == 0)
-			return 0;
-	return (*s1 - *--s2);
-}
-
-int getDigits(int n){
-    int digits=0;
-    while(n!=0){
-        n=n/10;
-        digits++;
-    }
-    return digits;
-}
 
 int strcmp(const char* str1, const char* str2) {
     int i = 0;

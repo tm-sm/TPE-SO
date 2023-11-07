@@ -42,7 +42,6 @@ unsigned int getYear() {
     return retrieve(YEAR);
 }
 
-
 void printTime() {
     printFormat("Current time: %02d:%02d:%02d", (int)getHours(), (int)getMinutes(), (int)getSeconds());
 }

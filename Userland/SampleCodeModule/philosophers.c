@@ -83,17 +83,17 @@ void addPhilo(int i) {
     strcpy(philosophers[i]->name,philosophersName[i]);
     philosophers[i]->state = THINKING;
     int pid= createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
-    if(pid==-1){
+    if(pid==-1) {
         printFormat("Error creating philosopher %s\n",philosophersName[i]);
     }
-    else{
+    else {
         philosophers[i]->pid=pid;
     }
 }
 
 void getInput() {
     waitSem(MUTEX);
-    if(isCharPressed('r') ) {
+    if(isCharPressed('r')) {
         if(philoAmount > 0){
         int pid = philosophers[philoAmount - 1]->pid;
         philoAmount--;

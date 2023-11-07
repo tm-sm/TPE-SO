@@ -57,6 +57,9 @@ int findFirstAvailablePid();
 int isPidValid(int pid);
 int addChildNode(int parentPid, int childPid);
 void removeChildNode(int parentPid, int childPid);
+void notifyParent(int parentPid, int childPid);
+void removeFromFgStack(int pid);
+void addToFgStack(int pid);
 
 int fgStack[MAX_PROC];
 int lastFgProc = -1;
