@@ -14,14 +14,14 @@ typedef struct Buddyblock {
     char pid;
     char isFree;
     char isSplit;
-    struct Buddyblock *left;
-    struct Buddyblock *right;
+    struct Buddyblock* left;
+    struct Buddyblock* right;
 } Buddyblock;
 
-static Buddyblock *root = NULL;
+static Buddyblock* root = NULL;
 
-Buddyblock *createBlock(int size, void *address) {
-    Buddyblock * block = (Buddyblock *) address;
+Buddyblock* createBlock(int size, void* address) {
+    Buddyblock* block = (Buddyblock* ) address;
 
     block->size = size;
     block->isFree = 1;
@@ -34,7 +34,7 @@ Buddyblock *createBlock(int size, void *address) {
 }
 
 void createMemoryManager() {
-    void * memory = (void *)MEM_START_ADR;
+    void* memory = (void* )MEM_START_ADR;
     root = createBlock(MEMORY_SIZE, memory);
 }
 
@@ -53,7 +53,7 @@ size_t convertToClosestPowerOf2(size_t size) {
 }
 
 
-void splitBlock(Buddyblock *block) {
+void splitBlock(Buddyblock* block) {
     if(block->size == MIN_SIZE){
         return;
     }
@@ -66,7 +66,7 @@ void splitBlock(Buddyblock *block) {
 }
 
 //Recursive function call to merge 'buddies' if mergeable as to reduce fragmentation and increase the general memory pool
-void mergeBlocksRecursive(Buddyblock *node) {
+void mergeBlocksRecursive(Buddyblock* node) {
     if(node == NULL){
         return;
     }
@@ -99,8 +99,8 @@ Buddyblock* allocateRecursive(size_t size, Buddyblock* node) {
         return node;
     }
 
-    Buddyblock * left;
-    Buddyblock * right;
+    Buddyblock* left;
+    Buddyblock* right;
 
     if(!node->isSplit && node->isFree && node->size/2 >= MIN_SIZE){
         splitBlock(node);
@@ -119,24 +119,24 @@ Buddyblock* allocateRecursive(size_t size, Buddyblock* node) {
     return NULL;
 }
 
-void *allocate(size_t size) {
+void* allocate(size_t size) {
     if(size >= MEMORY_SIZE){
         return NULL;
     }
 
     size_t sizeToUse = convertToClosestPowerOf2(size);
-    Buddyblock *node = root;
+    Buddyblock* node = root;
     mergeBlocks();
-    Buddyblock *allocatedBlock = allocateRecursive(sizeToUse, node);
+    Buddyblock* allocatedBlock = allocateRecursive(sizeToUse, node);
 
     if (allocatedBlock != NULL) {
-        return (void*)((char*)allocatedBlock + sizeof(Buddyblock));
+        return (void* )((char* )allocatedBlock + sizeof(Buddyblock));
     }
 
     return NULL;
 }
 
-void deallocate(void *addr) {
+void deallocate(void* addr) {
     if(addr == NULL){
         return;
     }
@@ -152,7 +152,7 @@ void deallocate(void *addr) {
     mergeBlocks();
 }
 
-void * reallocate(void * ptr, size_t newSize) {
+void* reallocate(void* ptr, size_t newSize) {
     if (newSize == 0) {
         deallocate(ptr);
         return NULL;
@@ -162,10 +162,10 @@ void * reallocate(void * ptr, size_t newSize) {
         return allocate(newSize);
     }
 
-    void * newPtr = allocate(newSize);
+    void* newPtr = allocate(newSize);
 
     if (newPtr) {
-        size_t oldSize = ((Buddyblock *)(ptr - sizeof(Buddyblock)))->size;
+        size_t oldSize = ((Buddyblock* )(ptr - sizeof(Buddyblock)))->size;
         size_t copySize = (oldSize < newSize) ? oldSize : newSize;
         memcpy(newPtr, ptr, copySize);
 
@@ -177,7 +177,7 @@ void * reallocate(void * ptr, size_t newSize) {
 }
 
 //Recursive function call to go over the whole tree in order to check free memory and sum it up
-size_t getCurrentFreeMemRecursively(Buddyblock * node){
+size_t getCurrentFreeMemRecursively(Buddyblock* node){
     if (node == NULL) {
         return 0;
     }
@@ -201,7 +201,7 @@ size_t getCurrentMemSize(){
 }
 
 //Recursive function call to go over the whole tree in order to check pids and dealloc if needed
-void deallocateAllProcRecursive(Buddyblock * node, int pid){
+void deallocateAllProcRecursive(Buddyblock* node, int pid){
     if (node == NULL) {
         return;
     }
