@@ -19,14 +19,15 @@ typedef int (*functionPtr)(ARGS);
 
 #define SH_HELP "help"
 
-struct EXECUTABLE {
+struct Executable {
     char* name;
     char* description;
     functionPtr program;
-}EXECUTABLE;
+}Executable;
 
+//TODO agregar mensajes de error para parametros mal pasados
 
-typedef struct EXECUTABLE* exec;
+typedef struct Executable* exec;
 
 extern void invalidOp();
 
@@ -73,9 +74,9 @@ static exec pArr[] = {
 };
 
 int callBuiltin(int argc, char* argv[]) {
-    if (argc >= 1) {
-        for (int i = 0; bArr[i] != NULL; i++) {
-            if (strcmp(bArr[i]->name, argv[0]) == 0) {
+    if(argc >= 1) {
+        for(int i = 0; bArr[i] != NULL; i++) {
+            if(strcmp(bArr[i]->name, argv[0]) == 0) {
                 return bArr[i]->program(argc, argv);
             }
         }
@@ -100,7 +101,7 @@ int createProcessWithParams(exec p, int priority, int fg, int isBlocked, char* a
 
 
 int parseCommand(char* str) {
-    if (str == NULL) {
+    if(str == NULL) {
         return -1;
     }
 
@@ -109,7 +110,7 @@ int parseCommand(char* str) {
     int i = 0;
     char *token = strtok(str, " ");
 
-    while (token != NULL && i < MAX_PARAMS) {
+    while(token != NULL && i < MAX_PARAMS) {
         commands[i] = (char *)alloc(strlen(token) + 1);
         strcpy(commands[i], token);
         i++;
@@ -121,7 +122,7 @@ int parseCommand(char* str) {
 
     //no process was created, signal the shell to not wait for any process
 
-    for (int k = 0; k < i; k++) {
+    for(int k = 0; k < i; k++) {
         dealloc((void *) commands[k]);
     }
 
@@ -240,23 +241,23 @@ int sh(int argc, char* argv[]) {
     char* proc = NULL;
     if(argc >= 2) {
         int paramStart = 1;
-        if (strcmp(argv[1], SH_HELP) == 0) {
+        if(strcmp(argv[1], SH_HELP) == 0) {
             shHelp();
             return -1;
         }
 
         for(int i = 0; pArr[i] != NULL; i++) {
-            if (strcmp(pArr[i]->name, argv[1]) == 0) {
+            if(strcmp(pArr[i]->name, argv[1]) == 0) {
                 int fg = FOREGROUND;
                 int paramEnd = 2;
 
                 for(int j = 2; j < argc; j++) {
-                    if (strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
+                    if(strcmp(argv[j], START_IN_BACKGROUND_SYMBOL) == 0) {
                         fg = BACKGROUND;
-                        if (paramEnd == 2) {
+                        if(paramEnd == 2) {
                             paramEnd = j + 1;
                         }
-                    } else if (strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
+                    } else if(strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
                         int ret1 = createProcessWithParams(pArr[i], HIGH, BACKGROUND, 1, argv, paramStart, paramEnd);
 
                         if(argc == j) {
@@ -268,13 +269,13 @@ int sh(int argc, char* argv[]) {
                         paramEnd = argc;
 
                         for(int k = 0; pArr[k] != NULL; k++) {
-                            if (strcmp(pArr[k]->name, argv[j + 1]) == 0) {
+                            if(strcmp(pArr[k]->name, argv[j + 1]) == 0) {
                                 int ret2 = createProcessWithParams(pArr[k], HIGH, fg, 1, argv, paramStart, paramEnd);
 
                                 connectProcesses(ret1, ret2);
                                 unblockProcess(ret1);
                                 unblockProcess(ret2);
-                                if (fg == BACKGROUND) {
+                                if(fg == BACKGROUND) {
                                     return -1;
                                 }
 
@@ -341,9 +342,9 @@ int wcProc(ARGS) {
     int counter = 0;
     char *buff = alloc(BUFFER_SIZE);
     size_t len = getStrn(buff, BUFFER_SIZE);
-    while (len != 0 && buff[0] != -1) {
-        for (int i = 0; buff[i] != '\0'; i++) {
-            if (buff[i] == '\n') {
+    while(len != 0 && buff[0] != -1) {
+        for(int i = 0; buff[i] != '\0'; i++) {
+            if(buff[i] == '\n') {
                 counter++;
             }
         }
@@ -379,7 +380,7 @@ int isVowel(char c){
     return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';
 }
 
-int filterUser(char * string){
+int filterUser(char* string){
     for(int i = 0;i < strlen(string); i ++){
         char c = string[i];
         if(!isVowel(c)){
