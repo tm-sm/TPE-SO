@@ -197,16 +197,6 @@ size_t getCurrentMemSize(){
     return getCurrentFreeMemRecursively(root);
 }
 
-size_t convertToPageSize(size_t size, size_t pageSize) {
-    if (pageSize == 0) {
-        return 0;
-    }
-
-    size_t quotient = size / pageSize;
-
-    return pageSize*quotient + pageSize;
-}
-
 void deallocateAllProcRecursive(Buddyblock * node, int pid){
     if (node == NULL) {
         return;

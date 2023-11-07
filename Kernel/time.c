@@ -16,13 +16,13 @@
 #define TIME_ZONE -3
 #define TICK_MS 55
 
-struct waitNode {
+struct WaitNode {
     int remainingTicks;
     int pid;
-    struct waitNode* next;
-}waitNode;
+    struct WaitNode* next;
+}WaitNode;
 
-typedef struct waitNode* node;
+typedef struct WaitNode* node;
 
 static node waitingList = NULL;
 
@@ -33,18 +33,8 @@ char userInterrupted = FALSE;
 
 extern unsigned char clock(unsigned char mode);
 
-/*
- * Primero se extrae la primera cifra multiplicando el valor del 
- * primer nibble (los primeros 4 bits) por 10. 
- * Luego, se extrae la segunda cifra tomando 
- * el valor del segundo nibble (los últimos 4 bits) y 
- * se suma al valor de la primera cifra convertida a decimal. 
- */
 static unsigned  int decode(unsigned char time){
     return (time >> 4) * 10 + (time & 0x0F);
-    //Decalaje para formato bcd .. b0b1b2b3b4b5b6b7
-    // b0b1b2b3  --> Parte decimal alta
-    // b4b5b6b7 --> Parte decimal baja --> hago el & para que solo agarre esos bits
 }
 
 unsigned int seconds(){
@@ -71,21 +61,21 @@ unsigned int month(){
     return decode(clock(MONTH));
 }
 
-void timeToStr(char * dest){
+void timeToStr(char * dest) {
     dest[2] = dest[5] = ':';
     uint8_t s, m, h = hours();
 
-    dest[0] = (h/10) % 10 + '0';    //hour 9 ==> deja 0 luego deja el 9
+    dest[0] = (h/10) % 10 + '0';
     dest[1] = h % 10 + '0';
     m = minutes();
-    dest[3] = (m/10)%10 + '0';      //min 13 ==> deja 1 y luego deja 3
+    dest[3] = (m/10)%10 + '0';
     dest[4] = m % 10 + '0';
     s= seconds();
     dest[6] = (s /10) %10 + '0';
     dest[7] = s % 10 + '0';
 }
 
-void dateToStr(char * dest){
+void dateToStr(char * dest) {
     dest[2] = dest[5] = '/';
     uint8_t d = day(),m,y;
     dest[0] = (d/10) + '0';
@@ -125,7 +115,7 @@ int seconds_elapsed() {
 }
 
 void addToWaitingList(int totalTicks, int pid) {
-    node n = allocate(sizeof(waitNode));
+    node n = allocate(sizeof(WaitNode));
     n->remainingTicks = totalTicks;
     n->pid = pid;
     n->next = waitingList;
@@ -166,11 +156,3 @@ void wait(uint64_t milliseconds) {
 void raiseUserInterruptedFlag() {
     userInterrupted = TRUE;
 }
-
-
-/*void wait(uint64_t milliseconds) {
-    unsigned long initTicks = ticks;
-    while((ticks - initTicks) < (milliseconds / 55)) {
-
-    }
-}*/

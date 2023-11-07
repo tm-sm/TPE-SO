@@ -3,6 +3,8 @@
 #include "lib.h"
 #define MEM_START_ADR 0x0000000000050000
 
+size_t convertToPageSize(size_t size, size_t pageSize);
+
 typedef struct BlockHeader {
     size_t size;
     size_t isFree;
@@ -11,17 +13,17 @@ typedef struct BlockHeader {
 }BlockHeader;
 
 /*
- * Struct -> Define bloques que tienen como dato:
- * El espacio que ocupan.
- * Si esta siendo utilizado.
- * Un puntero al siguiente en la lista.
+ * Struct -> Define block with the following data:
+ * space occupied.
+ * if it is in use.
+ * Pointer to the next one in the list.
  */
 
-//Puntero estatico al comienzo del bloque de memoria
+//Static pointer to the beginning of memmory
 static BlockHeader * firstBlock;
 
 void createMemoryManager() {
-    // Inicializo la cabecera del bloque haciendo que apunte al comienzo del array memory
+    // Initialize the block header making reference to the beginning of the memory array
 
     firstBlock = (BlockHeader *)MEM_START_ADR;
     firstBlock->size = MEMORY_SIZE - sizeof(BlockHeader);
@@ -36,46 +38,46 @@ void * allocate(size_t size) {
     }
 
     size_t pageTBU = convertToPageSize(size, PAGE_SIZE);
-    // Ahora la idea es buscar un bloque con suficiente espacio
+    // Now i should look for a block with enough space
     BlockHeader* currentBlock = firstBlock;
     while (currentBlock) {
         if (currentBlock->isFree && currentBlock->size >= pageTBU) {
 
-            // Si el bloque es mas grande de lo necesario, reservo el espacio y dejo el resto del espacio libre;
+            // If the block is bigger than needed, save the space and leave the extra free;
             if (currentBlock->size >= pageTBU + sizeof(BlockHeader)) {
 
-                BlockHeader* newBlock = (BlockHeader*)((char*)currentBlock + sizeof(BlockHeader) + pageTBU);    //puntero al nuevo bloque va a estar en la posicion currentBlock + el size del struct + lo que quiero reservar de memoria
+                BlockHeader* newBlock = (BlockHeader*)((char*)currentBlock + sizeof(BlockHeader) + pageTBU);    // Pointer to new block in position currentBlock + struct size + ammount of memory to be saved
 
-                //newBlock reduce su size en size y sizeof(BlockHeader), esta libre, y su next es el next del current block
+                // newBlock reduce its size in size and sizeof(BlockHeader), starts free, and next as next of current block
                 newBlock->size = currentBlock->size - pageTBU - sizeof(BlockHeader);
                 newBlock->isFree = 1;
                 newBlock->next = currentBlock->next;
 
 
-                //current block toma el size pedido, se reserva y el siguiente es el new block
+                //current block gets the required size, saves it and next is the new block
                 currentBlock->size = pageTBU;
                 currentBlock->isFree = 0;
                 currentBlock->next = newBlock;
                 currentBlock->pid = getActiveProcessPid();
-            } else {  //tiene el espacio justo para este bloque => lo reservo
+            } else {  //got just the space for the block => keep the space
                 currentBlock->isFree = 0;
             }
 
 
-            // Retorno un puntero a esta seccion del bloque
+            // return pointer to that section of the block
             return (void*)((char*)currentBlock + sizeof(BlockHeader));
         }
-        //si no hay espacio sigo al siguiente
+        // contine to the next block if there is not enough space
         currentBlock = currentBlock->next;
     }
 
-    // No hay bloques de memoria disponibles con suficiente espacio
+    // No memory blocks with enough space
     return NULL;
 }
 
 void deallocate(void * ptr) {
     if (ptr == NULL) {
-        return;  // Si apunta a nada => no hay nada que liberar
+        return;  // if it is pointing to nothing => there is noting to free
     }
 
 
@@ -83,13 +85,13 @@ void deallocate(void * ptr) {
         return;
     }
 
-    // Obtengo el puntero al bloque que quiero liberar y cambio el flag isFree a 1
+    // get pointer to the block i want to free y change the flag isFree to 1
     BlockHeader * block = (BlockHeader *)((char *)ptr - sizeof(BlockHeader));
     block->isFree = 1;
 
 
-    // Fusion de los bloques consecutivos que esten libres
-    BlockHeader * currentBlock = firstBlock;    //recorro desde el principio
+    // Combine consecutive free block
+    BlockHeader * currentBlock = firstBlock;    // Start from the beginning
     while (currentBlock) {
         if (currentBlock->isFree) {
             if (currentBlock->next && currentBlock->next->isFree) {
@@ -97,7 +99,7 @@ void deallocate(void * ptr) {
                 currentBlock->next = currentBlock->next->next;
             }
         }
-        //paso al siguiente
+        // Move on to the next
         currentBlock = currentBlock->next;
     }
 }
@@ -129,7 +131,7 @@ void * reallocate(void * ptr, size_t newSize){
 
     if (newPtr) {
         size_t oldSize = ((BlockHeader *)(ptr - sizeof(BlockHeader)))->size;
-        size_t copySize = (oldSize < newSize) ? oldSize : newSize;  //Copio lo minimo para no excederme del tamano, ESTO PUEDE CAUSAR PERDIDAS DE MEMORIA
+        size_t copySize = (oldSize < newSize) ? oldSize : newSize;  //Copy the minimum to not go over on, CAN CAUSE MEM LEAK
         memcpy(newPtr, ptr, copySize);
 
         deallocate(ptr);
