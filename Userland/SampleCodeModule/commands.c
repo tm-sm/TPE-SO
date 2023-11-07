@@ -38,38 +38,36 @@ sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), play
 ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),test_mm(ARGS),test_sync(ARGS) ;
 
 static exec bArr[] = {
-        &(struct EXECUTABLE){"help", "displays all available commands", help},
+        &(struct Executable){"help", "displays all available commands", help},
         /* deprecated for now, as proper exception handling hasn't been implemented with processes
-        &(struct EXECUTABLE){"test-div0", "runs a zero division", testException0},
-        &(struct EXECUTABLE){"test-invalidop", "runs an invalid op", testException6},
+        &(struct Executable){"test-div0", "runs a zero division", testException0},
+        &(struct Executable){"test-invalidop", "runs an invalid op", testException6},
          */
-        &(struct EXECUTABLE){"time", "prints the current time", displayTime},
-        &(struct EXECUTABLE){"date", "prints the current date", displayDate},
-        &(struct EXECUTABLE){"mem", "prints available memory in bytes", mem},
-        &(struct EXECUTABLE){"sh", "runs the specified process", sh},
-        &(struct EXECUTABLE){"cat", "prints the output of the specified process", cat},
-        &(struct EXECUTABLE){"wc", "prints the number of lines written by the specified process", wc},
-        &(struct EXECUTABLE){"filter", "prints the output of the specified process excluding vowels", filter},
-        &(struct EXECUTABLE){"kill", "kills a process given its pid", kill},
-        &(struct EXECUTABLE){"ps", "shows a list of all current existing processes", ps},
-        &(struct EXECUTABLE){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
-        &(struct EXECUTABLE){"block", "blocks or unblocks a process given its pid", block},
-        &(struct EXECUTABLE){"FIFO", "Displays the FIFO list", displayFIFOList},
-        &(struct EXECUTABLE){"connectFIFO", "connects two process to each end of a FIFO, requires pids and a FIFO", connectProcsToFIFO},
+        &(struct Executable){"time", "prints the current time", displayTime},
+        &(struct Executable){"date", "prints the current date", displayDate},
+        &(struct Executable){"mem", "prints available memory in bytes", mem},
+        &(struct Executable){"sh", "runs the specified process", sh},
+        &(struct Executable){"cat", "prints the output of the specified process", cat},
+        &(struct Executable){"wc", "prints the number of lines written by the specified process", wc},
+        &(struct Executable){"filter", "prints the output of the specified process excluding vowels", filter},
+        &(struct Executable){"kill", "kills a process given its pid", kill},
+        &(struct Executable){"ps", "shows a list of all current existing processes", ps},
+        &(struct Executable){"nice", "changes a process priority given its pid: 0->HIGH 1->MED 2->LOW", nice},
+        &(struct Executable){"block", "blocks or unblocks a process given its pid", block},
+        &(struct Executable){"FIFO", "Displays the FIFO list", displayFIFOList},
+        &(struct Executable){"connectFIFO", "connects two process to each end of a FIFO, requires pids and a FIFO", connectProcsToFIFO},
         NULL
         };
 
 static exec pArr[] = {
-        &(struct EXECUTABLE){"bubbles", "shows colored bubbles on the screen", playBubbles},
-        &(struct EXECUTABLE){"pong", "runs a virtual ping pong match against the computer", playPong},
-        &(struct EXECUTABLE){"beep", "produces a 'beep' sound", playBeep},
-        &(struct EXECUTABLE){"repeat", "prints all parameters passed", repeat},
-        &(struct EXECUTABLE){"loop", "prints its own pid every 2 seconds", loop},
-        &(struct EXECUTABLE){"phylo", "runs the dining philosophers problem", initPhyloReunion},
-        &(struct EXECUTABLE){"testmm","tests memory management",test_mm},
-        &(struct EXECUTABLE){"testsync","tests synchronization",test_sync},
-
-
+        &(struct Executable){"bubbles", "shows colored bubbles on the screen", playBubbles},
+        &(struct Executable){"pong", "runs a virtual ping pong match against the computer", playPong},
+        &(struct Executable){"beep", "produces a 'beep' sound", playBeep},
+        &(struct Executable){"repeat", "prints all parameters passed", repeat},
+        &(struct Executable){"loop", "prints its own pid every 2 seconds", loop},
+        &(struct Executable){"phylo", "runs the dining philosophers problem", initPhyloReunion},
+        &(struct Executable){"testmm","tests memory management",test_mm},
+        &(struct Executable){"testsync","tests synchronization",test_sync},
         NULL
 };
 
