@@ -20,19 +20,19 @@ typedef struct BlockHeader {
  */
 
 //Static pointer to the beginning of memmory
-static BlockHeader * firstBlock;
+static BlockHeader* firstBlock;
 
 void createMemoryManager() {
     // Initialize the block header making reference to the beginning of the memory array
 
-    firstBlock = (BlockHeader *)MEM_START_ADR;
+    firstBlock = (BlockHeader* )MEM_START_ADR;
     firstBlock->size = MEMORY_SIZE - sizeof(BlockHeader);
     firstBlock->isFree = 1;
     firstBlock->pid = getActiveProcessPid();
     firstBlock->next = NULL;
 }
 
-void * allocate(size_t size) {
+void* allocate(size_t size) {
     if(size > MEMORY_SIZE || size >= getCurrentMemSize()){
         return NULL;
     }
@@ -46,7 +46,7 @@ void * allocate(size_t size) {
             // If the block is bigger than needed, save the space and leave the extra free;
             if (currentBlock->size >= pageTBU + sizeof(BlockHeader)) {
 
-                BlockHeader* newBlock = (BlockHeader*)((char*)currentBlock + sizeof(BlockHeader) + pageTBU);    // Pointer to new block in position currentBlock + struct size + ammount of memory to be saved
+                BlockHeader* newBlock = (BlockHeader*)((char* )currentBlock + sizeof(BlockHeader) + pageTBU);    // Pointer to new block in position currentBlock + struct size + ammount of memory to be saved
 
                 // newBlock reduce its size in size and sizeof(BlockHeader), starts free, and next as next of current block
                 newBlock->size = currentBlock->size - pageTBU - sizeof(BlockHeader);
@@ -65,7 +65,7 @@ void * allocate(size_t size) {
 
 
             // return pointer to that section of the block
-            return (void*)((char*)currentBlock + sizeof(BlockHeader));
+            return (void* )((char* )currentBlock + sizeof(BlockHeader));
         }
         // contine to the next block if there is not enough space
         currentBlock = currentBlock->next;
@@ -75,7 +75,7 @@ void * allocate(size_t size) {
     return NULL;
 }
 
-void deallocate(void * ptr) {
+void deallocate(void* ptr) {
     if (ptr == NULL) {
         return;  // if it is pointing to nothing => there is noting to free
     }
@@ -86,12 +86,12 @@ void deallocate(void * ptr) {
     }
 
     // get pointer to the block i want to free y change the flag isFree to 1
-    BlockHeader * block = (BlockHeader *)((char *)ptr - sizeof(BlockHeader));
+    BlockHeader* block = (BlockHeader* )((char* )ptr - sizeof(BlockHeader));
     block->isFree = 1;
 
 
     // Combine consecutive free block
-    BlockHeader * currentBlock = firstBlock;    // Start from the beginning
+    BlockHeader* currentBlock = firstBlock;    // Start from the beginning
     while (currentBlock) {
         if (currentBlock->isFree) {
             if (currentBlock->next && currentBlock->next->isFree) {
@@ -105,7 +105,7 @@ void deallocate(void * ptr) {
 }
 
 void deallocateAllProcessRelatedMem(int pid){
-    BlockHeader * current = firstBlock;
+    BlockHeader* current = firstBlock;
 
     while(current != NULL){
         if(current->pid == pid){
@@ -116,7 +116,7 @@ void deallocateAllProcessRelatedMem(int pid){
     }
 }
 
-void * reallocate(void * ptr, size_t newSize){
+void* reallocate(void* ptr, size_t newSize){
     //Equivalente a un dealloc
     if (newSize == 0) {
         deallocate(ptr);
@@ -127,10 +127,10 @@ void * reallocate(void * ptr, size_t newSize){
         return allocate(newSize);
     }
 
-    void * newPtr = allocate(newSize);
+    void* newPtr = allocate(newSize);
 
     if (newPtr) {
-        size_t oldSize = ((BlockHeader *)(ptr - sizeof(BlockHeader)))->size;
+        size_t oldSize = ((BlockHeader* )(ptr - sizeof(BlockHeader)))->size;
         size_t copySize = (oldSize < newSize) ? oldSize : newSize;  //Copy the minimum to not go over on, CAN CAUSE MEM LEAK
         memcpy(newPtr, ptr, copySize);
 
@@ -155,7 +155,7 @@ size_t convertToPageSize(size_t size, size_t pageSize){
 size_t getCurrentMemSize(){
     size_t currentAvailable = 0;
 
-    BlockHeader * current = firstBlock;
+    BlockHeader* current = firstBlock;
 
     while(current){
         if(current->isFree){

@@ -14,16 +14,16 @@ void createMemoryManager();
  * Returns a pointer to the memory block
  */
 
-void * allocate(size_t size);
+void* allocate(size_t size);
 /**
  * Deallocates memory on the given address and free's the block.
  */
-void deallocate(void * addr);
+void deallocate(void* addr);
 
 /**
  * Allocates a block with the new size, copies the old block content and free's the old block.
  */
-void * reallocate(void * ptr, size_t newSize);
+void* reallocate(void* ptr, size_t newSize);
 
 /**
  * Goes through the list and checks how much free space remains. It returns the sum of it.
