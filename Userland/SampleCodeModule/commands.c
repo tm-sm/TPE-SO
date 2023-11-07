@@ -170,7 +170,7 @@ int displayDate(ARGS) {
 }
 
 int mem(ARGS) {
-    printFormat("\nTotal Memory: %d bytes\nAvailable Memory: %d bytes\n Occupied Memory: %d bytes \n", 65536 ,getAvailableMemory(), 65536 - getAvailableMemory());
+    printFormat("\nTotal Memory: %d bytes\nAvailable Memory: %d bytes\nOccupied Memory: %d bytes \n", 65536 ,getAvailableMemory(), 65536 - getAvailableMemory());
     return 0;
 }
 
