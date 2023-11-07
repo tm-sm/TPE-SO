@@ -24,19 +24,19 @@ void putForks(int philoNum);
 void eat(int philoNumber);
 void think(int philoNumber);
 
-typedef struct philosopher{
+typedef struct Philosopher{
     char name[24];
     int state;
     int pid;
-}philosopher;
+}Philosopher;
 
 static int philoAmount = 0;
-typedef struct philosopher* philo;
+typedef struct Philosopher* philo;
 
 static philo philosophers[MAX_PHILOSOPHERS];
 
 
-void philosopherActivity(int argc,char* argv[]) {
+void philosopherActivity(int argc, char* argv[]) {
     waitSem(MUTEX);
     int philoNumber=philoAmount;
     philoAmount++;
@@ -49,7 +49,7 @@ void philosopherActivity(int argc,char* argv[]) {
     }
 }
 
-void initPhyloReunion(int argc,char* argv[]) {
+void initPhyloReunion(int argc, char* argv[]) {
     destroySem(MUTEX);
     openSem(MUTEX,1);
     philoAmount=0;
@@ -79,12 +79,12 @@ void initPhyloReunion(int argc,char* argv[]) {
 }
 
 void addPhilo(int i) {
-    philosophers[i] = alloc(sizeof(philosopher));
+    philosophers[i] = alloc(sizeof(Philosopher));
     strcpy(philosophers[i]->name,philosophersName[i]);
     philosophers[i]->state = THINKING;
     int pid= createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
     if(pid==-1){
-        printFormat("Error creating philosopher %s\n",philosophersName[i]);
+        printFormat("Error creating Philosopher %s\n",philosophersName[i]);
     }
     else{
         philosophers[i]->pid=pid;
