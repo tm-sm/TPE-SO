@@ -22,8 +22,9 @@ void initializeConsole() {
 }
 
 void cPrintColored(Color c, char * string) {
-    for (int i = 0; string[i] != 0; i++)
+    for(int i = 0; string[i] != 0; i++) {
         cPrintColoredChar(c, string[i]);
+    }
 }
 
 void cPrint(char * string) {
@@ -38,18 +39,15 @@ void cPrintColoredChar(Color c, char character) {
     if(!isCurrentProcessInForeground()) {
         return;
     }
-    //writes at consoleCursor
-    if (character == '\b' && consoleCursor > 0) {
-        //backspace
+    if(character == '\b' && consoleCursor > 0) {
         cErase();
         return;
     }
-    if (consoleCursor >= width || character == '\n') {
+    if(consoleCursor >= width || character == '\n') {
         cNewline();
         return;
     }
-    if (character == '\t') {
-        //tab
+    if(character == '\t') {
         cPrintColoredChar(c, ' ');
         return;
     }
@@ -58,8 +56,9 @@ void cPrintColoredChar(Color c, char character) {
 }
 
 void gPrintColored(Color c, char* string) {
-    for (int i = 0; string[i] != 0; i++)
+    for(int i = 0; string[i] != 0; i++) {
         gPrintColoredChar(c, string[i]);
+    }
 }
 
 void gPrint(char* string) {
@@ -70,13 +69,11 @@ void gPrintColoredChar(Color c, char character) {
     if(!isCurrentProcessInForeground()) {
         return;
     }
-    //writes at globalCursor
-    if (character == '\b' && (globalCursorX != 0 || globalCursorY != 0)) {
-        //backspace
+    if(character == '\b' && (globalCursorX != 0 || globalCursorY != 0)) {
         gErase();
         return;
     }
-    if (globalCursorX >= width || character == '\n') {
+    if(globalCursorX >= width || character == '\n') {
         if(globalCursorY >= height) {
             gNewline();
         } else {
@@ -85,7 +82,7 @@ void gPrintColoredChar(Color c, char character) {
         }
         return;
     }
-    if (character == '\t') {
+    if(character == '\t') {
         gPrintColoredChar(c, ' ');
         gPrintColoredChar(c, ' ');
         gPrintColoredChar(c, ' ');
@@ -176,7 +173,7 @@ void cErase() {
 void cClear() {
     int i;
 
-    for (i = 0; i < height * width; i++) {
+    for(i = 0; i < height * width; i++) {
         uint32_t xPos = i % width;
         uint32_t yPos = i / width;
         putCharAt(xPos, yPos, ' ');

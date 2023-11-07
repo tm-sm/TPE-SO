@@ -8,8 +8,9 @@ static const uint32_t width = 80;
 static const uint32_t height = 25 ;
 
 void ncPrint(const char * string) {
-	for (int i = 0; string[i] != 0; i++)
-		ncPrintChar(string[i]);
+	for (int i = 0; string[i] != 0; i++) {
+        ncPrintChar(string[i]);
+    }
 }
 
 void ncPrintChar(char character) {
@@ -20,8 +21,7 @@ void ncPrintChar(char character) {
 void ncNewline() {
 	do {
 		ncPrintChar(' ');
-	}
-	while((uint64_t)(currentVideo - video) % (width * 2) != 0);
+	} while((uint64_t)(currentVideo - video) % (width * 2) != 0);
 }
 
 void ncPrintDec(uint64_t value) {
@@ -42,7 +42,8 @@ void ncPrintBase(uint64_t value, uint32_t base) {
 }
 
 void ncClear() {
-	for (int i = 0; i < height * width; i++)
-		video[i * 2] = ' ';
+	for(int i = 0; i < height * width; i++) {
+        video[i * 2] = ' ';
+    }
 	currentVideo = video;
 }

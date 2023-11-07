@@ -89,7 +89,7 @@ uint64_t sys_read(BASE_PARAMS) {
 //rcx= FINAL COORDINATES (used for lines :: upper half -> x1 || lower half -> y1
 //r8= DIMENSIONS (used by circles and rectangles) :: upper half -> rectangle height || lower half -> rectangle width // circle radius
 //r9= COLOR :: in hex values
-// returns= 0 on success, -1 on fail
+//returns= 0 on success, -1 on fail
 uint64_t sys_draw(BASE_PARAMS) {
     uint32_t x0 = (uint32_t) (rdx >> 32);
     uint32_t y0 = (uint32_t) rdx;
@@ -130,7 +130,7 @@ uint64_t sys_draw(BASE_PARAMS) {
 
 //ID= 3
 //rsi= INSTRUCTION :: 0 -> disables double buffering || 1 -> enables double buffering || 2 -> swaps buffers
-// returns= nothing
+//returns= nothing
 uint64_t sys_double_buffer(BASE_PARAMS) {
     switch(rsi) {
         case 0:
@@ -151,7 +151,7 @@ uint64_t sys_double_buffer(BASE_PARAMS) {
 //ID=4
 //rsi= DATA TYPE :: 0 -> seconds || 1 -> minutes || 2 -> hours || 3 -> day || 4 -> month || 5 -> year
 //rdx= pointer to an unsigned int, the value is stored in this position
-// returns= nothing TODO
+//returns= nothing
 uint64_t sys_get_time(BASE_PARAMS) {
     switch(rsi) {
         case 0:
@@ -180,91 +180,91 @@ uint64_t sys_get_time(BASE_PARAMS) {
 
 
 //ID=5
-// returns= 0 if key buffer is empty, 1 if not
+//returns= 0 if key buffer is empty, 1 if not
 uint64_t sys_detect_key_press(BASE_PARAMS) {
     return keyPressed();
 }
 
 //ID=6
 //rsi= milliseconds to wait in unsigned long
-// returns= nothing
+//returns= nothing
 uint64_t sys_wait(BASE_PARAMS) {
     wait(rsi);
     return 0;
 }
 
-// ID= 7
-// rsi= frequency of beep
-// rdx= duration of beep
-// returns= nothing
+//ID= 7
+//rsi= frequency of beep
+//rdx= duration of beep
+//returns= nothing
 uint64_t sys_sound(BASE_PARAMS) {
     //beep needs the timer tick interruption to work, this isn't pretty, but it won't work without it
     play_beep(rsi, rdx);
     return 0;
 }
 
-// ID= 8
-// returns= nothing
+//ID= 8
+//returns= nothing
 uint64_t sys_nop(BASE_PARAMS){
     //does nothing
     return 0;
 }
 
-// ID= 9
-// rsi= char corresponding to a key
-// rdx= pointer to an uint8_t, returns 1 if the key corresponding to the char is being pressed, 0 if not
-// returns= nothing TODO
+//ID= 9
+//rsi= char corresponding to a key
+//rdx= pointer to an uint8_t, returns 1 if the key corresponding to the char is being pressed, 0 if not
+//returns= nothing
 uint64_t sys_is_char_pressed(BASE_PARAMS) {
     *(uint8_t*) rsi = isCharPressed(rdx);
     return 0;
 }
 
-// ID= 10
-// rsi= instruction pointer
-// rdx= upper half PRIORITY :: 0 -> HIGH || 1 -> MEDIUM || 2 -> LOW  DRAWING STATE || lower half define FOREGROUND (1) / define BACKGROUND (0)
-// rcx= isBlocked 0 -> READY || 1 -> BLOCKED
-// r8= char* argv[]
-// returns= pid on success, -1 on fail
+//ID= 10
+//rsi= instruction pointer
+//rdx= upper half PRIORITY :: 0 -> HIGH || 1 -> MEDIUM || 2 -> LOW  DRAWING STATE || lower half define FOREGROUND (1) / define BACKGROUND (0)
+//rcx= isBlocked 0 -> READY || 1 -> BLOCKED
+//r8= char* argv[]
+//returns= pid on success, -1 on fail
 uint64_t sys_create_process(BASE_PARAMS) {
     uint32_t priority = (uint32_t) (rdx >> 32);
     uint32_t fg = (uint32_t) rdx;
     return startProcess((void*)rsi, (int)priority, (int)fg, (int)rcx, (char*)r8, 0, (char**)r9);
 }
 
-// ID= 11
-// rsi= pid
-// returns= nothing
+//ID= 11
+//rsi= pid
+//returns= nothing
 uint64_t sys_kill_process(BASE_PARAMS) {
     killProcess((int)rsi);
     return 0;
 }
 
-// ID= 12
-// rsi= pid
-// rdx= 0 -> background || 1 -> foreground
-// returns= nothing
+//ID= 12
+//rsi= pid
+//rdx= 0 -> background || 1 -> foreground
+//returns= nothing
 uint64_t sys_set_process_foreground(BASE_PARAMS) {
     setProcessForeground((int)rsi, (int)rdx);
     return 0;
 }
 
-// ID= 13
-// returns= pid
+//ID= 13
+//returns= pid
 uint64_t sys_get_own_pid(BASE_PARAMS) {
     return getActiveProcessPid();
 }
 
-// ID= 14
-// returns= 1 -> alive || 0 -> dead
+//ID= 14
+//returns= 1 -> alive || 0 -> dead
 uint64_t sys_is_process_alive(BASE_PARAMS) {
     return isProcessAlive(rsi);
 }
 
-// ID= 15
-// rsi= 0 -> allocate || 1 -> reallocate || 2 -> deallocate || 3 -> get available memory
-// rdx= memory address for reallocate and deallocate
-// rcx= size for allocate and reallocate
-// returns= memory address for allocate and reallocate, 0 for deallocate
+//ID= 15
+//rsi= 0 -> allocate || 1 -> reallocate || 2 -> deallocate || 3 -> get available memory
+//rdx= memory address for reallocate and deallocate
+//rcx= size for allocate and reallocate
+//returns= memory address for allocate and reallocate, 0 for deallocate
 uint64_t sys_memory_manager(BASE_PARAMS) {
     switch(rsi) {
         case 0:
@@ -280,25 +280,25 @@ uint64_t sys_memory_manager(BASE_PARAMS) {
     }
 }
 
-// ID= 16
-// rsi= pid
-// returns= 1 if in foreground, 0 if not
+//ID= 16
+//rsi= pid
+//returns= 1 if in foreground, 0 if not
 uint64_t sys_check_process_foreground(BASE_PARAMS) {
     return isProcessInForeground((int)rsi);
 }
 
-// ID= 17
-// returns= nothing
+//ID= 17
+//returns= nothing
 uint64_t sys_print_all_processes(BASE_PARAMS) {
     listAllProcesses();
     return 0;
 }
 
-// ID= 18
-// rsi= pid
-// rdx= 0 -> get || 1 -> set
-// rcx= value
-// returns= priority if rdx==get
+//ID= 18
+//rsi= pid
+//rdx= 0 -> get || 1 -> set
+//rcx= value
+//returns= priority if rdx==get
 uint64_t sys_process_priority(BASE_PARAMS) {
     switch(rdx) {
         case 0:
@@ -312,11 +312,11 @@ uint64_t sys_process_priority(BASE_PARAMS) {
     return 0;
 }
 
-// ID= 19
-// rsi= pid
-// rdx= 0 -> get || 1 -> set
-// rcx= if rdx==set 0 -> unblock || 1 -> block
-// returns= if rdx==get 0 -> unblocked || 1 -> blocked
+//ID= 19
+//rsi= pid
+//rdx= 0 -> get || 1 -> set
+//rcx= if rdx==set 0 -> unblock || 1 -> block
+//returns= if rdx==get 0 -> unblocked || 1 -> blocked
 uint64_t sys_process_block(BASE_PARAMS) {
     switch(rdx) {
         case 0:
@@ -334,8 +334,8 @@ uint64_t sys_process_block(BASE_PARAMS) {
     return 0;
 }
 
-// ID= 20
-// rsi= 0 -> all children || !0 -> child with specific pid
+//ID= 20
+//rsi= 0 -> all children || !0 -> child with specific pid
 uint64_t sys_wait_for_children(BASE_PARAMS) {
     if(rsi == 0) {
         waitForChildren();
@@ -344,28 +344,28 @@ uint64_t sys_wait_for_children(BASE_PARAMS) {
     }
     return 0;
 }
-// ID=21
-// rsi=semaphore name
-// rdx= semaphore value
-// returns 1 if a semaphore was created, 2 if it already exists, 0 if it failed
+//ID=21
+//rsi=semaphore name
+//rdx= semaphore value
+//returns 1 if a semaphore was created, 2 if it already exists, 0 if it failed
 uint64_t sys_open_sem(BASE_PARAMS){
     return (uint64_t)openSem((char*)rsi,(int)rdx);
 }
-// ID=22
-// rsi= semaphore name returns 1 if it was posted, 0 if it failed
+//ID=22
+//rsi= semaphore name returns 1 if it was posted, 0 if it failed
 uint64_t sys_post_sem(BASE_PARAMS){
    return (uint64_t)postSem((char*)rsi);
 
 }
 
-// ID=23
+//ID=23
 //rsi= semaphore name returns 1 if it was posted, 0 if it failed
 uint64_t sys_wait_sem(BASE_PARAMS){
     return (uint64_t)waitSem((char*)rsi);
 
 }
-// ID =24
-//rsi = semaphre name returns 1 if it was closed, 0 if it failed
+//ID =24
+//rsi = semaphore name returns 1 if it was closed, 0 if it failed
 uint64_t sys_destroy_sem(BASE_PARAMS){
     return (uint64_t)closeSem((char*)rsi);
 }
@@ -393,11 +393,18 @@ uint64_t sys_connect_processes(BASE_PARAMS) {
     return connectProcs((int)rsi, (int)rdx);
 }
 
-uint64_t sys_display_FIFO(BASE_PARAMS){
+
+//ID= 28
+uint64_t sys_display_FIFO(BASE_PARAMS) {
     displayFIFO();
     return 0;
 }
 
+//ID= 29
+//rsi= string with pipe's name
+//rdx= pid of first process
+//rcx= pid of second process
+//returns= 0 on success, -1 on failure
 uint64_t sys_connect_to_FIFO(BASE_PARAMS){
     return connectToNamedPipe((const char*)rsi,(int)rdx,(int)rcx);
 }

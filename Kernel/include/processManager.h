@@ -18,7 +18,7 @@
 #define SENTINEL_PID 0
 #define SENTINEL_STACK_SIZE 256
 
-typedef struct process* proc;
+typedef struct Process* proc;
 void initializeProcessManager();
 uint64_t switchProcess(uint64_t rsp);
 void selectNextProcess(int pid);
