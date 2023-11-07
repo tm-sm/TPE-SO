@@ -1,19 +1,18 @@
-#include "system.h"
-#include "standardLib.h"
-#include "test_util.h"
-#include <stdio.h>
+#include <syscall.h>
+#include <test_util.h>
+#include <system.h>
 #include <stdlib.h>
 #include <string.h>
+#include <standardLib.h>
 
 #define MAX_BLOCKS 128
-
 
 typedef struct MM_rq {
   void *address;
   uint32_t size;
 } mm_rq;
 
-int test_mm(int argc, char *argv[]) {
+uint64_t test_mm(int argc, char *argv[]) {
 
   mm_rq mm_rqs[MAX_BLOCKS];
   uint8_t rq;
@@ -21,10 +20,10 @@ int test_mm(int argc, char *argv[]) {
   uint64_t max_memory;
 
   if (argc != 1)
-    return -1;
+    exitProc();
 
-  if ((max_memory = satoi(argv[0])) <= 0)
-    return -1;
+  if ((max_memory = satoi(argv[1])) <= 0)
+    exitProc();
 
   while (1) {
     rq = 0;
@@ -52,7 +51,7 @@ int test_mm(int argc, char *argv[]) {
       if (mm_rqs[i].address)
         if (!memcheck(mm_rqs[i].address, i, mm_rqs[i].size)) {
           printFormat("test_mm ERROR\n");
-          return -1;
+          exitProc();
         }
 
     // Free

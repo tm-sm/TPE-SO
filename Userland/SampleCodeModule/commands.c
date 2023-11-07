@@ -35,7 +35,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),test_mm(ARGS),test_sync(ARGS) ;
+ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),test_mm(ARGS),test_sync(ARGS),test_processes(ARGS),test_prio(ARGS); ;
 
 static exec bArr[] = {
         &(struct Executable){"help", "displays all available commands", help},
@@ -68,6 +68,8 @@ static exec pArr[] = {
         &(struct Executable){"phylo", "runs the dining philosophers problem", initPhyloReunion},
         &(struct Executable){"testmm","tests memory management",test_mm},
         &(struct Executable){"testsync","tests synchronization",test_sync},
+        &(struct Executable){"testproc","tests processes",test_processes},
+        &(struct Executable){"testprio","tests priorities",test_prio},
         NULL
 };
 
