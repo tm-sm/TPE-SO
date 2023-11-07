@@ -25,6 +25,7 @@ struct Executable {
     functionPtr program;
 }Executable;
 
+//TODO agregar mensajes de error para parametros mal pasados
 
 typedef struct Executable* exec;
 
@@ -34,7 +35,8 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS), phylo(ARGS), monologue(ARGS), quietChild(ARGS), loudChild(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS), test_mm(ARGS), test_sync(ARGS) ;
+ps(ARGS), nice(ARGS), block(ARGS), phylo(ARGS), monologue(ARGS), quietChild(ARGS), loudChild(ARGS), displayFIFOList(ARGS),
+connectProcsToFIFO(ARGS), testMemory(ARGS), testSync(ARGS), testProcesses(ARGS), testPriority(ARGS); ;
 
 static exec bArr[] = {
         &(struct Executable){"help", "displays all available commands", help},
@@ -66,8 +68,10 @@ static exec pArr[] = {
         &(struct Executable){"loop", "prints its own pid every 2 seconds", loop},
         &(struct Executable){"phylo", "runs the dining philosophers problem", phylo},
         &(struct Executable){"monologue", "starts two processes with different priority, stops if the quiet child gets speaks", monologue},
-        &(struct Executable){"testmm","tests memory management",test_mm},
-        &(struct Executable){"testsync","tests synchronization",test_sync},
+        &(struct Executable){"testmm","tests memory management",testMemory},
+        &(struct Executable){"testsync","tests synchronization",testSync},
+        &(struct Executable){"testproc","tests processes",testProcesses},
+        &(struct Executable){"testprio","tests priorities",testPriority},
         NULL
 };
 
@@ -170,7 +174,7 @@ int displayDate(ARGS) {
 }
 
 int mem(ARGS) {
-    printFormat("\nTotal Memory: %d bytes\nAvailable Memory: %d bytes\n", 65536 ,getAvailableMemory());
+    printFormat("\nTotal Memory: %d bytes\nAvailable Memory: %d bytes\nOccupied Memory: %d bytes \n", 65536 ,getAvailableMemory(), 65536 - getAvailableMemory());
     return 0;
 }
 
@@ -460,12 +464,33 @@ int playBubbles(ARGS) {
     exitProc();
     return 0;
 }
+int testPriority(ARGS){
+    test_prio();
+    exitProc();
+    return 0;
+}
 
 int playPong(ARGS) {
     enableDoubleBuffering();
     pong();
     clearScreen();
     disableDoubleBuffering();
+    exitProc();
+    return 0;
+}
+
+int testMemory(ARGS) {
+    test_mm(argc, argv);
+    exitProc();
+    return 0;
+}
+int testSync(ARGS) {
+    test_sync(argc, argv);
+    exitProc();
+    return 0;
+}
+int testProcesses(ARGS) {
+    test_processes(argc, argv);
     exitProc();
     return 0;
 }
