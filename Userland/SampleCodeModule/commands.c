@@ -25,7 +25,6 @@ struct Executable {
     functionPtr program;
 }Executable;
 
-//TODO agregar mensajes de error para parametros mal pasados
 
 typedef struct Executable* exec;
 
@@ -35,7 +34,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS),initPhyloReunion(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS),test_mm(ARGS),test_sync(ARGS) ;
+ps(ARGS), nice(ARGS), block(ARGS), phylo(ARGS), monologue(ARGS), quietChild(ARGS), loudChild(ARGS), displayFIFOList(ARGS), connectProcsToFIFO(ARGS), test_mm(ARGS), test_sync(ARGS) ;
 
 static exec bArr[] = {
         &(struct Executable){"help", "displays all available commands", help},
@@ -65,7 +64,8 @@ static exec pArr[] = {
         &(struct Executable){"beep", "produces a 'beep' sound", playBeep},
         &(struct Executable){"repeat", "prints all parameters passed", repeat},
         &(struct Executable){"loop", "prints its own pid every 2 seconds", loop},
-        &(struct Executable){"phylo", "runs the dining philosophers problem", initPhyloReunion},
+        &(struct Executable){"phylo", "runs the dining philosophers problem", phylo},
+        &(struct Executable){"monologue", "starts two processes with different priority, stops if the quiet child gets speaks", monologue},
         &(struct Executable){"testmm","tests memory management",test_mm},
         &(struct Executable){"testsync","tests synchronization",test_sync},
         NULL
@@ -258,6 +258,11 @@ int sh(int argc, char* argv[]) {
                     } else if(strcmp(argv[j], CONNECT_WITH_PIPE_SYMBOL) == 0) {
                         int ret1 = createProcessWithParams(pArr[i], HIGH, BACKGROUND, 1, argv, paramStart, paramEnd);
 
+                        if(ret1 == -1) {
+                            printFormat("\nProcess creation failed\n");
+                            return -1;
+                        }
+
                         if(argc == j) {
                             killProcess(ret1);
                             unknownProcess(" ");
@@ -269,6 +274,12 @@ int sh(int argc, char* argv[]) {
                         for(int k = 0; pArr[k] != NULL; k++) {
                             if(strcmp(pArr[k]->name, argv[j + 1]) == 0) {
                                 int ret2 = createProcessWithParams(pArr[k], HIGH, fg, 1, argv, paramStart, paramEnd);
+
+                                if(ret2 == -1) {
+                                    killProcess(ret1);
+                                    printFormat("\nProcess creation failed\n");
+                                    return -1;
+                                }
 
                                 connectProcesses(ret1, ret2);
                                 unblockProcess(ret1);
@@ -292,6 +303,10 @@ int sh(int argc, char* argv[]) {
                 }
 
                 int ret = createProcessWithParams(pArr[i], HIGH, fg, 0, argv, paramStart, paramEnd);
+                if(ret == -1) {
+                    printFormat("\nProcess creation failed\n");
+                    return -1;
+                }
                 if(fg == BACKGROUND) {
                     return -1;
                 }
@@ -431,6 +446,12 @@ int loop(ARGS) {
     return 0;
 }
 
+int phylo(ARGS) {
+    initPhyloReunion();
+    exitProc();
+    return 0;
+}
+
 int playBubbles(ARGS) {
     enableDoubleBuffering();
     bubbles();
@@ -451,6 +472,40 @@ int playPong(ARGS) {
 
 int playBeep(ARGS) {
     play_beep(2000, 100);
+    exitProc();
+    return 0;
+}
+
+int loudChild(ARGS) {
+    while(1) {
+        printFormat("\nLOUD CHILD ");
+        setProcessPriority(getOwnPid(), HIGH);
+        printFormat("SPEAKING");
+    }
+    exitProc();
+    return 0;
+}
+
+int quietChild(ARGS) {
+    postSem("quietChild");
+    exitProc();
+    return 0;
+}
+
+int monologue(ARGS) {
+    int lc = createProcess(loudChild, HIGH, FOREGROUND, 1, "loudChild", NULL);
+    int qc = createProcess(quietChild, LOW, BACKGROUND, 1, "quietChild", NULL);
+    if(lc == -1 || qc == -1) {
+        printFormat("\nProcess creation failed\n");
+        exitProc();
+    }
+    openSem("quietChild", 0);
+    unblockProcess(qc);
+    unblockProcess(lc);
+    waitSem("quietChild");
+    destroySem("quietChild");
+    killProcess(lc);
+    printFormat("\nquiet child finally spoke");
     exitProc();
     return 0;
 }

@@ -10,4 +10,10 @@ void bubbles();
  */
 void pong();
 
+
+/**
+ * Runs the philosophers multi-process synchronization scenario
+ */
+void initPhyloReunion();
+
 #endif //TPE_ARQUI_PROGRAMS_H

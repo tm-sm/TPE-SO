@@ -49,7 +49,7 @@ void philosopherActivity(int argc, char* argv[]) {
     }
 }
 
-void initPhyloReunion(int argc, char* argv[]) {
+void initPhyloReunion() {
     destroySem(MUTEX);
     openSem(MUTEX,1);
     philoAmount=0;
@@ -75,7 +75,6 @@ void initPhyloReunion(int argc, char* argv[]) {
         printFormat("\n");
         postSem(MUTEX);
     }
-    exitProc();
 }
 
 void addPhilo(int i) {

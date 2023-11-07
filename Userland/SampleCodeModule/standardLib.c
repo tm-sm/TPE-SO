@@ -12,7 +12,7 @@ uint64_t join(uint32_t upper, uint32_t lower) {
     return ((uint64_t) upper << 32) | lower;
 }
 
-static char* itoa( uint64_t value, char* str, int base) {
+char* itoa( uint64_t value, char* str, int base) {
 // code taken from https://wiki.osdev.org/Printing_To_Screen
     char * rc;
     char * ptr;
