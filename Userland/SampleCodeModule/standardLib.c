@@ -5,32 +5,31 @@
 #define SYS_READ 1
 
 int getDigits(int n);
-void _printDec(int value, int len, uint8_t padding0, char* buff);
-void _printHex(uint64_t value, char* buff);
+void printDec(int value, int len, uint8_t padding0, char* buff);
+void printHex(uint64_t value, char* buff);
 
 uint64_t join(uint32_t upper, uint32_t lower) {
     return ((uint64_t) upper << 32) | lower;
 }
 
-static char * itoa( uint64_t value, char * str, int base )
+static char* itoa( uint64_t value, char* str, int base) {
 // code taken from https://wiki.osdev.org/Printing_To_Screen
-{
     char * rc;
     char * ptr;
     char * low;
-    if ( base < 2 || base > 36 ) {
+    if(base < 2 || base > 36) {
         *str = '\0';
         return str;
     }
     rc = ptr = str;
-    if ( value < 0 && base == 10 ) {
+    if(value < 0 && base == 10) {
         *ptr++ = '-';
     }
     low = ptr;
     do {
         *ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + value % base];
         value /= base;
-    } while ( value );
+    } while(value);
     *ptr-- = '\0';
     while( low < ptr ) {
         char tmp = *low;
@@ -49,12 +48,10 @@ int atoi(const char* str) {
     while (*str == ' ' || (*str >= 9 && *str <= 13)) {
         str++;
     }
-
     if (*str == '-' || *str == '+') {
         sign = (*str == '-') ? -1 : 1;
         str++;
     }
-
     while (*str >= '0' && *str <= '9') {
         result = result * 10 + (*str - '0');
         str++;
@@ -69,14 +66,12 @@ void putChar(char c){ //a partir del segundo parametro no importa lo que le pong
 
 void putStrn(char* s) {
     int i;
-    for(i=0;s[i]!='\0';i++) {
-    }
+    for(i=0;s[i]!='\0';i++);
     interrupt(SYS_WRITE, (uint64_t)s, i, 0, 0, 0);
 }
 
 char getChar() {
     char c[2];
-    //this prevents system calls from being blocked by the sys_read interruption
     interrupt(SYS_READ, (uint64_t)c, 2, 0, 0, 0);
     return c[0];
 }
@@ -112,7 +107,7 @@ void printFormat(const char* format, ...) {
             switch (*format) {
                 case 'd': {
                     int value = va_arg(args, int);
-                    _printDec(value, len, padding0, buff);
+                    printDec(value, len, padding0, buff);
                     break;
                 }
                 case 's': {
@@ -122,7 +117,7 @@ void printFormat(const char* format, ...) {
                 }
                 case 'x':{
                     uint64_t value =va_arg(args,uint64_t);
-                    _printHex(value, buff);
+                    printHex(value, buff);
                     break;
                 }
                 default: {
@@ -150,7 +145,7 @@ int _pow(int base, int power) {
     return result;
 }
 
-void _printDec(int value, int len, uint8_t padding0, char* buff) {
+void printDec(int value, int len, uint8_t padding0, char* buff) {
     char tempBuff[17];
     int i = 0;
     int isNegative = 0;
@@ -177,7 +172,7 @@ void _printDec(int value, int len, uint8_t padding0, char* buff) {
     }
 }
 
-void _printHex(uint64_t value, char* buff) {
+void printHex(uint64_t value, char* buff) {
     putStrn("0x");
     putStrn(itoa(value,buff,16));
 }
@@ -186,7 +181,6 @@ void _printHex(uint64_t value, char* buff) {
 int strcmp(const char* str1, const char* str2) {
     int i = 0;
     while (str1[i] && (str1[i] == str2[i])) i++;
-
     return (int)(str1[i] - str2[i]);
 }
 
@@ -202,17 +196,16 @@ size_t strlen(const char* str) {
     return len;
 }
 
-char * strcpy(char* dest, const char* src) {
+char* strcpy(char* dest, const char* src) {
     int i = 0;
     while ((dest[i] = src[i])) i++;
-
     return dest;
 }
 
-char * strcat(char* dest, const char* src) {
+char* strcat(char* dest, const char* src) {
     size_t dest_len = strlen(dest);
     int i = 0;
-    while(src[i] != '\0'){
+    while(src[i] != '\0') {
         dest[dest_len++] = src[i++];
     }
     dest[dest_len] = '\0';
