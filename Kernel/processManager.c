@@ -14,19 +14,19 @@
 
 #define MUTEX "processManagerMutex"
 
-typedef struct childNode* cNode;
+typedef struct ChildNode* cNode;
 
 #define TRUE 1
 #define FALSE 0
 #define STDOUT 1
 #define STDIN 0
 
-struct childNode {
+struct ChildNode {
     int pid;
     cNode next;
-}childNode;
+}ChildNode;
 
-struct process {
+struct Process {
     char pname[PROC_NAME_LENGTH + 1];
     int pid;
     uint8_t* stackTop;
@@ -42,7 +42,7 @@ struct process {
     char waitingForChildren;
     int waitingForChild;
     cNode children;
-} process;
+} Process;
 
 proc processes[MAX_PROC] = {NULL};
 static int amount = 0;
@@ -86,14 +86,14 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
         _sti();
         return -1;
     }
-    if (ip == NULL) {
+    if(ip == NULL) {
         ip = get_ip();
     }
-    if (stackSize == 0) {
+    if(stackSize == 0) {
         stackSize = INIT_STACK_SIZE;
     }
 
-    processes[pid] = (struct process*)allocate(sizeof(struct process));
+    processes[pid] = (struct Process*)allocate(sizeof(struct Process));
 
     if(processes[pid] == NULL) {
         for(int j=0; j<argc; j++) {
@@ -136,6 +136,7 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
     processes[pid]->stdout = STDOUT;
 
     processes[pid]->parentPid = currProc;
+
     if(processes[pid]->parentPid >= 1) {
         //the sentinel has no children
         if(addChildNode(processes[pid]->parentPid, pid) == -1) {
@@ -165,40 +166,6 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
     return pid;
 }
 
-int checkProcessHealth(int pid) {
-    if(!isPidValid(pid)) {
-        return 1;
-    }
-    if(pid == SENTINEL_PID) {
-        //the sentinel process shouldn't be terminated
-        return 0;
-    }
-
-    if(processes[pid]->stackTrace > processes[pid]->stackTop
-       || processes[pid]->stackTrace < (processes[pid]->stackTop - processes[pid]->totalMemory)) {
-        killProcess(pid);
-        return 1;
-    }
-
-    //check if process needs more memory
-    uint64_t usedMemory = ((uint64_t)processes[pid]->stackTop - (uint64_t)processes[pid]->stackTrace);
-    if( usedMemory > ((processes[pid]->totalMemory / 4) * 3)) {
-        int oldTotalMemory = processes[pid]->totalMemory;
-        int newTotalMemory = oldTotalMemory * 2;
-        processes[pid]->stackTop = reallocate(processes[pid]->stackTop - processes[pid]->totalMemory,
-                                              newTotalMemory);
-        memcpy(processes[pid]->stackTop - newTotalMemory, processes[pid]->stackTop - oldTotalMemory, oldTotalMemory);
-        if(processes[pid]->stackTop == NULL) {
-            killProcess(pid);
-            return -1;
-        }
-        processes[pid]->stackTop += newTotalMemory;
-        processes[pid]->stackTrace = processes[pid]->stackTop - usedMemory;
-        processes[pid]->totalMemory = newTotalMemory;
-    }
-    return 0;
-}
-
 void selectNextProcess(int pid) {
     waitSem(MUTEX);
     if(isPidValid(pid)) {
@@ -217,7 +184,6 @@ uint64_t switchProcess(uint64_t rsp) {
             }
         }
         currProc = nextProc;
-        checkProcessHealth(currProc);
         processes[currProc]->state = RUNNING;
         postSem(MUTEX);
         return (uint64_t)processes[currProc]->stackTrace;
@@ -283,7 +249,7 @@ void setProcessForeground(int pid, int foreground) {
 
 void setProcessPriority(int pid, int priority) {
     waitSem(MUTEX);
-    if(isPidValid(pid) && (priority == LOW || priority == MED || priority == HIGH) ) {
+    if(isPidValid(pid) && (priority == LOW || priority == MED || priority == HIGH)) {
         int oldPriority = processes[pid]->priority;
         processes[pid]->priority = priority;
         changeProcessPriority(pid, oldPriority, priority);
@@ -324,13 +290,12 @@ void addToFgStack(int pid) {
 
 // connects stdout proc1 to stdin proc2
 int connectProcs(int pidProc1, int pidProc2) {
-
     proc proc1 = getProcess(pidProc1);
     proc proc2 = getProcess(pidProc2);
 
     int fd[2];
 
-    if(customPipe(fd) == -1){
+    if(customPipe(fd) == -1) {
         return -1;
     }
 
@@ -357,15 +322,15 @@ int connectToNamedPipe(const char* name, int pidProc1, int pidProc2) {
 void removeFromFgStack(int pid) {
     //pid is not checked, as processes are removed from the stack after they are killed
     waitSem(MUTEX);
-    if (lastFgProc == -1) {
+    if(lastFgProc == -1) {
         postSem(MUTEX);
         return;
     }
-    if (fgStack[lastFgProc] == pid) {
+    if(fgStack[lastFgProc] == pid) {
         lastFgProc--;
     } else {
-        for (int i = 0; i < lastFgProc; i++) {
-            if (fgStack[i] == pid) {
+        for(int i = 0; i < lastFgProc; i++) {
+            if(fgStack[i] == pid) {
                 memcpy(fgStack + i, fgStack + i + 1, sizeof(int) * (MAX_PROC - i - 1));
                 lastFgProc--;
             }
@@ -377,7 +342,7 @@ void removeFromFgStack(int pid) {
 int isProcessAlive(int pid) {
     waitSem(MUTEX);
     int ret = 0;
-    if (isPidValid(pid)) {
+    if(isPidValid(pid)) {
         ret = processes[pid] != NULL;
     }
     postSem(MUTEX);
@@ -393,7 +358,7 @@ void killProcess(int pid) {
         return;
     }
 
-    if (isPidValid(pid)) {
+    if(isPidValid(pid)) {
         int priority = processes[pid]->priority;
         int parentPid = processes[pid]->parentPid;
 
@@ -430,7 +395,7 @@ void killProcess(int pid) {
         amount--;
         deallocateAllProcessRelatedMem(pid);
         notifyParent(parentPid, pid);
-        if (pid == currProc) {
+        if(pid == currProc) {
             _sti();
             interruptTick();
         }
@@ -484,7 +449,7 @@ void listAllProcesses() {
             cPrintHex((uint64_t)processes[i]->stackTop);
             cPrint(" |");
             if(processes[i]->pid != SENTINEL_PID) {
-                if (processes[i]->state == BLOCKED) {
+                if(processes[i]->state == BLOCKED) {
                     cPrint(" BLOCKED");
                 } else {
                     cPrint(" UNBLOCKED");
@@ -503,7 +468,7 @@ int isPidValid(int pid) {
 
 void unblockProcess(int pid) {
     waitSem(MUTEX);
-    if(isPidValid(pid)){
+    if(isPidValid(pid)) {
         processes[pid]->state = READY;
     }
     postSem(MUTEX);
@@ -542,7 +507,7 @@ void killProcessInForeground() {
 //only called within procManager, no checks are performed
 int addChildNode(int parentPid, int childPid) {
     //no mutex, read findFistAvailablePid
-    cNode child = allocate(sizeof(childNode));
+    cNode child = allocate(sizeof(ChildNode));
     if(child == NULL) {
         return -1;
     }
