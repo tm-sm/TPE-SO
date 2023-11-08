@@ -103,7 +103,7 @@ int doubleBufferingEnabled() {
 
 void drawBuffer() {
     if(isCurrentProcessInForeground()) {
-        memcut((void*)VBE_mode_info->framebuffer, videoBuffer,
+        memcut((void*)(uint64_t)VBE_mode_info->framebuffer, videoBuffer,
                VBE_mode_info->width * (VBE_mode_info->bpp / 8) * VBE_mode_info->height);
     }
 }
@@ -146,7 +146,7 @@ void putPixel(Color c, uint32_t x, uint32_t y) {
         return;
     }
     //double buffering is disabled, it paints directly to the screen
-    uint8_t* videoPtr = (uint8_t*)VBE_mode_info->framebuffer;
+    uint8_t* videoPtr = (uint8_t*)(uint64_t)VBE_mode_info->framebuffer;
     int offset = y * VBE_mode_info->pitch + x * (VBE_mode_info->bpp / 8);
     videoPtr[offset] = c.b;
     videoPtr[offset+1] = c.g;
@@ -170,11 +170,11 @@ void drawColoredLine(Color c, uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1
         putPixel(c, x0, y0);
         if (x0 == x1 && y0 == y1) break;
         e2 = 2 * err;
-        if (e2 >= dy) { 
-            err += dy; x0 += sx; 
+        if (e2 >= dy) {
+            err += dy; x0 += sx;
             } /* e_xy+e_x > 0 */
-        if (e2 <= dx) { 
-            err += dx; y0 += sy; 
+        if (e2 <= dx) {
+            err += dx; y0 += sy;
             } /* e_xy+e_y < 0 */
     }
 }
@@ -327,7 +327,7 @@ void clearScreen() {
 }
 
 void forceClearScreen() {
-    uint8_t *videoPtr = (uint8_t *) VBE_mode_info->framebuffer;
+    uint8_t *videoPtr = (uint8_t *)(uint64_t) VBE_mode_info->framebuffer;
     memset(videoPtr, 0, VBE_mode_info->width * VBE_mode_info->height * (VBE_mode_info->bpp / 8));
 }
 
