@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <syscall.h>
 #include <system.h>
 
 // Random

@@ -1,4 +1,3 @@
-#include <syscall.h>
 #include <test_util.h>
 #include <system.h>
 #include <stdlib.h>
