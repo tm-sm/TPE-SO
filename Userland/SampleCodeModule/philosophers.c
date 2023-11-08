@@ -1,6 +1,6 @@
 #include <system.h>
 #include <standardLib.h>
-#define MAX_PHILOSOPHERS 6
+#define MAX_PHILOSOPHERS 9
 #define MIN_PHILOSOPHERS 3
 #define INIT_PHILOSOPHERS 5
 #define HUNGRY 0
@@ -14,7 +14,7 @@ void initPhyloReunion();
 //                                         ^ AI made it
 
 //aka semaphoreName
-char philosophersName [MAX_PHILOSOPHERS][24]={"Aristoteles","Platon","Socrates","Descartes","Kant","Nietzsche"};
+char philosophersName [MAX_PHILOSOPHERS][24]={"Aristoteles","Platon","Socrates","Descartes","Kant","Nietzsche","Sartre","Russell","Machiavelli"};
 
 void getInput();
 void addPhilo(int i);
@@ -93,7 +93,7 @@ void addPhilo(int i) {
 void getInput() {
     waitSem(MUTEX);
     if(isCharPressed('r') ) {
-        if(philoAmount > 0){
+        if(philoAmount > MIN_PHILOSOPHERS){
         int pid = philosophers[philoAmount - 1]->pid;
         philoAmount--;
         killProcess(pid);
@@ -104,7 +104,6 @@ void getInput() {
     } else if(isCharPressed('a')) {
         if(philoAmount < MAX_PHILOSOPHERS){
         addPhilo(philoAmount);
-        philoAmount++;
         }
         else {
             printFormat("Max philosophers reached\n");
