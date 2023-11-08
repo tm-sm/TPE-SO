@@ -67,7 +67,7 @@ static exec pArr[] = {
         &(struct Executable){"repeat", "prints all parameters passed", repeat},
         &(struct Executable){"loop", "prints its own pid every 2 seconds", loop},
         &(struct Executable){"phylo", "runs the dining philosophers problem", phylo},
-        &(struct Executable){"monologue", "starts two processes with different priority, stops if the quiet child gets speaks", monologue},
+        &(struct Executable){"monologue", "starts two processes with different priority, stops once the quiet child speaks", monologue},
         &(struct Executable){"testmm","tests memory management",testMemory},
         &(struct Executable){"stressTest", "creates the maximum amount of process, incrementally blocks them and finally kills them", stressTest},
         NULL

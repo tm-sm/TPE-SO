@@ -156,6 +156,7 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
 
     amount++;
 
+    _sti();
     if(pid != 0) {
         addToScheduler(processes[pid]->pid);
     }
@@ -164,7 +165,6 @@ int startProcess(void* ip, int priority, int foreground, int isBlocked, const ch
         addToFgStack(pid);
     }
 
-    _sti();
     interruptTick();
     return pid;
 }
@@ -402,7 +402,7 @@ void killProcess(int pid) {
         deallocateAllProcessRelatedMem(pid);
         notifyParent(parentPid, pid);
         if(pid == currProc) {
-            _sti();
+
             interruptTick();
         }
     }
