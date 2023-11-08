@@ -1,6 +1,6 @@
 #include <system.h>
 #include <standardLib.h>
-#define MAX_PHILOSOPHERS 9
+#define MAX_PHILOSOPHERS 7
 #define MIN_PHILOSOPHERS 3
 #define INIT_PHILOSOPHERS 5
 #define HUNGRY 0
@@ -24,7 +24,7 @@ void putForks(int philoNum);
 void eat(int philoNumber);
 void think(int philoNumber);
 
-typedef struct Philosopher{
+typedef struct Philosopher {
     char name[24];
     int state;
     int pid;
@@ -62,15 +62,17 @@ void initPhyloReunion() {
         addPhilo(i);
     }
     postSem(MUTEX);
-    while(1){
+    while(1) {
         getInput();
         wait(500);
         waitSem(MUTEX);
-        for(int i=0;i<philoAmount;i++){
-            if(philosophers[i]->state == EATING)
+        for(int i=0;i<philoAmount;i++) {
+            if(philosophers[i]->state == EATING) {
                 printFormat("E");
-            else
+            }
+            else {
                 printFormat(".");
+            }
         }
         printFormat("\n");
         postSem(MUTEX);
@@ -79,31 +81,35 @@ void initPhyloReunion() {
 
 void addPhilo(int i) {
     philosophers[i] = alloc(sizeof(Philosopher));
+    if(philosophers[i]==NULL) {
+        printFormat("Error creating Philosopher %s\n",philosophersName[i]);
+        return -1;
+    }
     strcpy(philosophers[i]->name,philosophersName[i]);
     philosophers[i]->state = THINKING;
     int pid= createProcess(philosopherActivity,HIGH,BACKGROUND,0,philosophersName[i],NULL);
-    if(pid==-1){
+    if(pid==-1) {
         printFormat("Error creating Philosopher %s\n",philosophersName[i]);
     }
-    else{
+    else {
         philosophers[i]->pid=pid;
     }
 }
 
 void getInput() {
     waitSem(MUTEX);
-    if(isCharPressed('r') ) {
-        if(philoAmount > MIN_PHILOSOPHERS){
+    if(isCharPressed('r')) {
+        if(philoAmount > MIN_PHILOSOPHERS) {
         int pid = philosophers[philoAmount - 1]->pid;
         philoAmount--;
         killProcess(pid);
         }
-        else{
-            printFormat("No philosophers to kill\n");
+        else {
+            printFormat("Minimum philosophers reached\n");
         }
     } else if(isCharPressed('a')) {
-        if(philoAmount < MAX_PHILOSOPHERS){
-        addPhilo(philoAmount);
+        if(philoAmount < MAX_PHILOSOPHERS) {
+            addPhilo(philoAmount);
         }
         else {
             printFormat("Max philosophers reached\n");
