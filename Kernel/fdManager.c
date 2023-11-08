@@ -10,7 +10,7 @@
 #define PIPE_BUFFER_SIZE 100
 #define STDOUT 1
 #define STDIN 0
-#define FIFO_COUNT 5
+#define FIFO_COUNT 3
 
 struct CustomPipe {
     char buffer[PIPE_BUFFER_SIZE];

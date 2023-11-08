@@ -13,8 +13,8 @@ void createMemoryManager();
  *  Allocates the given size and reserves that memory block.
  * Returns a pointer to the memory block
  */
-
 void* allocate(size_t size);
+
 /**
  * Deallocates memory on the given address and free's the block.
  */

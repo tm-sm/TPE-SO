@@ -46,10 +46,13 @@ size_t convertToClosestPowerOf2(size_t size) {
 
     size_t power = 1;
     while (power < size) {
-        power <<= 1;
+        power *= 2;
     }
 
-    return power < MIN_SIZE ? MIN_SIZE: power;
+    if(power <= MIN_SIZE - sizeof(Buddyblock)){
+        power *= 2;
+    }
+    return power;
 }
 
 
@@ -67,7 +70,7 @@ void splitBlock(Buddyblock* block) {
 
 //Recursive function call to merge 'buddies' if mergeable as to reduce fragmentation and increase the general memory pool
 void mergeBlocksRecursive(Buddyblock* node) {
-    if(node == NULL){
+    if(node == NULL || node->left == NULL || node->right == NULL){
         return;
     }
 
@@ -94,7 +97,7 @@ Buddyblock* allocateRecursive(size_t size, Buddyblock* node) {
         return NULL;
     }
 
-    if(node->isFree && node->size == size){
+    if(node->isFree && node->size == size && !node->isSplit){
         node->isFree = 0;
         return node;
     }
@@ -145,7 +148,7 @@ void deallocate(void* addr) {
         cPrintColored(RED,"Illegal Memory free");
         return;
     }
-    Buddyblock *block = (Buddyblock *)((char *)addr - sizeof(Buddyblock));
+    Buddyblock *block = (Buddyblock* )((char* )addr - sizeof(Buddyblock));
     block->isFree = 1;
     block->pid = -2;
 
@@ -211,7 +214,7 @@ void deallocateAllProcRecursive(Buddyblock* node, int pid){
         deallocateAllProcRecursive(node->right, pid);
     } else if (!node->isFree && node->pid == pid) {
         node->isFree = 1;
-        node->pid = -1;
+        node->pid = -2;
     }
 }
 
