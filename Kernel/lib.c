@@ -3,9 +3,9 @@
 
 static char* regs[]={"rax: ", "rbx: ", "rcx: ", "rdx: ", "rbp: ", "rdi: ", "rsi: ", " r8: ", " r9: ", "r10: ", "r11: ", "r12: ", "r13: ","r14: ", "r15: ", "rsp: ", "rip: "};
 
-void * memset(void * destination, int32_t c, uint64_t length) {
+void* memset(void* destination, int32_t c, uint64_t length) {
 	uint8_t chr = (uint8_t)c;
-	char * dst = (char*)destination;
+	char* dst = (char*)destination;
 
 	while(length--) {
         dst[length] = chr;
@@ -14,7 +14,7 @@ void * memset(void * destination, int32_t c, uint64_t length) {
 	return destination;
 }
 
-void * memcpy(void * destination, const void * source, uint64_t length) {
+void * memcpy(void* destination, const void* source, uint64_t length) {
 	/*
 	* memcpy does not support overlapping buffers, so always do it
 	* forwards. (Don't change this without adjusting memmove.)
@@ -49,7 +49,7 @@ void * memcpy(void * destination, const void * source, uint64_t length) {
 	return destination;
 }
 
-void * memcut(void * destination, void * source, uint64_t length) {
+void* memcut(void* destination, void* source, uint64_t length) {
     /*
     * like memcpy, but sets the source to 0
     */
