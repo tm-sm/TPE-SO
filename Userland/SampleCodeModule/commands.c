@@ -149,6 +149,7 @@ int help(ARGS) {
 }
 
 
+/*
 int testException0(ARGS) {
    int i=1/0;
    return 0;
@@ -158,6 +159,7 @@ int testException6(ARGS){
     invalidOp();
     return 0;
 }
+ */
 
 int displayTime(ARGS) {
     printTime();
