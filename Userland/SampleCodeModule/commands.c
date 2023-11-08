@@ -32,11 +32,11 @@ typedef struct Executable* exec;
 extern void invalidOp();
 
 void unknownCommand(char* str);
-
+int test_mm(ARGS);
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
 ps(ARGS), nice(ARGS), block(ARGS), phylo(ARGS), monologue(ARGS), quietChild(ARGS), loudChild(ARGS), stressTest(ARGS), displayFIFOList(ARGS),
-connectProcsToFIFO(ARGS), testMemory(ARGS), testSync(ARGS), testProcesses(ARGS), testPriority(ARGS); ;
+connectProcsToFIFO(ARGS), testMemory(ARGS);
 
 static exec bArr[] = {
         &(struct Executable){"help", "displays all available commands", help},
@@ -69,9 +69,6 @@ static exec pArr[] = {
         &(struct Executable){"phylo", "runs the dining philosophers problem", phylo},
         &(struct Executable){"monologue", "starts two processes with different priority, stops once the quiet child speaks", monologue},
         &(struct Executable){"testmm","tests memory management",testMemory},
-        &(struct Executable){"testsync","tests synchronization",testSync},
-        &(struct Executable){"testproc","tests processes",testProcesses},
-        &(struct Executable){"testprio","tests priorities",testPriority},
         &(struct Executable){"stressTest", "creates the maximum amount of process, incrementally blocks them and finally kills them", stressTest},
         NULL
 };
@@ -465,11 +462,7 @@ int playBubbles(ARGS) {
     exitProc();
     return 0;
 }
-int testPriority(ARGS){
-    test_prio();
-    exitProc();
-    return 0;
-}
+
 
 int playPong(ARGS) {
     enableDoubleBuffering();
@@ -482,16 +475,6 @@ int playPong(ARGS) {
 
 int testMemory(ARGS) {
     test_mm(argc, argv);
-    exitProc();
-    return 0;
-}
-int testSync(ARGS) {
-    test_sync(argc, argv);
-    exitProc();
-    return 0;
-}
-int testProcesses(ARGS) {
-    test_processes(argc, argv);
     exitProc();
     return 0;
 }
