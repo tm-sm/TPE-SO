@@ -35,7 +35,7 @@ void unknownCommand(char* str);
 
 int help(ARGS), testException0(ARGS),testException6(ARGS), displayTime(ARGS), displayDate(ARGS), mem(ARGS),
 sh(ARGS), cat(ARGS), wc(ARGS), filter(ARGS), loop(ARGS), playBubbles(ARGS), playPong(ARGS), playBeep(ARGS), repeat(ARGS), kill(ARGS),
-ps(ARGS), nice(ARGS), block(ARGS), phylo(ARGS), monologue(ARGS), quietChild(ARGS), loudChild(ARGS), displayFIFOList(ARGS),
+ps(ARGS), nice(ARGS), block(ARGS), phylo(ARGS), monologue(ARGS), quietChild(ARGS), loudChild(ARGS), stressTest(ARGS), displayFIFOList(ARGS),
 connectProcsToFIFO(ARGS), testMemory(ARGS), testSync(ARGS), testProcesses(ARGS), testPriority(ARGS); ;
 
 static exec bArr[] = {
@@ -72,6 +72,7 @@ static exec pArr[] = {
         &(struct Executable){"testsync","tests synchronization",testSync},
         &(struct Executable){"testproc","tests processes",testProcesses},
         &(struct Executable){"testprio","tests priorities",testPriority},
+        &(struct Executable){"stressTest", "creates the maximum amount of process, incrementally blocks them and finally kills them", stressTest},
         NULL
 };
 
@@ -531,6 +532,35 @@ int monologue(ARGS) {
     destroySem("quietChild");
     killProcess(lc);
     printFormat("\nquiet child finally spoke");
+    exitProc();
+    return 0;
+}
+
+int stressTest(ARGS) {
+    printFormat("\nStarting stress test");
+    int testSize = 30;
+    int bPid[testSize];
+    for(int i=0; i<testSize && (i == 0 || bPid[i - 1] != -1); i++) {
+        bPid[i] = createProcess(playBubbles, HIGH, BACKGROUND, 1, "stressTestBubbles", NULL);
+        printFormat("\nCreated bubbles process with pid=%d", bPid[i]);
+    }
+
+    printFormat("\nProcess creation finished, waiting...");
+    printFormat("\n\nProcess unblocking started\n");
+    for(int i=0; i<testSize && bPid[i] != -1; i++) {
+        unblockProcess(bPid[i]);
+        printFormat("\nUnblocked process %d", bPid[i]);
+    }
+    printFormat("\n\nMax processes running\n");
+    printFormat("\nProcess blocking started\n");
+    for(int i=0; i<testSize && bPid[i] != -1; i++) {
+        blockProcess(bPid[i]);
+        printFormat("\nBlocked process %d", bPid[i]);
+    }
+    printFormat("\n\nAll processes blocked\nFINISHING\n");
+    for(int i=0; i<testSize && bPid[i] != -1; i++) {
+        killProcess(bPid[i]);
+    }
     exitProc();
     return 0;
 }
