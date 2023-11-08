@@ -402,7 +402,7 @@ void killProcess(int pid) {
         deallocateAllProcessRelatedMem(pid);
         notifyParent(parentPid, pid);
         if(pid == currProc) {
-            _sti();
+
             interruptTick();
         }
     }
